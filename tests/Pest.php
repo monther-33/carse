@@ -1,50 +1,83 @@
 <?php
 
+use App\Models\Account;
+use App\Models\Cashbox;
+use App\Models\Currency;
+use App\Models\User;
+use App\Services\Accounting\PostingService;
+use App\Services\Accounting\ReversalService;
+use App\Support\Money;
+use Brick\Math\BigDecimal;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
-
-/*
-|--------------------------------------------------------------------------
-| Test Case
-|--------------------------------------------------------------------------
-|
-| The closure you provide to your test functions is always bound to a specific PHPUnit test
-| case class. By default, that class is "PHPUnit\Framework\TestCase". Of course, you may
-| need to change it using the "pest()" function to bind a different classes or traits.
-|
-*/
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature');
 
 /*
-|--------------------------------------------------------------------------
-| Expectations
-|--------------------------------------------------------------------------
-|
-| When you're writing tests, you often need to check that values meet certain conditions. The
-| "expect()" function gives you access to a set of "expectations" methods that you can use
-| to assert different things. Of course, you may extend the Expectation API at any time.
-|
+| Helpers for feature tests. The base seed (chart of accounts, cashboxes, roles,
+| currencies, current-year periods) is loaded once by TestCase::$seed.
 */
 
-expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
-});
-
-/*
-|--------------------------------------------------------------------------
-| Functions
-|--------------------------------------------------------------------------
-|
-| While Pest is very powerful out-of-the-box, you may have some testing code specific to your
-| project that you don't want to repeat in every file. Here you can also expose helpers as
-| global functions to help you to reduce the number of lines of code in your test files.
-|
-*/
-
-function something()
+function account(string $code): Account
 {
-    // ..
+    return Account::query()->where('code', $code)->firstOrFail();
+}
+
+function lyd(): Currency
+{
+    return Currency::query()->where('code', 'LYD')->firstOrFail();
+}
+
+function usd(): Currency
+{
+    return Currency::query()->where('code', 'USD')->firstOrFail();
+}
+
+function cashbox(string $name): Cashbox
+{
+    return Cashbox::query()->where('name', $name)->firstOrFail();
+}
+
+function userWithRole(string $role): User
+{
+    return User::factory()->role($role)->create();
+}
+
+function posting(): PostingService
+{
+    return app(PostingService::class);
+}
+
+function reversal(): ReversalService
+{
+    return app(ReversalService::class);
+}
+
+/**
+ * Balance of one account in base currency (debit - credit) from journal lines.
+ */
+function baseBalance(Account|string $account): BigDecimal
+{
+    $id = $account instanceof Account ? $account->id : account($account)->id;
+
+    $row = DB::table('journal_lines')->where('account_id', $id)
+        ->selectRaw('COALESCE(SUM(debit_base), 0) AS d, COALESCE(SUM(credit_base), 0) AS c')
+        ->first();
+
+    return Money::of((string) $row->d)->minus(Money::of((string) $row->c));
+}
+
+/**
+ * Trial balance check over the whole ledger: total debits == total credits (base).
+ */
+function ledgerIsBalanced(): bool
+{
+    $row = DB::table('journal_lines')
+        ->selectRaw('COALESCE(SUM(debit_base), 0) AS d, COALESCE(SUM(credit_base), 0) AS c')
+        ->first();
+
+    return Money::of((string) $row->d)->isEqualTo(Money::of((string) $row->c));
 }
