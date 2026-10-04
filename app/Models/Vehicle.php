@@ -128,6 +128,12 @@ class Vehicle extends Model implements HasMedia
         return $this->belongsTo(PurchaseInvoice::class);
     }
 
+    /** @return BelongsTo<SalesInvoice, $this> */
+    public function saleInvoice(): BelongsTo
+    {
+        return $this->belongsTo(SalesInvoice::class, 'sale_invoice_id');
+    }
+
     /** @return HasMany<VehicleStatusLog, $this> */
     public function statusLogs(): HasMany
     {

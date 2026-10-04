@@ -4,8 +4,11 @@ namespace App\Providers;
 
 use App\Listeners\LogAuthenticationEvents;
 use App\Models\Expense;
+use App\Models\InstallmentPlan;
 use App\Models\PurchaseInvoice;
+use App\Models\Reservation;
 use App\Models\ReturnDocument;
+use App\Models\SalesInvoice;
 use App\Models\Vehicle;
 use App\Models\Voucher;
 use App\Services\Currency\ExchangeRateService;
@@ -35,6 +38,9 @@ class AppServiceProvider extends ServiceProvider
             'expense' => Expense::class,
             'voucher' => Voucher::class,
             'return' => ReturnDocument::class,
+            'sales_invoice' => SalesInvoice::class,
+            'reservation' => Reservation::class,
+            'installment_plan' => InstallmentPlan::class,
         ]);
 
         Model::preventLazyLoading(! $this->app->isProduction());
