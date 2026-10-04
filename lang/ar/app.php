@@ -16,9 +16,22 @@ return [
     'activate' => 'تفعيل',
     'deactivate' => 'تعطيل',
     'confirm_delete' => 'هل أنت متأكد من الحذف؟',
+    'all' => 'الكل',
+    'view' => 'عرض',
+    'change' => 'تغيير',
+    'close' => 'إغلاق',
+    'draft_ref' => 'مسودة #:id',
 
     'nav' => [
         'dashboard' => 'لوحة التحكم',
+        'trading' => 'المخزون والمشتريات',
+        'vehicles' => 'السيارات',
+        'purchases' => 'فواتير الشراء',
+        'parties' => 'العملاء والموردون',
+        'finance' => 'المالية',
+        'vouchers' => 'السندات',
+        'expenses' => 'المصروفات',
+        'expense_categories' => 'تصنيفات المصروفات',
         'accounting' => 'الحسابات',
         'accounts' => 'دليل الحسابات',
         'cashboxes' => 'الخزائن والمصارف',
@@ -65,6 +78,8 @@ return [
         'address' => 'العنوان',
         'date' => 'التاريخ',
         'user' => 'المستخدم',
+        'description' => 'البيان',
+        'notes' => 'ملاحظات',
     ],
 
     'users' => [

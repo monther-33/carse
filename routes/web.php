@@ -9,6 +9,27 @@ Route::middleware('auth')->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
     Route::view('profile', 'profile')->name('profile');
 
+    // Inventory
+    Route::get('vehicles', Livewire\Vehicles\Index::class)->middleware('can:vehicles.view')->name('vehicles.index');
+    Route::get('vehicles/{vehicle}', Livewire\Vehicles\Show::class)->middleware('can:vehicles.view')->name('vehicles.show');
+
+    // Parties
+    Route::get('parties', Livewire\Parties\Index::class)->middleware('can:parties.view')->name('parties.index');
+    Route::get('parties/{party}/statement', Livewire\Parties\Statement::class)->name('parties.statement');
+
+    // Purchases
+    Route::middleware('can:purchases.view')->group(function () {
+        Route::get('purchases', Livewire\Purchases\Index::class)->name('purchases.index');
+        Route::get('purchases/create', Livewire\Purchases\Form::class)->middleware('can:purchases.create')->name('purchases.create');
+        Route::get('purchases/{invoice}/edit', Livewire\Purchases\Form::class)->middleware('can:purchases.create')->name('purchases.edit');
+        Route::get('purchases/{invoice}', Livewire\Purchases\Show::class)->name('purchases.show');
+    });
+
+    // Finance
+    Route::get('expenses', Livewire\Expenses\Index::class)->middleware('can:expenses.view')->name('expenses.index');
+    Route::get('expense-categories', Livewire\Expenses\Categories::class)->middleware('can:accounts.manage')->name('expense-categories.index');
+    Route::get('vouchers', Livewire\Vouchers\Index::class)->middleware('can:vouchers.view')->name('vouchers.index');
+
     // Accounting
     Route::get('accounts', Livewire\Accounts\Index::class)->middleware('can:accounts.view')->name('accounts.index');
     Route::get('cashboxes', Livewire\Cashboxes\Index::class)->middleware('can:cashboxes.view')->name('cashboxes.index');

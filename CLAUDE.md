@@ -41,6 +41,27 @@
 - المستخدم يُعطَّل ولا يُحذف (`UserPolicy::delete` = false، ولا يعطّل نفسه). المستخدم المعطَّل يُمنع من الدخول ويُطرد من جلسته (`EnsureUserIsActive`).
 - سجل التدقيق: trait `Auditable` (spatie activitylog) على كل موديل مهم + `LogAuthenticationEvents` للدخول والخروج والمحاولات الفاشلة (log name `auth`).
 
+## المستندات (من المرحلة 2)
+
+- دورة كل مستند مالي: `draft → posted → cancelled` عبر trait `IsDocument` و`ManagesDocumentLifecycle`. **الرقم يُعطى عند الاعتماد** (المسودة بلا رقم وتُحذف دون فجوات). المعتمد لا يُحذف أبدًا؛ الإلغاء = `ReversalService` + `markCancelled` مع سبب.
+- إعداد `documents.require_approval`: مفعّل = الحفظ مسودة والاعتماد خطوة منفصلة بصلاحية `*.approve` (يجوز لنفس المستخدم إن ملك الصلاحية). معطّل = الحفظ يعتمد فورًا لمن يملك صلاحية الاعتماد.
+- الشاشات تستدعي Actions عبر `HandlesBusinessErrors::attempt()`؛ الرفض التجاري يُرمى كـ `BusinessRuleException` برسالة مترجمة.
+- **سياسات المستندات** ترث `Policies\Concerns\DocumentPolicy` (view/create/update/delete للمسودة، approve للمسودة، cancel للمعتمد).
+- أمين الخزينة: قوائم السندات والمصروفات مقيدة بخزائنه (`Cashbox::visibleTo`) والتحقق في الخادم بـ `Rule::in` على الخزائن المرئية.
+- `Relation::morphMap` للمستندات (`purchase_invoice`, `expense`, `voucher`, `return`, `vehicle`...). أضف كل مستند جديد إليها.
+
+## السيارات والمشتريات والمصروفات (المرحلة 2)
+
+- حالات إضافية غير مذكورة في المواصفة: `pending` (السيارة موجودة فقط على مسودة شراء) و`returned_to_supplier` (خرجت بمرتجع/إلغاء شراء). الانتقالات في `VehicleStatus::allowedTargets()`؛ اليدوي فقط عبر `manualTargets()` (قبل available، و`returned → available`). **لا تغيّر `vehicles.status` إلا عبر `VehicleStateMachine`.**
+- تكلفة السيارة على حساب 15 (في الطريق/الجمارك) ما دامت `in_transit/in_customs`، وعند الخروج من الجمارك يُرحَّل قيد نقل تلقائي 15 ← 14 بكامل `total_cost`. الدور المحاسبي: `VehicleStatus::stockRole()`.
+- رقم الشاصي فريد: نفس السيارة تعود للمخزون بنفس الصف (إعادة شراء بعد بيع أو مرتجع)؛ الأعمدة `purchase_cost/extra_cost/total_cost` تصف الدورة الحالية، و`vehicle_costs` سجل إلحاقي (صفوف سالبة عند الإلغاء).
+- **فاتورة الشراء** (مثل البيع النقدي): القيد دائمًا مدين المخزون / دائن ذمم المورّد لكل سيارة (`net` بعملة الفاتورة، `cost_base` بالدينار، الخصم يوزَّع بـ `Money::allocate`)، والمدفوع عند الاعتماد = سند صرف تلقائي معتمد يُسدَّد بسعر الفاتورة.
+- إلغاء فاتورة الشراء متاح فقط إن لم تتغير سياراتها (في المخزون، غير محجوزة، بلا مصاريف، بلا مرتجع، ونفس حساب المخزون)، ويُلغي معها سندات الدفع المرتبطة بها. غير ذلك = **مرتجع لسيارة** (`ReturnPurchaseItem`) يتطلب ألا تحمل مصاريف.
+- المصروف على سيارة في المخزون يُرسمل على حسابها (14/15)، وعلى سيارة مباعة يُرحَّل لتكلفة المبيعات دون تغيير `cost_snapshot`. إلغاؤه ممكن فقط ما دامت التكلفة في نفس الحساب. المصروف الدوري: `recurs_every_months` و`next_due_date` مع زر "تكرار".
+- **السندات**: العملة دائمًا عملة الخزينة. "الغرض" يحدد الحساب المقابل (`Vouchers\Index::PURPOSES`). على حسابات المراقبة بعملة أجنبية تُستخدم `SettlementLines`: الرصيد المفتوح يُسدَّد بسعر الفاتورة المرجعية إن وُجدت وإلا بمتوسط سعر الرصيد (`PartyBalanceService::carryingRate`)، والفائض بسعر السند، والفرق إلى حساب فروقات العملة. التحويل بين خزائن بعملتين مختلفتين غير مدعوم.
+- التقارير Query objects في `app/Reports` (`TrialBalance`, `PartyStatement`).
+- اختبار `TranslationKeysTest` يمسح الكود ويفشل لأي مفتاح ترجمة ناقص في ar أو en.
+
 ## هيكلة الكود
 
 - `app/Actions/<Module>/` منطق العمليات · `app/Services/{Accounting,Numbering,Currency}` · `app/Livewire/` شاشات رفيعة تستدعي Actions ولا تحتوي منطقًا ماليًا · `app/Policies` · `app/Support/{Money,Settings,Navigation,Labels}` · `app/Enums`.

@@ -16,9 +16,22 @@ return [
     'activate' => 'Activate',
     'deactivate' => 'Deactivate',
     'confirm_delete' => 'Are you sure you want to delete this?',
+    'all' => 'All',
+    'view' => 'View',
+    'change' => 'Change',
+    'close' => 'Close',
+    'draft_ref' => 'Draft #:id',
 
     'nav' => [
         'dashboard' => 'Dashboard',
+        'trading' => 'Stock & purchases',
+        'vehicles' => 'Vehicles',
+        'purchases' => 'Purchase invoices',
+        'parties' => 'Customers & suppliers',
+        'finance' => 'Finance',
+        'vouchers' => 'Vouchers',
+        'expenses' => 'Expenses',
+        'expense_categories' => 'Expense categories',
         'accounting' => 'Accounting',
         'accounts' => 'Chart of accounts',
         'cashboxes' => 'Cashboxes & banks',
@@ -65,6 +78,8 @@ return [
         'address' => 'Address',
         'date' => 'Date',
         'user' => 'User',
+        'description' => 'Description',
+        'notes' => 'Notes',
     ],
 
     'users' => [

@@ -22,6 +22,22 @@ class Navigation
                 ],
             ],
             [
+                'title' => 'app.nav.trading',
+                'items' => [
+                    ['label' => 'app.nav.vehicles', 'route' => 'vehicles.index', 'icon' => 'car', 'can' => 'vehicles.view'],
+                    ['label' => 'app.nav.purchases', 'route' => 'purchases.index', 'icon' => 'cart', 'can' => 'purchases.view'],
+                    ['label' => 'app.nav.parties', 'route' => 'parties.index', 'icon' => 'users', 'can' => 'parties.view'],
+                ],
+            ],
+            [
+                'title' => 'app.nav.finance',
+                'items' => [
+                    ['label' => 'app.nav.vouchers', 'route' => 'vouchers.index', 'icon' => 'receipt', 'can' => 'vouchers.view'],
+                    ['label' => 'app.nav.expenses', 'route' => 'expenses.index', 'icon' => 'cash', 'can' => 'expenses.view'],
+                    ['label' => 'app.nav.expense_categories', 'route' => 'expense-categories.index', 'icon' => 'tag', 'can' => 'accounts.manage'],
+                ],
+            ],
+            [
                 'title' => 'app.nav.accounting',
                 'items' => [
                     ['label' => 'app.nav.accounts', 'route' => 'accounts.index', 'icon' => 'tree', 'can' => 'accounts.view'],
@@ -60,7 +76,8 @@ class Navigation
                         'label' => __($item['label']),
                         'route' => $item['route'],
                         'icon' => $item['icon'],
-                        'active' => $item['route'],
+                        // vehicles.index stays highlighted on vehicles.show, etc.
+                        'active' => str_replace('.index', '.*', $item['route']),
                     ];
                 }
             }

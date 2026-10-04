@@ -2,6 +2,7 @@
 
 return [
     'reversal_of' => 'قيد عكسي للقيد :number',
+    'fx_difference' => 'فرق سعر الصرف',
 
     'errors' => [
         'unbalanced' => 'القيد غير متوازن: المدين :debit ≠ الدائن :credit.',

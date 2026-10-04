@@ -2,6 +2,7 @@
 
 return [
     'reversal_of' => 'Reversal of entry :number',
+    'fx_difference' => 'Exchange rate difference',
 
     'errors' => [
         'unbalanced' => 'Unbalanced entry: debit :debit ≠ credit :credit.',
