@@ -30,7 +30,7 @@ return [
         'reserved' => 'محجوزة',
         'sold' => 'مباعة',
         'returned' => 'مرتجعة من عميل',
-        'returned_to_supplier' => 'مرتجعة للمورّد',
+        'returned_to_supplier' => 'مُعادة للبائع',
     ],
     'vehicle_condition' => ['new' => 'جديدة', 'used' => 'مستعملة'],
     'fuel_type' => ['petrol' => 'بنزين', 'diesel' => 'ديزل', 'hybrid' => 'هجين', 'electric' => 'كهرباء', 'gas' => 'غاز'],

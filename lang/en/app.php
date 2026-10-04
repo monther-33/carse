@@ -24,6 +24,11 @@ return [
 
     'nav' => [
         'dashboard' => 'Dashboard',
+        'selling' => 'Sales',
+        'sales' => 'Sales invoices',
+        'reservations' => 'Reservations',
+        'installments' => 'Installments',
+        'commissions' => 'Commissions',
         'trading' => 'Stock & purchases',
         'vehicles' => 'Vehicles',
         'purchases' => 'Purchase invoices',
@@ -174,6 +179,9 @@ return [
         'company_name' => 'Showroom name',
         'logo' => 'Logo',
         'logo_hint' => 'Shown on printed documents. Up to 1 MB.',
+        'printing' => 'Printing',
+        'contract_terms' => 'Sale contract terms',
+        'contract_terms_hint' => 'Printed as-is on the sale contract after the parties, vehicle and price. Leave empty if you have none.',
         'operations' => 'Operations',
         'require_approval' => 'Separate document creation from approval',
         'require_approval_hint' => 'When enabled, documents are saved as drafts and approved by a user with approval permission.',

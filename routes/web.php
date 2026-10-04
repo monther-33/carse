@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PrintController;
 use App\Livewire;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +24,25 @@ Route::middleware('auth')->group(function () {
         Route::get('purchases/create', Livewire\Purchases\Form::class)->middleware('can:purchases.create')->name('purchases.create');
         Route::get('purchases/{invoice}/edit', Livewire\Purchases\Form::class)->middleware('can:purchases.create')->name('purchases.edit');
         Route::get('purchases/{invoice}', Livewire\Purchases\Show::class)->name('purchases.show');
+    });
+
+    // Sales
+    Route::middleware('can_any:sales.view,sales.view_all')->group(function () {
+        Route::get('sales', Livewire\Sales\Index::class)->name('sales.index');
+        Route::get('sales/create', Livewire\Sales\Form::class)->middleware('can:sales.create')->name('sales.create');
+        Route::get('sales/{invoice}/edit', Livewire\Sales\Form::class)->middleware('can:sales.create')->name('sales.edit');
+        Route::get('sales/{invoice}', Livewire\Sales\Show::class)->name('sales.show');
+    });
+    Route::get('reservations', Livewire\Reservations\Index::class)->middleware('can:reservations.view')->name('reservations.index');
+    Route::get('installments', Livewire\Installments\Index::class)->middleware('can_any:vouchers.view,sales.view_all')->name('installments.index');
+    Route::get('commissions', Livewire\Commissions\Index::class)->middleware('can:commissions.view')->name('commissions.index');
+
+    // Printing (A4 PDF with the showroom letterhead)
+    Route::prefix('print')->name('print.')->group(function () {
+        Route::get('sales/{invoice}/{document}', [PrintController::class, 'sales'])
+            ->whereIn('document', ['quotation', 'invoice', 'contract', 'delivery', 'schedule'])->name('sales');
+        Route::get('vouchers/{voucher}', [PrintController::class, 'voucher'])->name('voucher');
+        Route::get('parties/{party}/statement', [PrintController::class, 'statement'])->name('statement');
     });
 
     // Finance

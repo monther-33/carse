@@ -22,6 +22,15 @@ class Navigation
                 ],
             ],
             [
+                'title' => 'app.nav.selling',
+                'items' => [
+                    ['label' => 'app.nav.sales', 'route' => 'sales.index', 'icon' => 'tag', 'can' => ['sales.view', 'sales.view_all']],
+                    ['label' => 'app.nav.reservations', 'route' => 'reservations.index', 'icon' => 'calendar', 'can' => 'reservations.view'],
+                    ['label' => 'app.nav.installments', 'route' => 'installments.index', 'icon' => 'receipt', 'can' => ['vouchers.view', 'sales.view_all']],
+                    ['label' => 'app.nav.commissions', 'route' => 'commissions.index', 'icon' => 'currency', 'can' => 'commissions.view'],
+                ],
+            ],
+            [
                 'title' => 'app.nav.trading',
                 'items' => [
                     ['label' => 'app.nav.vehicles', 'route' => 'vehicles.index', 'icon' => 'car', 'can' => 'vehicles.view'],

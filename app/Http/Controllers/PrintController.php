@@ -1,0 +1,91 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Enums\AccountRole;
+use App\Models\Cashbox;
+use App\Models\Party;
+use App\Models\SalesInvoice;
+use App\Models\Voucher;
+use App\Reports\PartyStatement;
+use App\Services\Accounting\AccountResolver;
+use App\Support\Pdf;
+use App\Support\Settings;
+use Carbon\CarbonImmutable;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response;
+
+/**
+ * Printable A4 documents with the showroom letterhead (name, logo, phone, address from settings).
+ */
+class PrintController extends Controller
+{
+    public function __construct(private readonly Settings $settings) {}
+
+    public function sales(SalesInvoice $invoice, string $document): Response
+    {
+        Gate::authorize('print', $invoice);
+
+        // A quotation is a draft; every other document needs a posted sale.
+        abort_unless($document === 'quotation' ? $invoice->isDraft() : $invoice->isPosted(), 404);
+        abort_if($document === 'delivery' && $invoice->delivered_at === null, 404);
+        abort_if($document === 'schedule' && $invoice->installmentPlan()->doesntExist(), 404);
+
+        $invoice->load([
+            'party', 'salesperson', 'currency', 'items.vehicle.brand', 'items.vehicle.carModel', 'items.vehicle.color',
+            'tradeIn.vehicle.brand', 'tradeIn.vehicle.carModel', 'installmentPlan.installments', 'installmentPlan.guarantor', 'deliverer',
+        ]);
+
+        return Pdf::inline("print.sales.{$document}", $this->letterhead() + ['invoice' => $invoice], ($invoice->number ?? 'quotation-'.$invoice->id)."-{$document}.pdf");
+    }
+
+    public function voucher(Voucher $voucher): Response
+    {
+        Gate::authorize('view', $voucher);
+        abort_unless($voucher->isPosted(), 404);
+        abort_unless(request()->user()->can('view', Cashbox::query()->findOrFail($voucher->cashbox_id)), 403);
+
+        $voucher->load(['party', 'cashbox', 'toCashbox', 'account', 'currency', 'approver']);
+
+        return Pdf::inline('print.voucher', $this->letterhead() + ['voucher' => $voucher], $voucher->number.'.pdf');
+    }
+
+    public function statement(Request $request, Party $party, AccountResolver $accounts): Response
+    {
+        Gate::authorize('viewStatement', $party);
+
+        $from = $request->date('from') ? CarbonImmutable::parse($request->date('from')) : now()->startOfYear()->toImmutable();
+        $to = $request->date('to') ? CarbonImmutable::parse($request->date('to')) : now()->toImmutable();
+        $statement = new PartyStatement($party, $accounts->partyAccountIds(), $from, $to);
+
+        return Pdf::inline('print.statement', $this->letterhead() + [
+            'party' => $party,
+            'from' => $from,
+            'to' => $to,
+            'opening' => $statement->opening(),
+            'lines' => $statement->lines(),
+            'closing' => $statement->closing(),
+            'receivablesId' => $accounts->idFor(AccountRole::Receivables),
+        ], 'statement-'.$party->id.'.pdf');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function letterhead(): array
+    {
+        $logo = $this->settings->get('company.logo');
+
+        return [
+            'company' => [
+                'name' => $this->settings->get('company.name', config('app.name')),
+                'phone' => $this->settings->get('company.phone'),
+                'address' => $this->settings->get('company.address'),
+                'logo' => $logo && Storage::disk('public')->exists($logo) ? Storage::disk('public')->path($logo) : null,
+            ],
+            'contractTerms' => $this->settings->get('print.contract_terms'),
+        ];
+    }
+}

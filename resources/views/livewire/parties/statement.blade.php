@@ -15,8 +15,9 @@
                     <option value="customer_deposits">{{ __('enums.account_role.customer_deposits') }}</option>
                 </select>
             </x-ui.field>
-            <div class="ms-auto text-sm text-gray-600">
+            <div class="ms-auto flex items-center gap-3 text-sm text-gray-600">
                 <p>{{ $party->type->label() }} · <span class="num">{{ $party->phone }}</span></p>
+                <x-ui.button size="sm" variant="secondary" icon="printer" :href="route('print.statement', ['party' => $party, 'from' => $from, 'to' => $to])" target="_blank">{{ __('print.print') }}</x-ui.button>
             </div>
         </div>
     </x-ui.card>

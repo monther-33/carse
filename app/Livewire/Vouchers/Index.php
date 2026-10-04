@@ -13,7 +13,9 @@ use App\Livewire\Concerns\HandlesBusinessErrors;
 use App\Livewire\Concerns\Notifies;
 use App\Models\Account;
 use App\Models\Cashbox;
+use App\Models\InstallmentPlan;
 use App\Models\PurchaseInvoice;
+use App\Models\SalesInvoice;
 use App\Models\Voucher;
 use App\Services\Accounting\AccountResolver;
 use App\Support\Settings;
@@ -102,9 +104,12 @@ class Index extends Component
         }
 
         $this->editingId = $voucher->id;
+        // The form lists invoices; a plan reference is shown as its sales invoice.
+        $referenceId = $voucher->reference instanceof InstallmentPlan ? $voucher->reference->sales_invoice_id : $voucher->reference_id;
+
         $this->form = $voucher->only(['party_id', 'cashbox_id', 'to_cashbox_id', 'account_id', 'description'])
             + ['type' => $voucher->type->value, 'purpose' => $purpose, 'date' => $voucher->date->toDateString(),
-                'amount' => (string) $voucher->amount, 'rate' => (string) $voucher->rate, 'reference_id' => $voucher->reference_id];
+                'amount' => (string) $voucher->amount, 'rate' => (string) $voucher->rate, 'reference_id' => $referenceId];
         $this->resetValidation();
         $this->showForm = true;
     }
@@ -136,15 +141,18 @@ class Index extends Component
             $data['account_id'] = $role !== null ? $accounts->idFor($role) : $data['account_id'];
         }
 
-        // Supplier payments may be tied to one purchase invoice (settled at that invoice's rate).
+        // A supplier payment / customer receipt may be tied to one invoice (settled at its rate).
+        // A receipt for an installment sale references the plan so it is spread over the installments.
         $data['reference_type'] = null;
+        $reference = null;
         if (! empty($data['reference_id']) && ($data['purpose'] ?? null) === 'supplier') {
-            $invoice = PurchaseInvoice::query()->posted()->where('party_id', $data['party_id'])->find($data['reference_id']);
-            $data['reference_type'] = $invoice?->getMorphClass();
-            $data['reference_id'] = $invoice?->id;
-        } else {
-            $data['reference_id'] = null;
+            $reference = PurchaseInvoice::query()->posted()->where('party_id', $data['party_id'])->find($data['reference_id']);
+        } elseif (! empty($data['reference_id']) && ($data['purpose'] ?? null) === 'customer') {
+            $sale = SalesInvoice::query()->posted()->with('installmentPlan')->where('party_id', $data['party_id'])->find($data['reference_id']);
+            $reference = $sale === null ? null : ($sale->installmentPlan ?? $sale);
         }
+        $data['reference_type'] = $reference?->getMorphClass();
+        $data['reference_id'] = $reference?->getKey();
 
         $voucher = $this->attempt(fn () => $save->handle($data, $voucher), 'form.amount');
         if ($voucher === null) {
@@ -202,15 +210,18 @@ class Index extends Component
     /**
      * Invoices a voucher of the current form can be tied to.
      *
-     * @return Collection<int, PurchaseInvoice>
+     * @return Collection<int, PurchaseInvoice|SalesInvoice>
      */
     private function referenceOptions(): Collection
     {
-        if (($this->form['purpose'] ?? null) !== 'supplier' || empty($this->form['party_id'])) {
-            return collect();
-        }
+        $partyId = $this->form['party_id'] ?? null;
 
-        return PurchaseInvoice::query()->posted()->where('party_id', $this->form['party_id'])->latest('date')->limit(30)->get();
+        return match (true) {
+            empty($partyId) => collect(),
+            ($this->form['purpose'] ?? null) === 'supplier' => PurchaseInvoice::query()->posted()->where('party_id', $partyId)->latest('date')->limit(30)->get(),
+            ($this->form['purpose'] ?? null) === 'customer' => SalesInvoice::query()->posted()->where('party_id', $partyId)->latest('date')->limit(30)->get(),
+            default => collect(),
+        };
     }
 
     public function render(): View

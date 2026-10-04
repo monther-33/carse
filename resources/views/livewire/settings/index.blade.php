@@ -23,6 +23,12 @@
         </div>
     </x-ui.card>
 
+    <x-ui.card :title="__('app.settings.printing')">
+        <x-ui.field :label="__('app.settings.contract_terms')" for="contract_terms" error="contract_terms" :hint="__('app.settings.contract_terms_hint')">
+            <textarea id="contract_terms" rows="6" wire:model="contract_terms" class="form-input"></textarea>
+        </x-ui.field>
+    </x-ui.card>
+
     <x-ui.card :title="__('app.settings.operations')">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <label class="inline-flex items-start gap-2 text-sm sm:col-span-2">

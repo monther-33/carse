@@ -29,6 +29,8 @@ class Index extends Component
     /** @var TemporaryUploadedFile|null */
     public $logo = null;
 
+    public string $contract_terms = '';
+
     public bool $require_approval = true;
 
     public string $commission_type = 'percent';
@@ -54,6 +56,7 @@ class Index extends Component
         $this->company_phone = (string) $settings->get('company.phone', '');
         $this->company_address = (string) $settings->get('company.address', '');
         $this->company_logo = $settings->get('company.logo');
+        $this->contract_terms = (string) $settings->get('print.contract_terms', '');
         $this->require_approval = $settings->bool('documents.require_approval', true);
         $this->commission_type = (string) $settings->get('sales.commission_type', 'percent');
         $this->commission_value = (string) $settings->get('sales.commission_value', '0');
@@ -79,6 +82,7 @@ class Index extends Component
             'company_phone' => ['nullable', 'string', 'max:100'],
             'company_address' => ['nullable', 'string', 'max:255'],
             'logo' => ['nullable', 'image', 'max:1024'],
+            'contract_terms' => ['nullable', 'string', 'max:10000'],
             'require_approval' => ['boolean'],
             'commission_type' => ['required', 'in:percent,fixed'],
             'commission_value' => ['required', 'numeric', 'min:0', 'decimal:0,3'],
@@ -102,6 +106,7 @@ class Index extends Component
             'company.phone' => $this->company_phone,
             'company.address' => $this->company_address,
             'company.logo' => $this->company_logo,
+            'print.contract_terms' => $this->contract_terms,
             'documents.require_approval' => $this->require_approval,
             'sales.commission_type' => $this->commission_type,
             'sales.commission_value' => $this->commission_value,

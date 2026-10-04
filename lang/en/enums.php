@@ -30,7 +30,7 @@ return [
         'reserved' => 'Reserved',
         'sold' => 'Sold',
         'returned' => 'Returned by customer',
-        'returned_to_supplier' => 'Returned to supplier',
+        'returned_to_supplier' => 'Returned to seller',
     ],
     'vehicle_condition' => ['new' => 'New', 'used' => 'Used'],
     'fuel_type' => ['petrol' => 'Petrol', 'diesel' => 'Diesel', 'hybrid' => 'Hybrid', 'electric' => 'Electric', 'gas' => 'Gas'],

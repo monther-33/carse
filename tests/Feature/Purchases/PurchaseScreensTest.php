@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Purchases\SavePurchaseInvoice;
 use App\Enums\DocumentStatus;
 use App\Enums\VehicleStatus;
 use App\Livewire\Expenses\Index as ExpensesIndex;
@@ -49,7 +50,7 @@ test('a purchasing clerk creates a draft and an accountant approves it', functio
 
 test('a draft is reopened in the form, edited and saved', function () {
     $this->actingAs(userWithRole('purchasing'));
-    $draft = app(\App\Actions\Purchases\SavePurchaseInvoice::class)->handle([
+    $draft = app(SavePurchaseInvoice::class)->handle([
         'date' => today()->toDateString(), 'party_id' => supplier()->id, 'source' => 'supplier',
         'currency_id' => lyd()->id, 'rate' => '1', 'discount' => '0', 'paid' => '0', 'cashbox_id' => null, 'notes' => null,
         'items' => [purchaseLine(['price' => '10000', 'fuel' => 'diesel'])],
