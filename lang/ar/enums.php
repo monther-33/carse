@@ -59,5 +59,6 @@ return [
         'commission_expense' => 'مصروف العمولات',
         'fx_differences' => 'فروقات العملة',
         'discount_allowed' => 'الخصم المسموح به',
+        'forfeited_deposits' => 'العرابين المصادرة',
     ],
 ];

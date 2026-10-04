@@ -137,13 +137,13 @@ test('a salesperson reservation waits for the deposit to be approved before it c
     expect($reservation->voucher->status)->toBe(DocumentStatus::Draft)
         ->and($vehicle->fresh()->status)->toBe(VehicleStatus::Reserved);
 
-    // Not yet counted on the sale.
-    $draft = saveSale($vehicle, ['party_id' => $customer->id, 'reservation_id' => $reservation->id, 'price' => '35000']);
-    expect((string) $draft->deposit_applied)->toBe('0.000');
+    // Not usable on the sale until the deposit receipt is approved.
+    $data = ['party_id' => $customer->id, 'reservation_id' => $reservation->id, 'price' => '35000', 'deposit_applied' => '1000'];
+    expect(fn () => saveSale($vehicle, $data))->toThrow(BusinessRuleException::class);
 
     $this->actingAs(userWithRole('accountant'));
     app(PostVoucher::class)->handle($reservation->voucher);
-    $sale = app(PostSalesInvoice::class)->handle($draft);
+    $sale = app(PostSalesInvoice::class)->handle(saveSale($vehicle, $data));
 
     expect((string) $sale->deposit_applied)->toBe('1000.000')
         ->and((string) baseBalance('13'))->toBe('34000.000')

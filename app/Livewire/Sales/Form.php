@@ -22,6 +22,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\Currency\ExchangeRateService;
 use App\Services\Installments\InstallmentScheduleService;
+use App\Services\Sales\DepositService;
 use App\Support\Money;
 use App\Support\Settings;
 use Carbon\CarbonImmutable;
@@ -53,6 +54,9 @@ class Form extends Component
     public ?int $salesperson_id = null;
 
     public ?int $reservation_id = null;
+
+    /** How much of the customer's deposit credit to apply (any part, from any reservation). */
+    public string $deposit_applied = '0';
 
     public string $payment_type = 'cash';
 
@@ -112,6 +116,7 @@ class Form extends Component
                 $this->currency_id = $reservation->currency_id;
                 $this->reservation_id = $reservation->id;
                 $this->addVehicle($reservation->vehicle_id);
+                $this->suggestDeposit();
             }
         }
     }
@@ -124,6 +129,7 @@ class Form extends Component
         $this->party_id = $invoice->party_id;
         $this->salesperson_id = $invoice->salesperson_id;
         $this->reservation_id = $invoice->reservation_id;
+        $this->deposit_applied = (string) $invoice->deposit_applied;
         $this->payment_type = $invoice->payment_type->value;
         $this->currency_id = $invoice->currency_id;
         $this->rate = rtrim(rtrim($invoice->rate, '0'), '.');
@@ -187,6 +193,15 @@ class Form extends Component
     {
         $this->reservation_id = null;
         $this->guarantor_id = null;
+        $this->suggestDeposit();
+    }
+
+    /** Default to applying all of the customer's deposit credit; the user may lower it. */
+    private function suggestDeposit(): void
+    {
+        $this->deposit_applied = $this->party_id && $this->currency_id
+            ? (string) app(DepositService::class)->availableCredit($this->party_id, (int) $this->currency_id)
+            : '0';
     }
 
     public function updatedReservationId(?int $id): void
@@ -196,6 +211,7 @@ class Form extends Component
             $this->currency_id = $reservation->currency_id;
             $this->addVehicle($reservation->vehicle_id);
         }
+        $this->suggestDeposit();
     }
 
     public function updatedCurrencyId(): void
@@ -206,6 +222,7 @@ class Form extends Component
             $this->attempt(fn () => $this->rate = (string) $rates->rateFor((int) $this->currency_id, CarbonImmutable::parse($this->date ?: now())), 'rate');
         }
         $this->payments = [['cashbox_id' => null, 'amount' => '']];
+        $this->suggestDeposit();
     }
 
     public function addPayment(): void
@@ -243,6 +260,7 @@ class Form extends Component
             'currency_id' => ['required', 'exists:currencies,id'],
             'rate' => ['required', 'numeric', 'gt:0', 'decimal:0,6'],
             'discount' => ['required', 'numeric', 'min:0', 'decimal:0,3'],
+            'deposit_applied' => ['required', 'numeric', 'min:0', 'decimal:0,3'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.vehicle_id' => ['required', 'exists:vehicles,id'],
             'items.*.price' => ['required', 'numeric', 'gt:0', 'decimal:0,3'],
@@ -271,6 +289,7 @@ class Form extends Component
             'party_id' => $this->party_id,
             'salesperson_id' => $this->salesperson_id,
             'reservation_id' => $this->reservation_id,
+            'deposit_applied' => $this->deposit_applied,
             'payment_type' => $this->payment_type,
             'currency_id' => $this->currency_id,
             'rate' => $this->rate,
@@ -305,7 +324,6 @@ class Form extends Component
     private function terms(): SalesTerms
     {
         $num = fn ($v) => is_numeric($v) ? Money::of((string) $v) : Money::zero();
-        $reservation = $this->reservation_id ? Reservation::query()->with('voucher')->find($this->reservation_id) : null;
         $payments = array_map(fn ($p) => $num($p['amount']), $this->payments);
 
         return new SalesTerms(
@@ -313,14 +331,14 @@ class Form extends Component
             Money::sum(array_map(fn ($i) => $num($i['price']), $this->items)),
             $num($this->discount),
             $this->hasTradeIn ? $num($this->tradeIn['value'] ?? '') : Money::zero(),
-            app(SaveSalesInvoice::class)->postedDeposit($reservation),
+            $num($this->deposit_applied),
             $payments,
             Money::sum($payments),
             $this->months,
         );
     }
 
-    public function render(InstallmentScheduleService $schedule): View
+    public function render(InstallmentScheduleService $schedule, DepositService $deposits): View
     {
         $terms = $this->terms();
         $vehicles = Vehicle::query()->with(['brand', 'carModel'])->findMany(array_column($this->items, 'vehicle_id'))->keyBy('id');
@@ -342,6 +360,7 @@ class Form extends Component
             'colors' => Color::query()->orderBy('name')->get(),
             'locations' => Location::query()->orderBy('name')->get(),
             'canViewCost' => auth()->user()->can('vehicles.view_cost'),
+            'availableDeposit' => $this->party_id ? $deposits->availableCredit($this->party_id, (int) $this->currency_id) : Money::zero(),
         ])->title($this->invoice ? __('sales.edit', ['ref' => $this->invoice->displayNumber()]) : __('sales.new'));
     }
 }

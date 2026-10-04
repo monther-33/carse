@@ -57,6 +57,7 @@ test('full cycle: purchase, expense, reservation, installment sale with trade-in
     $sale = sell($carA, [
         'party_id' => $customer->id,
         'reservation_id' => $reservation->id,
+        'deposit_applied' => '2000',
         'price' => '50000',
         'discount' => '500',
         'payment_type' => 'installment',

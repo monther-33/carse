@@ -37,6 +37,9 @@ class Index extends Component
 
     public string $commission_value = '0';
 
+    /** credit | forfeit — what happens to the deposit when a reservation expires. */
+    public string $expiry_action = 'credit';
+
     public int $stale_warning = 60;
 
     public int $stale_critical = 90;
@@ -60,6 +63,7 @@ class Index extends Component
         $this->require_approval = $settings->bool('documents.require_approval', true);
         $this->commission_type = (string) $settings->get('sales.commission_type', 'percent');
         $this->commission_value = (string) $settings->get('sales.commission_value', '0');
+        $this->expiry_action = (string) $settings->get('reservations.expiry_action', 'credit');
         $this->stale_warning = $settings->int('inventory.stale_days_warning', 60);
         $this->stale_critical = $settings->int('inventory.stale_days_critical', 90);
         $this->cash_parent = $settings->int('cashbox.parent.cash') ?: null;
@@ -86,6 +90,7 @@ class Index extends Component
             'require_approval' => ['boolean'],
             'commission_type' => ['required', 'in:percent,fixed'],
             'commission_value' => ['required', 'numeric', 'min:0', 'decimal:0,3'],
+            'expiry_action' => ['required', 'in:credit,forfeit'],
             'stale_warning' => ['required', 'integer', 'min:1'],
             'stale_critical' => ['required', 'integer', 'gt:stale_warning'],
             'cash_parent' => ['required', $group],
@@ -110,6 +115,7 @@ class Index extends Component
             'documents.require_approval' => $this->require_approval,
             'sales.commission_type' => $this->commission_type,
             'sales.commission_value' => $this->commission_value,
+            'reservations.expiry_action' => $this->expiry_action,
             'inventory.stale_days_warning' => $this->stale_warning,
             'inventory.stale_days_critical' => $this->stale_critical,
             'cashbox.parent.cash' => $this->cash_parent,

@@ -110,6 +110,11 @@
                 <x-ui.field :label="__('documents.discount')" for="discount" error="discount" :hint="__('sales.discount_hint', ['limit' => \App\Support\Money::format(auth()->user()->max_discount)])">
                     <input id="discount" type="text" dir="ltr" inputmode="decimal" wire:model.live.debounce.500ms="discount" class="form-input">
                 </x-ui.field>
+                @if ($availableDeposit->isPositive() || \App\Support\Money::of(is_numeric($deposit_applied) ? $deposit_applied : '0')->isPositive())
+                    <x-ui.field :label="__('sales.apply_deposit')" for="deposit_applied" error="deposit_applied" :hint="__('sales.apply_deposit_hint', ['available' => \App\Support\Money::format($availableDeposit)])">
+                        <input id="deposit_applied" type="text" dir="ltr" inputmode="decimal" wire:model.live.debounce.500ms="deposit_applied" class="form-input">
+                    </x-ui.field>
+                @endif
                 @if ($salespeople->isNotEmpty())
                     <x-ui.field :label="__('sales.salesperson')" for="salesperson_id" error="salesperson_id">
                         <select id="salesperson_id" wire:model="salesperson_id" class="form-input">

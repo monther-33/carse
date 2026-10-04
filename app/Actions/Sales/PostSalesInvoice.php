@@ -22,6 +22,7 @@ use App\Services\Accounting\JournalBuilder;
 use App\Services\Accounting\PostingService;
 use App\Services\Numbering\SequenceService;
 use App\Services\Sales\CommissionCalculator;
+use App\Services\Sales\DepositService;
 use App\Services\Vehicles\VehicleStateMachine;
 use App\Support\Money;
 use Brick\Math\BigDecimal;
@@ -31,7 +32,7 @@ use Illuminate\Support\Facades\DB;
  * Approves a draft sale. One journal entry carries (spec 5.3):
  *  - revenue:    Dr receivables (party, invoice currency) / Cr vehicle sales     — per vehicle
  *  - cost:       Dr cost of vehicles sold / Cr inventory (vehicles.total_cost)  — per vehicle, frozen in cost_snapshot
- *  - deposit:    Dr customer deposits / Cr receivables                           — the reservation's posted deposit
+ *  - deposit:    Dr customer deposits / Cr receivables                           — any part of the customer's posted deposit credit
  *  - trade-in:   Dr inventory (customer's car) / Cr receivables
  *  - commission: Dr commission expense / Cr accrued commissions
  * Payments taken at the sale become posted receipt vouchers (Dr cashbox / Cr receivables),
@@ -53,6 +54,7 @@ class PostSalesInvoice
         private readonly SaveSalesInvoice $saveSales,
         private readonly SaveVoucher $saveVoucher,
         private readonly PostVoucher $postVoucher,
+        private readonly DepositService $deposits,
     ) {}
 
     public function handle(SalesInvoice $invoice): SalesInvoice
@@ -60,7 +62,7 @@ class PostSalesInvoice
         return DB::transaction(function () use ($invoice) {
             $invoice = $this->lockInStatus($invoice, DocumentStatus::Draft);
             $invoice->load(['items', 'payments', 'tradeIn', 'installmentPlan']);
-            $reservation = $invoice->reservation_id ? Reservation::query()->with('voucher')->lockForUpdate()->findOrFail($invoice->reservation_id) : null;
+            $reservation = $invoice->reservation_id ? Reservation::query()->lockForUpdate()->findOrFail($invoice->reservation_id) : null;
 
             $vehicles = Vehicle::query()->lockForUpdate()->findMany($invoice->items->pluck('vehicle_id'))->keyBy('id');
             $this->assertSellable($invoice, $vehicles->all(), $reservation);
@@ -70,8 +72,8 @@ class PostSalesInvoice
                 throw BusinessRuleException::make('purchases.errors.vin_in_stock', ['vin' => $tradeInVehicle->vin]);
             }
 
-            // Re-check the money with today's deposit state (the deposit voucher may have been posted or not).
-            $deposit = $this->saveSales->postedDeposit($reservation);
+            // Re-check the deposit credit as it stands now (it may have been used or refunded since the draft).
+            $deposit = $this->saveSales->depositToApply($invoice->deposit_applied, $invoice->party_id, $invoice->currency_id);
             $terms = new SalesTerms(
                 $invoice->payment_type,
                 Money::of($invoice->subtotal),
@@ -88,7 +90,7 @@ class PostSalesInvoice
             }
 
             $number = $this->sequences->next(SequenceType::SalesInvoice, $invoice->date);
-            $entry = $this->posting->post($this->entry($invoice, $number, $vehicles->all(), $reservation, $deposit));
+            $entry = $this->posting->post($this->entry($invoice, $number, $vehicles->all(), $deposit));
             $this->markPosted($invoice, $number, $entry);
             $invoice->update(['deposit_applied' => (string) $deposit]);
 
@@ -172,7 +174,7 @@ class PostSalesInvoice
     /**
      * @param  array<int, Vehicle>  $vehicles
      */
-    private function entry(SalesInvoice $invoice, string $number, array $vehicles, ?Reservation $reservation, BigDecimal $deposit): JournalBuilder
+    private function entry(SalesInvoice $invoice, string $number, array $vehicles, BigDecimal $deposit): JournalBuilder
     {
         $receivables = $this->accounts->idFor(AccountRole::Receivables);
         $builder = JournalBuilder::make($invoice->date, __('sales.entry', ['number' => $number]))
@@ -197,11 +199,12 @@ class PostSalesInvoice
             $commissionTotal = $commissionTotal->plus($this->commissions->forVehicle(Money::of($item->net_base)));
         }
 
-        if ($deposit->isPositive() && $reservation?->voucher !== null) {
-            $depositRate = $reservation->voucher->rate;
+        // The customer's deposit credit, at the rate it is carried, moves to the receivable.
+        if ($deposit->isPositive()) {
+            $depositRate = $this->deposits->carryingRate($invoice->party_id, $invoice->currency_id);
             $builder
-                ->debit($this->accounts->idFor(AccountRole::CustomerDeposits), $deposit, $reservation->currency_id, $depositRate, partyId: $invoice->party_id, memo: $reservation->number)
-                ->credit($receivables, $deposit, $reservation->currency_id, $depositRate, partyId: $invoice->party_id, memo: $reservation->number);
+                ->debit($this->accounts->idFor(AccountRole::CustomerDeposits), $deposit, $invoice->currency_id, $depositRate, partyId: $invoice->party_id, memo: __('sales.deposit'))
+                ->credit($receivables, $deposit, $invoice->currency_id, $depositRate, partyId: $invoice->party_id, memo: __('sales.deposit'));
         }
 
         if ($invoice->tradeIn !== null) {

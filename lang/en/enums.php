@@ -59,5 +59,6 @@ return [
         'commission_expense' => 'Commission expense',
         'fx_differences' => 'Currency differences',
         'discount_allowed' => 'Discount allowed',
+        'forfeited_deposits' => 'Forfeited deposits',
     ],
 ];

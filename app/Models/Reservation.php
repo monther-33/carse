@@ -19,6 +19,7 @@ use Illuminate\Support\Carbon;
  * @property int $party_id
  * @property int $salesperson_id
  * @property string $deposit
+ * @property string $forfeited_amount
  * @property int $currency_id
  * @property Carbon $expires_at
  * @property ReservationStatus $status
@@ -30,7 +31,7 @@ class Reservation extends Model
     use Auditable, HasUserstamps;
 
     protected $fillable = [
-        'branch_id', 'number', 'date', 'vehicle_id', 'party_id', 'salesperson_id', 'deposit', 'currency_id',
+        'branch_id', 'number', 'date', 'vehicle_id', 'party_id', 'salesperson_id', 'deposit', 'forfeited_amount', 'currency_id',
         'expires_at', 'status', 'voucher_id', 'notes', 'cancelled_by', 'cancelled_at', 'cancel_reason',
     ];
 
@@ -40,6 +41,7 @@ class Reservation extends Model
             'date' => 'date',
             'expires_at' => 'date',
             'deposit' => 'decimal:3',
+            'forfeited_amount' => 'decimal:3',
             'status' => ReservationStatus::class,
             'cancelled_at' => 'datetime',
         ];

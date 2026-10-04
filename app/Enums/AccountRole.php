@@ -23,6 +23,7 @@ enum AccountRole: string
     case CommissionExpense = 'commission_expense';
     case FxDifferences = 'fx_differences';
     case DiscountAllowed = 'discount_allowed';
+    case ForfeitedDeposits = 'forfeited_deposits';
 
     public function settingKey(): string
     {

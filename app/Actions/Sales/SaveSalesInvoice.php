@@ -22,6 +22,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\Currency\ExchangeRateService;
 use App\Services\Installments\InstallmentScheduleService;
+use App\Services\Sales\DepositService;
 use App\Services\Vehicles\DraftVehicleResolver;
 use App\Support\Money;
 use Brick\Math\BigDecimal;
@@ -44,6 +45,7 @@ class SaveSalesInvoice
         private readonly ExchangeRateService $rates,
         private readonly DraftVehicleResolver $vehicles,
         private readonly InstallmentScheduleService $schedule,
+        private readonly DepositService $deposits,
     ) {}
 
     /**
@@ -61,7 +63,7 @@ class SaveSalesInvoice
             $type = PaymentType::from($data['payment_type']);
             $currencyId = (int) $data['currency_id'];
             $rate = $this->rates->isBase($currencyId) ? Money::rate(1) : Money::rate((string) $data['rate']);
-            $reservation = $this->reservation($data, $currencyId);
+            $reservation = $this->reservation($data);
 
             $prices = array_map(fn (array $item) => Money::of((string) $item['price']), $data['items']);
             if ($prices === []) {
@@ -82,7 +84,7 @@ class SaveSalesInvoice
                 Money::sum($prices),
                 $discount,
                 $tradeInValue,
-                $this->postedDeposit($reservation),
+                $this->depositToApply($data['deposit_applied'] ?? '0', (int) $data['party_id'], $currencyId),
                 array_column($payments, 'amount'),
                 $installment !== null ? Money::of($installment['down_payment'] ?? '0') : null,
                 $installment !== null ? (int) ($installment['months'] ?? 0) : null,
@@ -120,7 +122,7 @@ class SaveSalesInvoice
     /**
      * @param  array<string, mixed>  $data
      */
-    private function reservation(array $data, int $currencyId): ?Reservation
+    private function reservation(array $data): ?Reservation
     {
         if (empty($data['reservation_id'])) {
             return null;
@@ -131,21 +133,28 @@ class SaveSalesInvoice
         if ($reservation->status !== ReservationStatus::Active || $reservation->party_id !== (int) $data['party_id']) {
             throw BusinessRuleException::make('sales.errors.reservation');
         }
-        if ($reservation->currency_id !== $currencyId) {
-            throw BusinessRuleException::make('sales.errors.reservation_currency');
-        }
 
         return $reservation;
     }
 
-    /** The deposit counts only once its receipt voucher is posted. */
-    public function postedDeposit(?Reservation $reservation): BigDecimal
+    /**
+     * Any part of the customer's posted deposit credit in the invoice currency may be
+     * applied — from this reservation, an older cancelled one, or several.
+     */
+    public function depositToApply(mixed $requested, int $partyId, int $currencyId): BigDecimal
     {
-        if ($reservation === null || $reservation->voucher?->status !== DocumentStatus::Posted) {
-            return Money::zero();
+        $amount = Money::of((string) ($requested ?: '0'));
+
+        if ($amount->isNegative()) {
+            throw BusinessRuleException::make('sales.errors.deposit_negative');
         }
 
-        return Money::of($reservation->deposit);
+        $available = $this->deposits->availableCredit($partyId, $currencyId);
+        if ($amount->isGreaterThan($available)) {
+            throw BusinessRuleException::make('sales.errors.deposit_exceeds', ['available' => Money::format($available)]);
+        }
+
+        return $amount;
     }
 
     /**

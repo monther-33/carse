@@ -30,6 +30,7 @@ class SettingsSeeder extends Seeder
         AccountRole::CommissionExpense->value => '65',
         AccountRole::FxDifferences->value => '71',
         AccountRole::DiscountAllowed->value => '72',
+        AccountRole::ForfeitedDeposits->value => '42',
     ];
 
     public function run(Settings $settings): void
@@ -47,6 +48,7 @@ class SettingsSeeder extends Seeder
             'sales.commission_value' => '0',
             'inventory.stale_days_warning' => '60',
             'inventory.stale_days_critical' => '90',
+            'reservations.expiry_action' => 'credit', // credit | forfeit
             'cashbox.parent.cash' => $accountIds['11'] ?? null,
             'cashbox.parent.bank' => $accountIds['12'] ?? null,
         ];
