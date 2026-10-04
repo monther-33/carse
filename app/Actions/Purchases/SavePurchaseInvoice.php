@@ -11,6 +11,7 @@ use App\Models\PurchaseInvoice;
 use App\Models\PurchaseInvoiceItem;
 use App\Models\Vehicle;
 use App\Services\Currency\ExchangeRateService;
+use App\Services\Vehicles\DraftVehicleResolver;
 use App\Support\Money;
 use Brick\Math\BigDecimal;
 use Illuminate\Support\Facades\Auth;
@@ -27,7 +28,10 @@ class SavePurchaseInvoice
 {
     use ManagesDocumentLifecycle;
 
-    public function __construct(private readonly ExchangeRateService $rates) {}
+    public function __construct(
+        private readonly ExchangeRateService $rates,
+        private readonly DraftVehicleResolver $vehicles,
+    ) {}
 
     /**
      * @param  array{date: string, party_id: int, source: string, currency_id: int, rate: string|null,
@@ -123,30 +127,10 @@ class SavePurchaseInvoice
      */
     private function resolveVehicle(PurchaseInvoice $invoice, array $item): Vehicle
     {
-        $vin = strtoupper(trim((string) $item['vin']));
-        $vehicle = Vehicle::query()->lockForUpdate()->where('vin', $vin)->first();
-
-        $attributes = array_intersect_key($item, array_flip(Vehicle::EDITABLE));
-
-        if ($vehicle === null) {
-            return Vehicle::query()->create($attributes + [
-                'branch_id' => $invoice->branch_id,
-                'vin' => $vin,
-                'status' => VehicleStatus::Pending,
-            ]);
-        }
-
-        $onThisInvoice = $invoice->items()->where('vehicle_id', $vehicle->id)->exists();
-
-        if ($vehicle->status === VehicleStatus::Pending && ! $onThisInvoice) {
-            throw BusinessRuleException::make('purchases.errors.vin_on_other_draft', ['vin' => $vin]);
-        }
-        if ($vehicle->status->isInStock()) {
-            throw BusinessRuleException::make('purchases.errors.vin_in_stock', ['vin' => $vin]);
-        }
-
-        $vehicle->update($attributes);
-
-        return $vehicle;
+        return $this->vehicles->resolve(
+            $item,
+            $invoice->branch_id,
+            fn (Vehicle $vehicle) => $invoice->items()->where('vehicle_id', $vehicle->id)->exists(),
+        );
     }
 }

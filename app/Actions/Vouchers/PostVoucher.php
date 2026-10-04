@@ -7,12 +7,15 @@ use App\Enums\DocumentStatus;
 use App\Enums\SequenceType;
 use App\Enums\VoucherType;
 use App\Models\Cashbox;
+use App\Models\InstallmentPlan;
 use App\Models\PurchaseInvoice;
+use App\Models\SalesInvoice;
 use App\Models\Voucher;
 use App\Services\Accounting\AccountResolver;
 use App\Services\Accounting\JournalBuilder;
 use App\Services\Accounting\PostingService;
 use App\Services\Accounting\SettlementLines;
+use App\Services\Installments\InstallmentAllocator;
 use App\Services\Numbering\SequenceService;
 use App\Support\Money;
 use Brick\Math\BigDecimal;
@@ -34,6 +37,7 @@ class PostVoucher
         private readonly SequenceService $sequences,
         private readonly AccountResolver $accounts,
         private readonly SettlementLines $settlement,
+        private readonly InstallmentAllocator $installments,
     ) {}
 
     public function handle(Voucher $voucher): Voucher
@@ -61,6 +65,9 @@ class PostVoucher
 
             $entry = $this->posting->post($builder);
             $this->markPosted($voucher, $number, $entry);
+
+            // A collection on an installment plan is spread over its installments, oldest first.
+            $this->installments->allocate($voucher);
 
             return $voucher;
         });
@@ -101,7 +108,11 @@ class PostVoucher
     {
         $invoice = $voucher->reference;
 
-        if ($invoice instanceof PurchaseInvoice && $invoice->currency_id === $voucher->currency_id) {
+        if ($invoice instanceof InstallmentPlan) {
+            $invoice = $invoice->invoice;
+        }
+
+        if (($invoice instanceof PurchaseInvoice || $invoice instanceof SalesInvoice) && $invoice->currency_id === $voucher->currency_id) {
             return Money::rate($invoice->rate);
         }
 

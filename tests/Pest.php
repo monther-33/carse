@@ -4,6 +4,8 @@ use App\Actions\Expenses\PostExpense;
 use App\Actions\Expenses\SaveExpense;
 use App\Actions\Purchases\PostPurchaseInvoice;
 use App\Actions\Purchases\SavePurchaseInvoice;
+use App\Actions\Sales\PostSalesInvoice;
+use App\Actions\Sales\SaveSalesInvoice;
 use App\Actions\Vouchers\PostVoucher;
 use App\Actions\Vouchers\SaveVoucher;
 use App\Models\Account;
@@ -14,6 +16,7 @@ use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\Party;
 use App\Models\PurchaseInvoice;
+use App\Models\SalesInvoice;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\Voucher;
@@ -155,6 +158,45 @@ function postVoucher(array $data): Voucher
     $voucher = app(SaveVoucher::class)->handle($data + ['date' => today()->toDateString(), 'description' => 'سند']);
 
     return app(PostVoucher::class)->handle($voucher);
+}
+
+/**
+ * Save a draft sale. $data overrides the defaults (one vehicle, cash, LYD).
+ *
+ * @param  array<string, mixed>  $data
+ */
+function saveSale(Vehicle $vehicle, array $data = []): SalesInvoice
+{
+    return app(SaveSalesInvoice::class)->handle($data + [
+        'date' => today()->toDateString(),
+        'party_id' => $data['party_id'] ?? customer()->id,
+        'payment_type' => 'credit',
+        'currency_id' => lyd()->id,
+        'rate' => '1',
+        'discount' => '0',
+        'items' => [['vehicle_id' => $vehicle->id, 'price' => $data['price'] ?? '60000']],
+        'payments' => [],
+        'trade_in' => null,
+        'installment' => null,
+        'notes' => null,
+    ]);
+}
+
+/**
+ * @param  array<string, mixed>  $data
+ */
+function sell(Vehicle $vehicle, array $data = []): SalesInvoice
+{
+    return app(PostSalesInvoice::class)->handle(saveSale($vehicle, $data));
+}
+
+/** Profit recognised in the ledger: revenue − cost of sales − commission expense − currency differences. */
+function ledgerProfit(): BigDecimal
+{
+    return baseBalance('41')->negated()
+        ->minus(baseBalance('51'))
+        ->minus(baseBalance('65'))
+        ->minus(baseBalance('71'));
 }
 
 /**

@@ -68,10 +68,13 @@ test('parallel processes never get the same number and leave no gaps', function 
     }
 
     $numbers = [];
-    foreach ($processes as $process) {
+    $diagnostics = [];
+    foreach ($processes as $i => $process) {
         $process->wait();
+        $lines = array_values(array_filter(array_map('trim', preg_split('/\R/', $process->getOutput()))));
+        $diagnostics[] = "worker {$i}: exit=".$process->getExitCode().' lines='.count($lines).' stderr='.trim($process->getErrorOutput());
         expect($process->getExitCode())->toBe(0, $process->getErrorOutput());
-        array_push($numbers, ...array_filter(explode(PHP_EOL, trim($process->getOutput()))));
+        array_push($numbers, ...$lines);
     }
 
     (new Process([$php, $script, 'reset', (string) $year], base_path(), $env))->mustRun();
@@ -79,7 +82,7 @@ test('parallel processes never get the same number and leave no gaps', function 
     $expected = array_map(fn (int $n) => sprintf('JE-%d-%06d', $year, $n), range(1, $workers * $perWorker));
     sort($numbers);
 
-    expect($numbers)->toHaveCount($workers * $perWorker)
+    expect($numbers)->toHaveCount($workers * $perWorker, implode(PHP_EOL, $diagnostics))
         ->and(array_unique($numbers))->toHaveCount($workers * $perWorker)
         ->and($numbers)->toBe($expected);
 });
