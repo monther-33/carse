@@ -12,6 +12,7 @@ use App\Models\FiscalPeriod;
 use App\Models\JournalEntry;
 use App\Models\JournalLine;
 use App\Models\Sequence;
+use App\Models\Vehicle;
 use App\Services\Accounting\JournalBuilder;
 use App\Services\Currency\ExchangeRateService;
 use Carbon\CarbonImmutable;
@@ -151,13 +152,16 @@ test('journal rows cannot be written, changed or deleted outside PostingService'
 });
 
 test('party and vehicle dimensions and memo are stored on lines', function () {
+    $party = customer();
+    $vehicle = Vehicle::factory()->create();
+
     $entry = posting()->post(
         JournalBuilder::make($this->today, 'أبعاد')
-            ->debit(account('13'), '500', partyId: 7, memo: 'عميل')
-            ->credit(account('41'), '500', vehicleId: 3)
+            ->debit(account('13'), '500', partyId: $party->id, memo: 'عميل')
+            ->credit(account('41'), '500', vehicleId: $vehicle->id)
     );
 
-    expect($entry->lines[0]->party_id)->toBe(7)
+    expect($entry->lines[0]->party_id)->toBe($party->id)
         ->and($entry->lines[0]->memo)->toBe('عميل')
-        ->and($entry->lines[1]->vehicle_id)->toBe(3);
+        ->and($entry->lines[1]->vehicle_id)->toBe($vehicle->id);
 });

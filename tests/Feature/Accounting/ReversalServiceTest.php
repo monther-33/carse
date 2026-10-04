@@ -6,6 +6,7 @@ use App\Exceptions\Accounting\ClosedPeriodException;
 use App\Exceptions\Accounting\InvalidJournalLineException;
 use App\Models\FiscalPeriod;
 use App\Models\JournalEntry;
+use App\Models\Vehicle;
 use App\Services\Accounting\JournalBuilder;
 use App\Services\Currency\ExchangeRateService;
 use Carbon\CarbonImmutable;
@@ -18,9 +19,9 @@ beforeEach(function () {
     // Multi-line, multi-currency entry with dimensions.
     $this->original = posting()->post(
         JournalBuilder::make($this->today, 'فاتورة شراء')
-            ->debit(account('14'), '9700', vehicleId: 11, memo: 'سيارة')
+            ->debit(account('14'), '9700', vehicleId: Vehicle::factory()->create()->id, memo: 'سيارة')
             ->credit(cashbox('خزينة دولار')->account_id, '1000', usd())
-            ->credit(account('21'), '4850', partyId: 5)
+            ->credit(account('21'), '4850', partyId: supplier()->id)
     );
 });
 

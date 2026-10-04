@@ -31,4 +31,18 @@ class AccountResolver
     {
         return (int) $this->for($role)->getKey();
     }
+
+    /**
+     * Control accounts whose lines must carry a party_id (receivables, payables, deposits).
+     *
+     * @return list<int>
+     */
+    public function partyAccountIds(): array
+    {
+        return [
+            $this->idFor(AccountRole::Receivables),
+            $this->idFor(AccountRole::Payables),
+            $this->idFor(AccountRole::CustomerDeposits),
+        ];
+    }
 }

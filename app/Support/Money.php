@@ -71,6 +71,44 @@ final class Money
     }
 
     /**
+     * Split $total across $weights proportionally (3 decimals). The last share takes the
+     * rounding remainder, so the shares always add up to $total exactly.
+     *
+     * @param  BigDecimal|string|int  $total
+     * @param  list<BigDecimal|string|int>  $weights
+     * @return list<BigDecimal>
+     */
+    public static function allocate(mixed $total, array $weights): array
+    {
+        $total = self::of($total);
+        $weights = array_map(fn ($w) => self::decimal($w), $weights);
+        $sum = array_reduce($weights, fn (BigDecimal $carry, BigDecimal $w) => $carry->plus($w), BigDecimal::zero());
+
+        if ($weights === []) {
+            return [];
+        }
+
+        $shares = [];
+        $allocated = self::zero();
+        $last = count($weights) - 1;
+
+        foreach ($weights as $i => $weight) {
+            if ($i === $last) {
+                $shares[] = $total->minus($allocated);
+                break;
+            }
+
+            $share = $sum->isZero()
+                ? self::zero()
+                : $total->multipliedBy($weight)->dividedBy($sum, self::SCALE, RoundingMode::HalfUp);
+            $shares[] = $share;
+            $allocated = $allocated->plus($share);
+        }
+
+        return $shares;
+    }
+
+    /**
      * Display format: thousands separator and fixed decimals, e.g. 12,500.000
      *
      * @param  BigDecimal|string|int|null  $value
