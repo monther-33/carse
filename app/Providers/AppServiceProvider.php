@@ -3,12 +3,18 @@
 namespace App\Providers;
 
 use App\Listeners\LogAuthenticationEvents;
+use App\Models\Expense;
+use App\Models\PurchaseInvoice;
+use App\Models\ReturnDocument;
+use App\Models\Vehicle;
+use App\Models\Voucher;
 use App\Services\Currency\ExchangeRateService;
 use App\Support\Settings;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,6 +28,15 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Stable aliases for polymorphic references (journal sources, voucher references, returns).
+        Relation::morphMap([
+            'vehicle' => Vehicle::class,
+            'purchase_invoice' => PurchaseInvoice::class,
+            'expense' => Expense::class,
+            'voucher' => Voucher::class,
+            'return' => ReturnDocument::class,
+        ]);
+
         Model::preventLazyLoading(! $this->app->isProduction());
         Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
 

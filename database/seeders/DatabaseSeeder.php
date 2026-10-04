@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             FoundationSeeder::class,
             ReferenceDataSeeder::class,
+            ExpenseCategorySeeder::class,
         ]);
     }
 }
