@@ -97,6 +97,9 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
+    // Password given to the first admin user created by the seeder.
+    'seed_admin_password' => env('ADMIN_PASSWORD', 'password'),
+
     'key' => env('APP_KEY'),
 
     'previous_keys' => [
