@@ -2,11 +2,10 @@
 
 use App\Models\User;
 use Livewire\Volt\Volt;
+use Spatie\Activitylog\Models\Activity;
 
 test('login screen can be rendered', function () {
-    $response = $this->get('/login');
-
-    $response
+    $this->get('/login')
         ->assertOk()
         ->assertSeeVolt('pages.auth.login');
 });
@@ -14,59 +13,73 @@ test('login screen can be rendered', function () {
 test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
 
-    $component = Volt::test('pages.auth.login')
+    Volt::test('pages.auth.login')
         ->set('form.email', $user->email)
-        ->set('form.password', 'password');
-
-    $component->call('login');
-
-    $component
+        ->set('form.password', 'password')
+        ->call('login')
         ->assertHasNoErrors()
         ->assertRedirect(route('dashboard', absolute: false));
 
-    $this->assertAuthenticated();
+    $this->assertAuthenticatedAs($user);
+    expect(Activity::query()->where('log_name', 'auth')->where('event', 'login')->where('causer_id', $user->id)->exists())->toBeTrue();
 });
 
-test('users can not authenticate with invalid password', function () {
+test('users can not authenticate with invalid password and the attempt is audited', function () {
     $user = User::factory()->create();
 
-    $component = Volt::test('pages.auth.login')
+    Volt::test('pages.auth.login')
         ->set('form.email', $user->email)
-        ->set('form.password', 'wrong-password');
-
-    $component->call('login');
-
-    $component
+        ->set('form.password', 'wrong-password')
+        ->call('login')
         ->assertHasErrors()
         ->assertNoRedirect();
 
     $this->assertGuest();
+
+    $failed = Activity::query()->where('log_name', 'auth')->where('event', 'login_failed')->latest('id')->first();
+    expect($failed)->not->toBeNull()
+        ->and($failed->properties['email'])->toBe($user->email);
 });
 
-test('navigation menu can be rendered', function () {
-    $user = User::factory()->create();
+test('inactive users cannot log in', function () {
+    $user = User::factory()->inactive()->create();
 
+    Volt::test('pages.auth.login')
+        ->set('form.email', $user->email)
+        ->set('form.password', 'password')
+        ->call('login')
+        ->assertHasErrors(['form.email' => __('app.auth.inactive')]);
+
+    $this->assertGuest();
+});
+
+test('a user deactivated mid-session is logged out on the next request', function () {
+    $user = User::factory()->create();
     $this->actingAs($user);
 
-    $response = $this->get('/dashboard');
+    $user->update(['is_active' => false]);
 
-    $response
+    $this->get('/dashboard')->assertRedirect(route('login'));
+    $this->assertGuest();
+});
+
+test('dashboard renders the RTL layout with the sidebar', function () {
+    $this->actingAs(User::factory()->role('admin')->create());
+
+    $this->get('/dashboard')
         ->assertOk()
-        ->assertSeeVolt('layout.navigation');
+        ->assertSee('dir="rtl"', false)
+        ->assertSee(__('app.nav.accounts'));
 });
 
 test('users can logout', function () {
-    $user = User::factory()->create();
+    $this->actingAs(User::factory()->create());
 
-    $this->actingAs($user);
-
-    $component = Volt::test('layout.navigation');
-
-    $component->call('logout');
-
-    $component
-        ->assertHasNoErrors()
-        ->assertRedirect('/');
+    $this->post('/logout')->assertRedirect('/');
 
     $this->assertGuest();
+});
+
+test('there is no self registration', function () {
+    $this->get('/register')->assertNotFound();
 });
