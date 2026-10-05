@@ -15,14 +15,14 @@ final class Pdf
     /**
      * @param  array<string, mixed>  $data
      */
-    public static function render(string $view, array $data): string
+    public static function render(string $view, array $data, bool $landscape = false): string
     {
         $tempDir = storage_path('app/mpdf');
         File::ensureDirectoryExists($tempDir);
 
         $mpdf = new Mpdf([
             'mode' => 'utf-8',
-            'format' => 'A4',
+            'format' => $landscape ? 'A4-L' : 'A4',
             'tempDir' => $tempDir,
             'default_font' => 'xbriyaz',
             'directionality' => 'rtl',
@@ -44,9 +44,9 @@ final class Pdf
     /**
      * @param  array<string, mixed>  $data
      */
-    public static function inline(string $view, array $data, string $filename): Response
+    public static function inline(string $view, array $data, string $filename, bool $landscape = false): Response
     {
-        return response(self::render($view, $data), 200, [
+        return response(self::render($view, $data, $landscape), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="'.$filename.'"',
         ]);

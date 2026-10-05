@@ -2,6 +2,7 @@
 
 return [
     'print' => 'طباعة',
+    'sold_to' => 'بيعت إلى :party بالفاتورة :number بتاريخ :date.',
     'quotation' => 'عرض سعر',
     'invoice' => 'فاتورة بيع',
     'contract' => 'عقد بيع سيارة',

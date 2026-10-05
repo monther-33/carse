@@ -6,6 +6,7 @@ use App\Enums\AccountRole;
 use App\Models\Cashbox;
 use App\Models\Party;
 use App\Models\SalesInvoice;
+use App\Models\Vehicle;
 use App\Models\Voucher;
 use App\Reports\PartyStatement;
 use App\Services\Accounting\AccountResolver;
@@ -50,6 +51,22 @@ class PrintController extends Controller
         $voucher->load(['party', 'cashbox', 'toCashbox', 'account', 'currency', 'approver']);
 
         return Pdf::inline('print.voucher', $this->letterhead() + ['voucher' => $voucher], $voucher->number.'.pdf');
+    }
+
+    /**
+     * The full vehicle card: details, prices, costs (with vehicles.view_cost), purchase,
+     * sale and status history.
+     */
+    public function vehicle(Request $request, Vehicle $vehicle): Response
+    {
+        Gate::authorize('view', $vehicle);
+
+        $vehicle->load(['brand', 'carModel', 'color', 'location', 'purchaseInvoice.party', 'saleInvoice.party', 'statusLogs.user', 'costs']);
+
+        return Pdf::inline('print.vehicle', $this->letterhead() + [
+            'vehicle' => $vehicle,
+            'canViewCost' => $request->user()->can('vehicles.view_cost'),
+        ], 'vehicle-'.$vehicle->vin.'.pdf');
     }
 
     public function statement(Request $request, Party $party, AccountResolver $accounts): Response

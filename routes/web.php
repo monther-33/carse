@@ -1,13 +1,14 @@
 <?php
 
 use App\Http\Controllers\PrintController;
+use App\Http\Controllers\ReportController;
 use App\Livewire;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', Livewire\Dashboard::class)->name('dashboard');
     Route::view('profile', 'profile')->name('profile');
 
     // Inventory
@@ -42,6 +43,7 @@ Route::middleware('auth')->group(function () {
         Route::get('sales/{invoice}/{document}', [PrintController::class, 'sales'])
             ->whereIn('document', ['quotation', 'invoice', 'contract', 'delivery', 'schedule'])->name('sales');
         Route::get('vouchers/{voucher}', [PrintController::class, 'voucher'])->name('voucher');
+        Route::get('vehicles/{vehicle}', [PrintController::class, 'vehicle'])->name('vehicle');
         Route::get('parties/{party}/statement', [PrintController::class, 'statement'])->name('statement');
     });
 
@@ -50,7 +52,14 @@ Route::middleware('auth')->group(function () {
     Route::get('expense-categories', Livewire\Expenses\Categories::class)->middleware('can:accounts.manage')->name('expense-categories.index');
     Route::get('vouchers', Livewire\Vouchers\Index::class)->middleware('can:vouchers.view')->name('vouchers.index');
 
+    // Reports (each report checks its own permissions)
+    Route::get('reports', Livewire\Reports\Index::class)->name('reports.index');
+    Route::get('reports/{key}', Livewire\Reports\Viewer::class)->name('reports.show');
+    Route::get('reports/{key}/pdf', [ReportController::class, 'pdf'])->name('reports.pdf');
+    Route::get('reports/{key}/excel', [ReportController::class, 'excel'])->name('reports.excel');
+
     // Accounting
+    Route::get('journals', Livewire\Journals\Index::class)->middleware('can:journal.view')->name('journals.index');
     Route::get('accounts', Livewire\Accounts\Index::class)->middleware('can:accounts.view')->name('accounts.index');
     Route::get('cashboxes', Livewire\Cashboxes\Index::class)->middleware('can:cashboxes.view')->name('cashboxes.index');
     Route::get('periods', Livewire\FiscalPeriods\Index::class)->middleware('can:periods.view')->name('periods.index');

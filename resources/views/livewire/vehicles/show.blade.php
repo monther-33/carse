@@ -3,6 +3,7 @@
         <x-ui.card :title="__('vehicles.card')">
             <x-slot:actions>
                 <x-ui.badge :color="$vehicle->status->color()">{{ $vehicle->status->label() }}</x-ui.badge>
+                <x-ui.button size="sm" variant="secondary" icon="printer" :href="route('print.vehicle', $vehicle)" target="_blank">{{ __('print.print') }}</x-ui.button>
                 @if ($canUpdate)
                     <x-ui.button size="sm" variant="secondary" icon="pencil" wire:click="edit">{{ __('app.edit') }}</x-ui.button>
                 @endif

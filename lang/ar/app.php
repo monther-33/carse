@@ -24,6 +24,8 @@ return [
 
     'nav' => [
         'dashboard' => 'لوحة التحكم',
+        'reports' => 'التقارير',
+        'journals' => 'القيود اليدوية',
         'selling' => 'المبيعات',
         'sales' => 'فواتير البيع',
         'reservations' => 'الحجوزات',

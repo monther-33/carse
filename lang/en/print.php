@@ -2,6 +2,7 @@
 
 return [
     'print' => 'Print',
+    'sold_to' => 'Sold to :party on invoice :number on :date.',
     'quotation' => 'Price quotation',
     'invoice' => 'Sales invoice',
     'contract' => 'Vehicle sale contract',

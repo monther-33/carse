@@ -24,6 +24,8 @@ return [
 
     'nav' => [
         'dashboard' => 'Dashboard',
+        'reports' => 'Reports',
+        'journals' => 'Manual entries',
         'selling' => 'Sales',
         'sales' => 'Sales invoices',
         'reservations' => 'Reservations',

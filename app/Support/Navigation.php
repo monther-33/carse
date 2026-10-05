@@ -49,6 +49,8 @@ class Navigation
             [
                 'title' => 'app.nav.accounting',
                 'items' => [
+                    ['label' => 'app.nav.reports', 'route' => 'reports.index', 'icon' => 'document', 'can' => ['reports.financial', 'reports.sales', 'reports.inventory', 'audit.view', 'sales.view', 'commissions.view', 'cashboxes.view', 'vehicles.view']],
+                    ['label' => 'app.nav.journals', 'route' => 'journals.index', 'icon' => 'pencil', 'can' => 'journal.view'],
                     ['label' => 'app.nav.accounts', 'route' => 'accounts.index', 'icon' => 'tree', 'can' => 'accounts.view'],
                     ['label' => 'app.nav.cashboxes', 'route' => 'cashboxes.index', 'icon' => 'cash', 'can' => 'cashboxes.view'],
                     ['label' => 'app.nav.periods', 'route' => 'periods.index', 'icon' => 'calendar', 'can' => 'periods.view'],
