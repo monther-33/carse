@@ -109,6 +109,8 @@
 ## هيكلة الكود
 
 - `app/Actions/<Module>/` منطق العمليات · `app/Services/{Accounting,Numbering,Currency}` · `app/Livewire/` شاشات رفيعة تستدعي Actions ولا تحتوي منطقًا ماليًا · `app/Policies` · `app/Support/{Money,Settings,Navigation,Labels}` · `app/Enums`.
+- **الإضافة السريعة**: مودال واحد `App\Livewire\QuickCreate` في الـ layout (طرف، ماركة، موديل، لون، موقع، بند مصروف؛ الصلاحيات في `QuickCreate::TYPES`). زر `<x-ui.quick-add type="color" target="form.color_id" />` بجانب الحقل، والمكوّن المضيف يستخدم trait `AcceptsQuickCreate` ليُختار السجل الجديد في الحقل. قائمة "إضافة سريعة" في الشريط العلوي، وشاشات السندات والمصروفات والحجوزات تفتح نموذجها مع `?new=1`.
+- الـ select في RTL: سهم `@tailwindcss/forms` منقول لليسار في `resources/css/app.css`.
 - شاشات الإعداد البسيطة ترث `App\Livewire\Concerns\CrudComponent`. رسائل النجاح عبر trait `Notifies`، ومكوّنات الواجهة في `resources/views/components/ui/*`.
 - عنصر قائمة جانبية جديد: `App\Support\Navigation` مع صلاحيته.
 - Enums بدل النصوص الحرة، مع `label()` من `lang/*/enums.php`.

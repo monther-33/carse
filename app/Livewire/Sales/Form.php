@@ -7,6 +7,7 @@ use App\Actions\Sales\SalesTerms;
 use App\Actions\Sales\SaveSalesInvoice;
 use App\Enums\PaymentType;
 use App\Enums\VehicleStatus;
+use App\Livewire\Concerns\AcceptsQuickCreate;
 use App\Livewire\Concerns\HandlesBusinessErrors;
 use App\Livewire\Concerns\Notifies;
 use App\Models\Brand;
@@ -40,7 +41,7 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 class Form extends Component
 {
-    use HandlesBusinessErrors, Notifies;
+    use AcceptsQuickCreate, HandlesBusinessErrors, Notifies;
 
     public ?SalesInvoice $invoice = null;
 

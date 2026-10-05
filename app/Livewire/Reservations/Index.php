@@ -49,6 +49,11 @@ class Index extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Reservation::class);
+
+        // ?new=1 (quick-add menu) opens the form straight away.
+        if (request()->boolean('new') && auth()->user()->can('create', Reservation::class)) {
+            $this->create();
+        }
     }
 
     private function activeCashboxRule(): Exists

@@ -7,6 +7,7 @@ use App\Actions\Expenses\CancelExpense;
 use App\Actions\Expenses\PostExpense;
 use App\Actions\Expenses\SaveExpense;
 use App\Enums\DocumentStatus;
+use App\Livewire\Concerns\AcceptsQuickCreate;
 use App\Livewire\Concerns\HandlesBusinessErrors;
 use App\Livewire\Concerns\Notifies;
 use App\Models\Cashbox;
@@ -27,7 +28,7 @@ use Livewire\WithPagination;
 #[Layout('layouts.app')]
 class Index extends Component
 {
-    use HandlesBusinessErrors, Notifies, WithFileUploads, WithPagination;
+    use AcceptsQuickCreate, HandlesBusinessErrors, Notifies, WithFileUploads, WithPagination;
 
     #[Url]
     public string $status = '';
@@ -57,6 +58,11 @@ class Index extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Expense::class);
+
+        // ?new=1 (quick-add menu) opens the form straight away.
+        if (request()->boolean('new') && auth()->user()->can('create', Expense::class)) {
+            $this->create();
+        }
     }
 
     /** @return list<int> */

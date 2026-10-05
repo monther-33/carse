@@ -59,6 +59,39 @@
 
             <span class="hidden sm:inline text-sm text-gray-500">{{ auth()->user()->branch?->name }}</span>
 
+            @php($quickTypes = array_values(array_filter(['party_customer', 'party_supplier', 'brand', 'model', 'color', 'location', 'expense_category'], fn ($t) => \App\Livewire\QuickCreate::allowed(str_starts_with($t, 'party') ? 'party' : $t))))
+            @php($quickLinks = array_values(array_filter([
+                [route('sales.create'), 'sales.create', 'quick.links.sale'],
+                [route('purchases.create'), 'purchases.create', 'quick.links.purchase'],
+                [route('reservations.index', ['new' => 1]), 'reservations.create', 'quick.links.reservation'],
+                [route('vouchers.index', ['new' => 1]), 'vouchers.create', 'quick.links.voucher'],
+                [route('expenses.index', ['new' => 1]), 'expenses.create', 'quick.links.expense'],
+            ], fn ($l) => auth()->user()->can($l[1]))))
+            @if ($quickTypes !== [] || $quickLinks !== [])
+                <div x-data="{ open: false }" class="relative">
+                    <button type="button" @click="open = ! open" class="inline-flex items-center gap-1 rounded-md bg-brand-700 px-3 py-2 text-sm font-medium text-white hover:bg-brand-900">
+                        <x-ui.icon name="plus" class="h-4 w-4" />
+                        <span class="hidden sm:inline">{{ __('quick.menu') }}</span>
+                    </button>
+                    <div x-show="open" x-cloak @click.outside="open = false" x-transition
+                         class="absolute end-0 z-50 mt-2 w-60 rounded-md border border-gray-200 bg-white py-1 shadow-lg">
+                        @foreach ($quickLinks as [$url, $permission, $label])
+                            <a href="{{ $url }}" wire:navigate class="block px-4 py-2 text-sm text-gray-700 hover:bg-brand-50">{{ __($label) }}</a>
+                        @endforeach
+                        @if ($quickTypes !== [] && $quickLinks !== [])
+                            <div class="my-1 border-t border-gray-100"></div>
+                        @endif
+                        @foreach ($quickTypes as $t)
+                            @php([$type, $kind] = str_starts_with($t, 'party_') ? ['party', substr($t, 6)] : [$t, null])
+                            <button type="button" class="block w-full px-4 py-2 text-start text-sm text-gray-700 hover:bg-brand-50"
+                                    @click="open = false; $dispatch('open-quick-create', { type: @js($type), preset: { kind: @js($kind) } })">
+                                {{ __('quick.menu_items.'.$t) }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             <livewire:notifications.bell />
 
             <x-dropdown width="48">
@@ -86,6 +119,7 @@
     </div>
 </div>
 
+<livewire:quick-create />
 <x-ui.toasts />
 </body>
 </html>

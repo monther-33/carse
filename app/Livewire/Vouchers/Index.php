@@ -64,6 +64,11 @@ class Index extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Voucher::class);
+
+        // ?new=1 (quick-add menu) opens the form straight away.
+        if (request()->boolean('new') && auth()->user()->can('create', Voucher::class)) {
+            $this->create();
+        }
     }
 
     /** @return list<int> */

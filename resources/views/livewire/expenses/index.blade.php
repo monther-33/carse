@@ -100,12 +100,15 @@
                 <input id="e-date" type="date" wire:model="form.date" class="form-input">
             </x-ui.field>
             <x-ui.field :label="__('expenses.category')" for="e-cat" error="form.category_id" required>
-                <select id="e-cat" wire:model="form.category_id" class="form-input">
-                    <option value="">—</option>
-                    @foreach ($categories as $c)
-                        <option value="{{ $c->id }}">{{ $c->name }}</option>
-                    @endforeach
-                </select>
+                <div class="flex gap-2">
+                    <select id="e-cat" wire:model="form.category_id" class="form-input min-w-0 flex-1">
+                        <option value="">—</option>
+                        @foreach ($categories as $c)
+                            <option value="{{ $c->id }}">{{ $c->name }}</option>
+                        @endforeach
+                    </select>
+                    <x-ui.quick-add type="expense_category" target="form.category_id" />
+                </div>
             </x-ui.field>
             <x-ui.field :label="__('documents.cashbox')" for="e-cb" error="form.cashbox_id" required>
                 <select id="e-cb" wire:model.live="form.cashbox_id" class="form-input">

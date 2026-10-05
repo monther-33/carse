@@ -7,6 +7,7 @@ use App\Enums\FuelType;
 use App\Enums\Transmission;
 use App\Enums\VehicleCondition;
 use App\Enums\VehicleStatus;
+use App\Livewire\Concerns\AcceptsQuickCreate;
 use App\Livewire\Concerns\HandlesBusinessErrors;
 use App\Livewire\Concerns\Notifies;
 use App\Models\Brand;
@@ -30,7 +31,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 #[Layout('layouts.app')]
 class Show extends Component
 {
-    use HandlesBusinessErrors, Notifies, WithFileUploads;
+    use AcceptsQuickCreate, HandlesBusinessErrors, Notifies, WithFileUploads;
 
     public Vehicle $vehicle;
 

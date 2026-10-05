@@ -9,6 +9,7 @@ use App\Enums\PurchaseSource;
 use App\Enums\Transmission;
 use App\Enums\VehicleCondition;
 use App\Enums\VehicleStatus;
+use App\Livewire\Concerns\AcceptsQuickCreate;
 use App\Livewire\Concerns\HandlesBusinessErrors;
 use App\Livewire\Concerns\Notifies;
 use App\Models\Brand;
@@ -35,7 +36,7 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 class Form extends Component
 {
-    use HandlesBusinessErrors, Notifies;
+    use AcceptsQuickCreate, HandlesBusinessErrors, Notifies;
 
     public ?PurchaseInvoice $invoice = null;
 

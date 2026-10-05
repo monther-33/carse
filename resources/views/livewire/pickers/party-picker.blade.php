@@ -10,8 +10,13 @@
             </button>
         </div>
     @else
-        <input type="search" wire:model.live.debounce.300ms="search" wire:focus="$set('open', true)"
-               placeholder="{{ __('parties.search_placeholder') }}" class="form-input" autocomplete="off">
+        <div class="flex gap-2">
+            <input type="search" wire:model.live.debounce.300ms="search" wire:focus="$set('open', true)"
+                   placeholder="{{ __('parties.search_placeholder') }}" class="form-input min-w-0 flex-1" autocomplete="off">
+            @if ($allowCreate)
+                <x-ui.quick-add type="party" target="value" :preset="'{ name: $wire.search, kind: '.\Illuminate\Support\Js::from($kind).' }'" />
+            @endif
+        </div>
 
         @if ($open && $search !== '')
             <div class="absolute z-30 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg">
@@ -28,14 +33,13 @@
                     @endforelse
                 </ul>
 
-                @if ($allowCreate && auth()->user()->can('parties.manage'))
-                    <div class="space-y-2 border-t border-gray-200 bg-gray-50 p-3">
-                        <p class="text-xs font-semibold text-gray-600">{{ __('parties.quick_create') }}</p>
-                        <input type="text" wire:model="newName" placeholder="{{ __('app.fields.name') }}" class="form-input">
-                        @error('newName')<p class="text-xs text-red-600">{{ $message }}</p>@enderror
-                        <input type="text" dir="ltr" wire:model="newPhone" placeholder="{{ __('app.fields.phone') }}" class="form-input">
-                        <x-ui.button size="sm" icon="plus" wire:click="createParty">{{ __('app.add') }}</x-ui.button>
-                    </div>
+                @if ($allowCreate && \App\Livewire\QuickCreate::allowed('party'))
+                    <button type="button"
+                            x-on:click="$dispatch('open-quick-create', { type: 'party', owner: $wire.$id, target: 'value', preset: { name: $wire.search, kind: @js($kind) } }); $wire.set('open', false)"
+                            class="flex w-full items-center gap-2 border-t border-gray-200 bg-gray-50 px-3 py-2 text-start text-sm font-medium text-brand-700 hover:bg-brand-50">
+                        <x-ui.icon name="plus" class="h-4 w-4" />
+                        {{ __('quick.add_named', ['name' => $search]) }}
+                    </button>
                 @endif
             </div>
         @endif

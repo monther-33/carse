@@ -128,7 +128,7 @@
                 @endif
                 @if (($form['purpose'] ?? '') !== 'commissions')
                     <x-ui.field :label="__('vouchers.party')" error="form.party_id" class="sm:col-span-2">
-                        <livewire:pickers.party-picker wire:model.live="form.party_id" :kind="in_array($form['purpose'] ?? '', ['supplier', 'supplier_refund']) ? 'supplier' : 'any'" :key="'pp-'.($form['purpose'] ?? '')" />
+                        <livewire:pickers.party-picker wire:model.live="form.party_id" :allow-create="true" :kind="in_array($form['purpose'] ?? '', ['supplier', 'supplier_refund']) ? 'supplier' : 'any'" :key="'pp-'.($form['purpose'] ?? '')" />
                     </x-ui.field>
                 @endif
                 @if ($referenceOptions->isNotEmpty())

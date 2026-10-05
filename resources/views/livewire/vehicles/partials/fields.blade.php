@@ -1,20 +1,27 @@
-{{-- Vehicle descriptive fields bound to "{$prefix}.x". Expects $brands, $brandModels (models of the chosen brand), $colors, $locations. --}}
+{{-- Vehicle descriptive fields bound to "{$prefix}.x". Expects $brands, $brandModels (models of the chosen brand), $colors, $locations.
+     The host component uses AcceptsQuickCreate so the "+" buttons select what they add. --}}
 @php($p = $prefix)
 <x-ui.field :label="__('vehicles.brand')" error="{{ $p }}.brand_id" required>
-    <select wire:model.live="{{ $p }}.brand_id" class="form-input">
-        <option value="">—</option>
-        @foreach ($brands as $b)
-            <option value="{{ $b->id }}">{{ $b->name }}</option>
-        @endforeach
-    </select>
+    <div class="flex gap-2">
+        <select wire:model.live="{{ $p }}.brand_id" class="form-input min-w-0 flex-1">
+            <option value="">—</option>
+            @foreach ($brands as $b)
+                <option value="{{ $b->id }}">{{ $b->name }}</option>
+            @endforeach
+        </select>
+        <x-ui.quick-add type="brand" :target="$p.'.brand_id'" />
+    </div>
 </x-ui.field>
 <x-ui.field :label="__('vehicles.model')" error="{{ $p }}.model_id" required>
-    <select wire:model="{{ $p }}.model_id" class="form-input">
-        <option value="">—</option>
-        @foreach ($brandModels as $m)
-            <option value="{{ $m->id }}">{{ $m->name }}</option>
-        @endforeach
-    </select>
+    <div class="flex gap-2">
+        <select wire:model="{{ $p }}.model_id" class="form-input min-w-0 flex-1">
+            <option value="">—</option>
+            @foreach ($brandModels as $m)
+                <option value="{{ $m->id }}">{{ $m->name }}</option>
+            @endforeach
+        </select>
+        <x-ui.quick-add type="model" :target="$p.'.model_id'" :preset="'{ brand_id: $wire.get('.\Illuminate\Support\Js::from($p.'.brand_id').') }'" />
+    </div>
 </x-ui.field>
 <x-ui.field :label="__('vehicles.trim')" error="{{ $p }}.trim">
     <input type="text" wire:model="{{ $p }}.trim" class="form-input">
@@ -23,12 +30,15 @@
     <input type="number" dir="ltr" wire:model="{{ $p }}.year" class="form-input">
 </x-ui.field>
 <x-ui.field :label="__('vehicles.color')" error="{{ $p }}.color_id">
-    <select wire:model="{{ $p }}.color_id" class="form-input">
-        <option value="">—</option>
-        @foreach ($colors as $c)
-            <option value="{{ $c->id }}">{{ $c->name }}</option>
-        @endforeach
-    </select>
+    <div class="flex gap-2">
+        <select wire:model="{{ $p }}.color_id" class="form-input min-w-0 flex-1">
+            <option value="">—</option>
+            @foreach ($colors as $c)
+                <option value="{{ $c->id }}">{{ $c->name }}</option>
+            @endforeach
+        </select>
+        <x-ui.quick-add type="color" :target="$p.'.color_id'" />
+    </div>
 </x-ui.field>
 <x-ui.field :label="__('vehicles.plate')" error="{{ $p }}.plate_no">
     <input type="text" dir="ltr" wire:model="{{ $p }}.plate_no" class="form-input">
@@ -63,12 +73,15 @@
     <input type="text" wire:model="{{ $p }}.origin" class="form-input">
 </x-ui.field>
 <x-ui.field :label="__('vehicles.location')" error="{{ $p }}.location_id">
-    <select wire:model="{{ $p }}.location_id" class="form-input">
-        <option value="">—</option>
-        @foreach ($locations as $l)
-            <option value="{{ $l->id }}">{{ $l->name }}</option>
-        @endforeach
-    </select>
+    <div class="flex gap-2">
+        <select wire:model="{{ $p }}.location_id" class="form-input min-w-0 flex-1">
+            <option value="">—</option>
+            @foreach ($locations as $l)
+                <option value="{{ $l->id }}">{{ $l->name }}</option>
+            @endforeach
+        </select>
+        <x-ui.quick-add type="location" :target="$p.'.location_id'" />
+    </div>
 </x-ui.field>
 <x-ui.field :label="__('vehicles.asking_price')" error="{{ $p }}.asking_price">
     <input type="text" inputmode="decimal" dir="ltr" wire:model="{{ $p }}.asking_price" class="form-input">

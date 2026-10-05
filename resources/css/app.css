@@ -11,6 +11,16 @@
     }
 }
 
+/*
+ * @tailwindcss/forms draws the select arrow on the right and reserves padding there. In RTL the
+ * text starts on the right, so the arrow sat on top of it: move both to the left.
+ */
+[dir="rtl"] select:not([multiple]):not([size]) {
+    background-position: left 0.5rem center;
+    padding-left: 2.5rem;
+    padding-right: 0.75rem;
+}
+
 @layer components {
     .table-base {
         @apply min-w-full divide-y divide-gray-200 text-sm;

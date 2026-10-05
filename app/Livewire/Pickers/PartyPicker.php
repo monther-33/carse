@@ -2,19 +2,21 @@
 
 namespace App\Livewire\Pickers;
 
-use App\Enums\PartyType;
+use App\Livewire\Concerns\AcceptsQuickCreate;
 use App\Models\Party;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Modelable;
 use Livewire\Component;
 
 /**
  * Searchable party selector: <livewire:pickers.party-picker wire:model="party_id" kind="supplier" />
- * With :allow-create="true" a new party (name + phone) can be added inline when the user may manage parties.
+ * With :allow-create="true" a "+" button opens the quick-create modal (full party form) when the
+ * user may manage parties; the new party is then selected here.
  */
 class PartyPicker extends Component
 {
+    use AcceptsQuickCreate;
+
     #[Modelable]
     public ?int $value = null;
 
@@ -26,10 +28,6 @@ class PartyPicker extends Component
     public string $search = '';
 
     public bool $open = false;
-
-    public string $newName = '';
-
-    public string $newPhone = '';
 
     public function updatedSearch(): void
     {
@@ -48,24 +46,12 @@ class PartyPicker extends Component
         $this->value = null;
     }
 
-    public function createParty(): void
+    /** The quick-create modal answered this picker: select the new party. */
+    protected function applyQuickCreated(string $type, int $id, string $target): void
     {
-        abort_unless(Auth::user()?->can('parties.manage'), 403);
-
-        $data = $this->validate([
-            'newName' => ['required', 'string', 'max:255'],
-            'newPhone' => ['nullable', 'string', 'max:50'],
-        ]);
-
-        $party = Party::query()->create([
-            'branch_id' => Auth::user()->branch_id,
-            'type' => $this->kind === 'supplier' ? PartyType::Supplier : PartyType::Customer,
-            'name' => $data['newName'],
-            'phone' => $data['newPhone'] ?: null,
-        ]);
-
-        $this->reset(['newName', 'newPhone']);
-        $this->choose($party->id);
+        if ($type === 'party') {
+            $this->choose($id);
+        }
     }
 
     public function render(): View
