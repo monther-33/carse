@@ -10,6 +10,7 @@ Route::redirect('/', '/dashboard');
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', Livewire\Dashboard::class)->name('dashboard');
     Route::view('profile', 'profile')->name('profile');
+    Route::get('notifications', Livewire\Notifications\Index::class)->name('notifications.index');
 
     // Inventory
     Route::get('vehicles', Livewire\Vehicles\Index::class)->middleware('can:vehicles.view')->name('vehicles.index');
