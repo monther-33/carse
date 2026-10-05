@@ -24,6 +24,7 @@ enum AccountRole: string
     case FxDifferences = 'fx_differences';
     case DiscountAllowed = 'discount_allowed';
     case ForfeitedDeposits = 'forfeited_deposits';
+    case OpeningBalances = 'opening_balances';
 
     public function settingKey(): string
     {

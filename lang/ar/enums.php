@@ -60,5 +60,6 @@ return [
         'fx_differences' => 'فروقات العملة',
         'discount_allowed' => 'الخصم المسموح به',
         'forfeited_deposits' => 'العرابين المصادرة',
+        'opening_balances' => 'الأرصدة الافتتاحية',
     ],
 ];

@@ -21,6 +21,7 @@ class CancelledDocumentsReport extends Report
         'expenses' => 'reports.doc_types.expense',
         'vouchers' => 'reports.doc_types.voucher',
         'manual_journals' => 'reports.doc_types.manual_journal',
+        'opening_stocks' => 'reports.doc_types.opening_stock',
     ];
 
     public static function key(): string
@@ -54,7 +55,7 @@ class CancelledDocumentsReport extends Report
     public function rows(User $user, array $f): array
     {
         $rows = [];
-        $amountColumn = ['purchase_invoices' => 'total', 'sales_invoices' => 'total', 'expenses' => 'amount', 'vouchers' => 'amount', 'manual_journals' => null];
+        $amountColumn = ['purchase_invoices' => 'total', 'sales_invoices' => 'total', 'expenses' => 'amount', 'vouchers' => 'amount', 'manual_journals' => null, 'opening_stocks' => null];
 
         foreach (self::TABLES as $table => $label) {
             $query = DB::table("{$table} as d")

@@ -32,6 +32,7 @@ class ChartOfAccountsSeeder extends Seeder
             ['31', 'رأس المال', null, false, []],
             ['32', 'جاري الشركاء', null, false, []],
             ['33', 'الأرباح المحتجزة', null, false, []],
+            ['34', 'أرصدة افتتاحية', null, false, []],
         ]],
         ['4', 'الإيرادات', AccountType::Revenue, true, [
             ['41', 'مبيعات السيارات', null, false, []],

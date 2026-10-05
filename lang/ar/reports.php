@@ -110,6 +110,7 @@ return [
         'expense' => 'مصروف',
         'voucher' => 'سند',
         'manual_journal' => 'قيد يدوي',
+        'opening_stock' => 'بضاعة أول المدة',
         'reservation' => 'حجز',
     ],
 ];

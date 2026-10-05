@@ -32,6 +32,8 @@ return [
         'users' => 'Users',
         'roles' => 'Roles',
         'audit' => 'Audit log',
+        'imports' => 'Imports',
+        'backups' => 'Backups',
     ],
 
     'actions' => [
@@ -65,5 +67,7 @@ return [
         'users' => ['manage' => 'Manage users'],
         'roles' => ['manage' => 'Manage roles and permissions'],
         'audit' => ['view' => 'View audit log'],
+        'imports' => ['run' => 'Import opening data from Excel'],
+        'backups' => ['manage' => 'Manage backups'],
     ],
 ];

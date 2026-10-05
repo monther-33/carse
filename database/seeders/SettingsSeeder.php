@@ -31,6 +31,7 @@ class SettingsSeeder extends Seeder
         AccountRole::FxDifferences->value => '71',
         AccountRole::DiscountAllowed->value => '72',
         AccountRole::ForfeitedDeposits->value => '42',
+        AccountRole::OpeningBalances->value => '34',
     ];
 
     public function run(Settings $settings): void

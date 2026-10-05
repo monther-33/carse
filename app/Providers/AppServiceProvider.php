@@ -6,6 +6,7 @@ use App\Listeners\LogAuthenticationEvents;
 use App\Models\Expense;
 use App\Models\InstallmentPlan;
 use App\Models\ManualJournal;
+use App\Models\OpeningStock;
 use App\Models\PurchaseInvoice;
 use App\Models\Reservation;
 use App\Models\ReturnDocument;
@@ -43,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
             'reservation' => Reservation::class,
             'installment_plan' => InstallmentPlan::class,
             'manual_journal' => ManualJournal::class,
+            'opening_stock' => OpeningStock::class,
         ]);
 
         Model::preventLazyLoading(! $this->app->isProduction());

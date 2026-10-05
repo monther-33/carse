@@ -33,6 +33,8 @@ return [
         'users' => ['manage'],
         'roles' => ['manage'],
         'audit' => ['view'],
+        'imports' => ['run'],
+        'backups' => ['manage'],
     ],
 
     'roles' => [
@@ -52,6 +54,7 @@ return [
             'periods.view', 'periods.manage',
             'exchange_rates.manage',
             'reports.financial', 'reports.sales', 'reports.inventory',
+            'imports.run',
         ],
 
         'cashier' => [

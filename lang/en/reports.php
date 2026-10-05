@@ -110,6 +110,7 @@ return [
         'expense' => 'Expense',
         'voucher' => 'Voucher',
         'manual_journal' => 'Manual entry',
+        'opening_stock' => 'Opening stock',
         'reservation' => 'Reservation',
     ],
 ];

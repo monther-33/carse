@@ -77,6 +77,7 @@ Route::middleware('auth')->group(function () {
     // Administration
     Route::get('users', Livewire\Users\Index::class)->middleware('can:users.manage')->name('users.index');
     Route::get('roles', Livewire\Roles\Index::class)->middleware('can:roles.manage')->name('roles.index');
+    Route::get('imports', Livewire\Imports\Index::class)->middleware('can:imports.run')->name('imports.index');
 });
 
 require __DIR__.'/auth.php';

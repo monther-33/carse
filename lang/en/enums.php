@@ -60,5 +60,6 @@ return [
         'fx_differences' => 'Currency differences',
         'discount_allowed' => 'Discount allowed',
         'forfeited_deposits' => 'Forfeited deposits',
+        'opening_balances' => 'Opening balances',
     ],
 ];

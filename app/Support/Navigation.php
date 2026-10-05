@@ -72,6 +72,7 @@ class Navigation
                 'items' => [
                     ['label' => 'app.nav.users', 'route' => 'users.index', 'icon' => 'users', 'can' => 'users.manage'],
                     ['label' => 'app.nav.roles', 'route' => 'roles.index', 'icon' => 'shield', 'can' => 'roles.manage'],
+                    ['label' => 'app.nav.imports', 'route' => 'imports.index', 'icon' => 'document', 'can' => 'imports.run'],
                 ],
             ],
         ];
