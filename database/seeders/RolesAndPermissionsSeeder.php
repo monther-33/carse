@@ -9,8 +9,9 @@ use Spatie\Permission\PermissionRegistrar;
 
 /**
  * Idempotent: creates missing permissions/roles from config/permissions.php.
- * The admin role always receives every permission; other roles are only filled
- * when first created, so changes made from the UI are not overwritten.
+ * The admin role always receives every permission. Other roles are filled from the config
+ * when first created; afterwards only permissions that did not exist before this run are
+ * granted to them, so changes made from the UI are never overwritten.
  */
 class RolesAndPermissionsSeeder extends Seeder
 {
@@ -19,9 +20,14 @@ class RolesAndPermissionsSeeder extends Seeder
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $all = [];
+        $new = [];
         foreach (config('permissions.permissions') as $module => $actions) {
             foreach ($actions as $action) {
-                $all[] = Permission::findOrCreate("{$module}.{$action}", 'web')->name;
+                $permission = Permission::findOrCreate("{$module}.{$action}", 'web');
+                $all[] = $permission->name;
+                if ($permission->wasRecentlyCreated) {
+                    $new[] = $permission->name;
+                }
             }
         }
 
@@ -32,6 +38,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 $role->syncPermissions($all);
             } elseif ($role->wasRecentlyCreated || $role->permissions()->doesntExist()) {
                 $role->syncPermissions($permissions);
+            } else {
+                $role->givePermissionTo(array_values(array_intersect($permissions, $new)));
             }
         }
 

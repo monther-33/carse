@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Listeners\LogAuthenticationEvents;
 use App\Models\Expense;
 use App\Models\InstallmentPlan;
+use App\Models\ManualJournal;
 use App\Models\PurchaseInvoice;
 use App\Models\Reservation;
 use App\Models\ReturnDocument;
@@ -41,6 +42,7 @@ class AppServiceProvider extends ServiceProvider
             'sales_invoice' => SalesInvoice::class,
             'reservation' => Reservation::class,
             'installment_plan' => InstallmentPlan::class,
+            'manual_journal' => ManualJournal::class,
         ]);
 
         Model::preventLazyLoading(! $this->app->isProduction());

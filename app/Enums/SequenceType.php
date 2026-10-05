@@ -18,6 +18,7 @@ enum SequenceType: string
     case Reservation = 'reservation';
     case SalesInvoice = 'sales_invoice';
     case SalesReturn = 'sales_return';
+    case ManualJournal = 'manual_journal';
 
     public function defaultPrefix(): string
     {
@@ -32,6 +33,7 @@ enum SequenceType: string
             self::Reservation => 'RS',
             self::SalesInvoice => 'SI',
             self::SalesReturn => 'SR',
+            self::ManualJournal => 'MJ',
         };
     }
 
@@ -41,7 +43,7 @@ enum SequenceType: string
             VoucherType::Receipt => self::ReceiptVoucher,
             VoucherType::Payment => self::PaymentVoucher,
             VoucherType::Transfer => self::TransferVoucher,
-            VoucherType::Journal => self::JournalEntry,
+            VoucherType::Journal => self::ManualJournal,
         };
     }
 }
