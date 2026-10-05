@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Listeners\LogAuthenticationEvents;
+use App\Listeners\NotifyBackupProblems;
 use App\Models\Expense;
 use App\Models\InstallmentPlan;
 use App\Models\ManualJournal;
@@ -22,6 +23,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Spatie\Backup\Events\BackupHasFailed;
+use Spatie\Backup\Events\CleanupHasFailed;
+use Spatie\Backup\Events\UnhealthyBackupWasFound;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -53,5 +57,9 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(Login::class, [LogAuthenticationEvents::class, 'login']);
         Event::listen(Failed::class, [LogAuthenticationEvents::class, 'failed']);
         Event::listen(Logout::class, [LogAuthenticationEvents::class, 'logout']);
+
+        Event::listen(BackupHasFailed::class, [NotifyBackupProblems::class, 'failed']);
+        Event::listen(CleanupHasFailed::class, [NotifyBackupProblems::class, 'cleanupFailed']);
+        Event::listen(UnhealthyBackupWasFound::class, [NotifyBackupProblems::class, 'unhealthy']);
     }
 }

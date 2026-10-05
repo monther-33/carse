@@ -18,3 +18,8 @@ Artisan::command('alerts:daily', function (SendDailyAlerts $alerts) {
 // Times are in the application timezone (APP_TIMEZONE).
 Schedule::command('reservations:expire')->dailyAt('00:10');
 Schedule::command('alerts:daily')->dailyAt('07:00');
+
+// Backups: database dump + uploaded files (config/backup.php), then retention and a health check.
+Schedule::command('backup:clean')->dailyAt('01:30');
+Schedule::command('backup:run')->dailyAt('02:00');
+Schedule::command('backup:monitor')->dailyAt('08:00');
