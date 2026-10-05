@@ -9,6 +9,7 @@
 - قاعدة التطوير `cars`، والاختبارات `cars_test` (MySQL حقيقي وليس SQLite؛ `TestCase` يرفض العمل على غيرها).
 - تشغيل MariaDB: `C:\xampp\mysql\bin\mysqld.exe --defaults-file=C:\xampp\mysql\bin\my.ini --standalone`
 - `composer test` (Pest) · `composer analyse` (Larastan مستوى 6) · `composer lint` (Pint) · `npm run build`
+- المهام المجدولة: `php artisan schedule:list` (reservations:expire، alerts:daily، backup:*). التثبيت والتشغيل: `docs/DEPLOYMENT.md`.
 - `php artisan migrate:fresh --seed` — كل Seeders متكررة الأمان (idempotent). المدير الأول: `admin@cars.local` / قيمة `ADMIN_PASSWORD` (افتراضيًا `password`).
 
 ## قواعد صارمة
@@ -91,6 +92,19 @@
 - **الميزانية**: صافي ربح الفترة غير المقفلة يظهر في حقوق الملكية كسطر "أرباح الفترة الحالية" (لا قيد إقفال سنوي). أعمار الديون FIFO (الدفعات تُطفئ الأقدم أولًا).
 - **لوحة التحكم** `App\Livewire\Dashboard` + `DashboardMetrics`: كل عنصر يرجع null إن لم يملك المستخدم صلاحيته.
 - **`DemoMonthSeeder`** (`php artisan db:seed --class=DemoMonthSeeder`): شهر كامل من النشاط (الشهر السابق) بكل أنواع المستندات؛ هو أساس اختبار بوابة المرحلة (`MonthGateTest`: الأصول = الخصوم + حقوق الملكية).
+
+## الترحيل والتشغيل (المرحلة 5)
+
+- **الاستيراد من Excel** (شاشة `imports.index`، صلاحية `imports.run` للمدير والمحاسب): `SheetReader` يقرأ الصف الأول عناوين ويطابقها بتسميات `imports.columns.*` بالعربية أو الإنجليزية أو بالمفتاح (أي ترتيب)، و`CellParser` يحوّل الخلايا (أرقام Excel العائمة → نصوص عشرية، أرقام عربية، تواريخ Excel أو نصية، قيم Enums بالتسمية). كل مستورد يرث `Actions\Imports\Importer`: `analyse()` بلا كتابة، و`import()` يعيد نفس الفحص ثم يكتب الكل في transaction أو لا شيء. القوالب من `Exports\ImportTemplate`.
+  - الأطراف: الموجود (نفس الرقم الوطني، أو نفس الاسم والهاتف) يُتخطى → الاستيراد متكرر الأمان.
+  - السيارات الحالية: مستند `OpeningStock` (morph `opening_stock`، تسلسل `OS`، سياسة بصلاحيات `journal.*`): مسودة بسيارات `pending` ثم الاعتماد: مدين حساب `stockRole()` / دائن حساب الدور `opening_balances` (34). الماركات والموديلات الناقصة تُنشأ. الإلغاء مثل إلغاء فاتورة الشراء (لم تتغير السيارة، وكل تغيّر حالة بعده يدوي).
+  - الأرصدة الافتتاحية: مسودة `ManualJournal`، الفرق إلى 34. ممنوع فيها حسابا المخزون (14/15) وحساب العرابين (22، لأن رصيد العربون يُحسب من السندات).
+  - بعد الاستيراد يُقفل 34 في رأس المال بقيد يدوي.
+- **التنبيهات**: جدول `notifications` (database channel). `alerts:daily` الساعة 07:00 (`SendDailyAlerts` + `AlertDigest`): أقساط متأخرة ومستحقة خلال 7 أيام (`vouchers.view`/`sales.view_all`/`reports.financial`)، حجوزات تنتهي خلال 3 أيام (`reservations.view`)، سيارات راكدة فوق حدّي الإعدادات (`reports.inventory`/`vehicles.update`). الملخص غير المقروء يُستبدل ولا يتراكم. النص يُبنى عند العرض (`Notification::lines()`) بلغة القارئ. الجرس `Livewire\Notifications\Bell` في الشريط العلوي.
+- **النسخ الاحتياطي** (spatie/laravel-backup): قاعدة البيانات + `storage/app/{public,private}` إلى قرص `backups` (`BACKUP_PATH`)، الجدولة: clean 01:30، run 02:00، monitor 08:00. `DB_DUMP_PATH` لمسار mysqldump (XAMPP: `C:/xampp/mysql/bin`). الفشل يصل لمن يملك `backups.manage` عبر `NotifyBackupProblems` (البريد فقط إن ضُبط `BACKUP_MAIL_TO`). شاشة `backups.index` للقائمة والتنزيل والنسخ الفوري.
+- المنطقة الزمنية من `APP_TIMEZONE` (`Africa/Tripoli`).
+- **`DemoSeeder`** (`php artisan db:seed --class=DemoSeeder`، مرة واحدة على قاعدة فارغة): مستخدم لكل دور (`accountant@`, `cashier@`, `sales1@`, `sales2@`, `purchasing@cars.local` بكلمة `ADMIN_PASSWORD`)، بدء تشغيل قبل شهرين عبر المستوردات نفسها، ثم شهر بدء التشغيل، ثم `DemoMonthSeeder`، ثم الشهر الحالي حتى اليوم. لا يُشغَّل على الإنتاج.
+- دليل التثبيت والنشر والاستعادة: `docs/DEPLOYMENT.md`.
 
 ## هيكلة الكود
 

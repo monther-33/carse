@@ -40,7 +40,7 @@ test('there is an active user for every role, with the admin password', function
         $user = User::query()->where('email', "{$name}@cars.local")->firstOrFail();
         expect($user->roles)->toHaveCount(1)
             ->and($user->is_active)->toBeTrue()
-            ->and(Hash::check((string) env('ADMIN_PASSWORD', 'password'), $user->password))->toBeTrue();
+            ->and(Hash::check((string) config('app.seed_admin_password'), $user->password))->toBeTrue();
     }
 });
 

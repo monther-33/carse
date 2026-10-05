@@ -106,7 +106,7 @@ class DemoSeeder extends DemoMonthSeeder
 
     private function users(): void
     {
-        $password = (string) env('ADMIN_PASSWORD', 'password');
+        $password = (string) config('app.seed_admin_password');
         $people = [
             'accountant' => ['accountant@cars.local', 'نوري الشريف', 'accountant', '0'],
             'cashier' => ['cashier@cars.local', 'سامي الككلي', 'cashier', '0'],
