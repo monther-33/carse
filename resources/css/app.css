@@ -42,3 +42,37 @@
 [x-cloak] {
     display: none !important;
 }
+
+/* Searchable select panel (resources/js/searchable-select.js). */
+@layer components {
+    .ss-panel {
+        @apply fixed z-[60] hidden rounded-md border border-gray-200 bg-white p-2 shadow-xl;
+    }
+    .ss-search {
+        @apply mb-2 block w-full rounded-md border-gray-300 text-sm focus:border-brand-500 focus:ring-brand-500;
+    }
+    .ss-list {
+        @apply max-h-64 overflow-y-auto;
+    }
+    .ss-item {
+        @apply cursor-pointer rounded px-3 py-1.5 text-sm text-gray-800;
+    }
+    .ss-item.ss-active {
+        @apply bg-brand-50 text-brand-700;
+    }
+    .ss-item.ss-selected {
+        @apply font-semibold;
+    }
+    .ss-item.ss-disabled {
+        @apply cursor-not-allowed text-gray-400;
+    }
+    .ss-group {
+        @apply px-2 pt-2 text-xs font-semibold text-gray-500;
+    }
+    .ss-empty:empty {
+        @apply hidden;
+    }
+    .ss-empty {
+        @apply px-3 py-2 text-sm text-gray-500;
+    }
+}
