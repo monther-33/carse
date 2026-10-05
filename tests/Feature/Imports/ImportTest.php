@@ -193,9 +193,10 @@ test('opening balances refuse stock accounts, group accounts, unknown accounts a
         5 => ['account' => '13', 'debit' => '1000'],
         6 => ['account' => '31', 'party' => 'أحد', 'credit' => '1000'],
         7 => ['account' => '31', 'debit' => '5', 'credit' => '5'],
+        8 => ['account' => '22', 'party' => customer()->name, 'credit' => '500'],
     ], ['date' => today()->toDateString()]);
 
-    expect(array_column($preview->errors, 'row'))->toBe([2, 3, 4, 5, 6, 7]);
+    expect(array_column($preview->errors, 'row'))->toBe([2, 3, 4, 5, 6, 7, 8]);
     expect(fn () => app(ImportOpeningBalances::class)->import([2 => ['account' => '14', 'debit' => '1']], ['date' => today()->toDateString()]))
         ->toThrow(BusinessRuleException::class);
     expect(ManualJournal::query()->count())->toBe(0);

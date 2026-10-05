@@ -27,7 +27,9 @@ use Illuminate\Support\Facades\Auth;
  * currency. If the sheet does not balance, the difference goes to the "opening balances"
  * account, to be closed into capital by the accountant.
  *
- * Vehicle stock is refused here: it comes with the vehicles import, car by car.
+ * Vehicle stock is refused here: it comes with the vehicles import, car by car. Customer
+ * deposits are refused too: deposit credit is computed from receipt vouchers (DepositService),
+ * so open deposits are recorded as reservations with their deposit after go-live.
  */
 class ImportOpeningBalances extends Importer
 {
@@ -73,6 +75,7 @@ class ImportOpeningBalances extends Importer
         $base = $this->rates->baseCurrency();
         $partyAccounts = $this->accounts->partyAccountIds();
         $stockAccounts = [$this->accounts->idFor(AccountRole::Inventory), $this->accounts->idFor(AccountRole::InTransit)];
+        $depositsAccount = $this->accounts->idFor(AccountRole::CustomerDeposits);
         $lines = [];
         $debitBase = Money::zero();
         $creditBase = Money::zero();
@@ -86,6 +89,9 @@ class ImportOpeningBalances extends Importer
                 }
                 if (in_array($account->id, $stockAccounts, true)) {
                     throw new InvalidCell(__('imports.errors.stock_account', ['code' => $code]));
+                }
+                if ($account->id === $depositsAccount) {
+                    throw new InvalidCell(__('imports.errors.deposit_account', ['code' => $code]));
                 }
 
                 $party = $this->party(CellParser::text($row['party'] ?? null));

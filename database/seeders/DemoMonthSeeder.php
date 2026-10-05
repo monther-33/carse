@@ -70,13 +70,13 @@ class DemoMonthSeeder extends Seeder
         }
     }
 
-    private function branchId(): int
+    protected function branchId(): int
     {
         return (int) Branch::query()->value('id');
     }
 
     /** A 17-character VIN-like code (no I, O or Q). */
-    private function vin(string $prefix): string
+    protected function vin(string $prefix): string
     {
         $chars = 'ABCDEFGHJKLMNPRSTUVWXYZ0123456789';
         $vin = $prefix;
@@ -224,7 +224,7 @@ class DemoMonthSeeder extends Seeder
     /**
      * @param  list<array{0: string, 1: string, 2: string}>  $lines  [price, entry status, asking price]
      */
-    private function purchase(Party $supplier, array $lines, string $paid = '0', ?Cashbox $cashbox = null, ?Currency $currency = null, string $rate = '1', string $discount = '0', string $source = 'supplier'): PurchaseInvoice
+    protected function purchase(Party $supplier, array $lines, string $paid = '0', ?Cashbox $cashbox = null, ?Currency $currency = null, string $rate = '1', string $discount = '0', string $source = 'supplier'): PurchaseInvoice
     {
         $models = CarModel::query()->inRandomOrder()->limit(count($lines))->get();
         $items = [];
@@ -252,7 +252,7 @@ class DemoMonthSeeder extends Seeder
      * @param  list<array{0: Cashbox, 1: string}>  $payments
      * @param  array<string, mixed>  $extra
      */
-    private function sell(Vehicle $vehicle, Party $customer, string $price, string $type, array $payments = [], array $extra = []): SalesInvoice
+    protected function sell(Vehicle $vehicle, Party $customer, string $price, string $type, array $payments = [], array $extra = []): SalesInvoice
     {
         $draft = app(SaveSalesInvoice::class)->handle($extra + [
             'date' => now()->toDateString(), 'party_id' => $customer->id, 'payment_type' => $type,
@@ -266,7 +266,7 @@ class DemoMonthSeeder extends Seeder
     }
 
     /** @return array<string, mixed> */
-    private function tradeIn(string $value): array
+    protected function tradeIn(string $value): array
     {
         $model = CarModel::query()->inRandomOrder()->firstOrFail();
 
@@ -277,7 +277,7 @@ class DemoMonthSeeder extends Seeder
         ];
     }
 
-    private function expense(string $category, Cashbox $cashbox, string $amount, ?Vehicle $vehicle, string $description): void
+    protected function expense(string $category, Cashbox $cashbox, string $amount, ?Vehicle $vehicle, string $description): void
     {
         $categoryId = ExpenseCategory::query()->where('name', 'like', "%{$category}%")->value('id') ?? ExpenseCategory::query()->value('id');
 
@@ -288,7 +288,7 @@ class DemoMonthSeeder extends Seeder
         app(PostExpense::class)->handle($expense);
     }
 
-    private function voucher(string $type, Cashbox $cashbox, string $amount, ?Party $party, ?int $accountId, string $description, ?string $rate = null, mixed $reference = null, ?Cashbox $toCashbox = null): void
+    protected function voucher(string $type, Cashbox $cashbox, string $amount, ?Party $party, ?int $accountId, string $description, ?string $rate = null, mixed $reference = null, ?Cashbox $toCashbox = null): void
     {
         $voucher = app(SaveVoucher::class)->handle([
             'type' => $type, 'date' => now()->toDateString(), 'cashbox_id' => $cashbox->id, 'to_cashbox_id' => $toCashbox?->id,
@@ -301,7 +301,7 @@ class DemoMonthSeeder extends Seeder
     /**
      * @param  list<array<string, mixed>>  $lines
      */
-    private function journal(string $description, array $lines): void
+    protected function journal(string $description, array $lines): void
     {
         $journal = app(SaveManualJournal::class)->handle(['date' => now()->toDateString(), 'description' => $description, 'lines' => $lines]);
         app(PostManualJournal::class)->handle($journal);

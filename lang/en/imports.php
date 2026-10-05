@@ -10,7 +10,7 @@ return [
     'help' => [
         'parties' => 'One party per row (customer, supplier or both). A party that already exists with the same national ID, or the same name and phone, is skipped. Party balances are imported with "Opening balances".',
         'vehicles' => 'One vehicle in stock at go-live per row, with its cost in the base currency. A draft "opening stock" is created; approving it posts Dr inventory (or vehicles in transit) / Cr opening balances. Unknown brands, models, colours and locations are created.',
-        'balances' => 'One account balance per row, by account code (cashboxes, customers, suppliers, deposits, capital...). The party is required on customer, supplier and deposit accounts (national ID or name). A draft manual journal is created; any difference goes to the opening balances account. Vehicle stock is not imported here.',
+        'balances' => 'One account balance per row, by account code (cashboxes, customers, suppliers, deposits, capital...). The party is required on customer and supplier accounts (national ID or name). A draft manual journal is created; any difference goes to the opening balances account. Vehicle stock is not imported here.',
     ],
     'columns_hint' => 'Columns (* = required, any order):',
     'columns' => [
@@ -115,6 +115,7 @@ return [
         'account' => 'No account with code :code.',
         'account_group' => 'Account :code is a group or inactive account; use a sub-account.',
         'stock_account' => 'Account :code is a vehicle stock account; stock is imported with "Current vehicles", car by car.',
+        'deposit_account' => 'Account :code holds customer deposits; record open deposits as reservations with their deposit after go-live.',
         'party_not_allowed' => 'Account :code does not take a party; parties go on customer, supplier and deposit accounts only.',
         'party_not_found' => 'No party with national ID or name ":party". Import the parties first.',
         'party_ambiguous' => 'More than one party is named ":party"; use the national ID.',
