@@ -59,6 +59,10 @@
 
             <span class="hidden sm:inline text-sm text-gray-500">{{ auth()->user()->branch?->name }}</span>
 
+            @can('vehicles.view')
+                <livewire:pickers.vehicle-finder />
+            @endcan
+
             @php($quickTypes = array_values(array_filter(['party_customer', 'party_supplier', 'brand', 'model', 'color', 'location', 'expense_category'], fn ($t) => \App\Livewire\QuickCreate::allowed(str_starts_with($t, 'party') ? 'party' : $t))))
             @php($quickLinks = array_values(array_filter([
                 [route('sales.create'), 'sales.create', 'quick.links.sale'],
