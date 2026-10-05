@@ -83,6 +83,15 @@
 - موظف المبيعات يرى فواتيره فقط (`SalesInvoice::scopeVisibleTo` + `SalesInvoicePolicy::view`) وعمولاته فقط. خزينة الدفعات في شاشتي البيع والحجز تُختار من كل الخزائن النشطة بعملة الفاتورة (البائع يحدد أين ذهب المال، والترحيل عند الاعتماد).
 - **الطباعة**: `PrintController` + `App\Support\Pdf` (mPDF، خط XB Riyaz، RTL) وقوالب `resources/views/print/*` بترويسة من الإعدادات. بنود عقد البيع نص حر في الإعدادات (`print.contract_terms`) ولا تُكتب بنود قانونية في الكود. التفقيط `App\Support\Tafqeet` (دينار/درهم 1000، دولار/سنت 100) مع اختبارات المطابقة النحوية.
 
+## المحاسبة والتقارير (المرحلة 4)
+
+- **القيود اليدوية**: مستند `ManualJournal` (morph `manual_journal`، تسلسل `MJ`) بدورة المستندات المعتادة وصلاحيات `journal.{view,create,approve,cancel}`. `SaveManualJournal` يتحقق: طرف واحد لكل سطر، مبلغ موجب، حساب ترحيلي، الطرف إلزامي على حسابات المراقبة، سطران على الأقل، توازن بالدينار. `PostManualJournal` يرحّل عبر `PostingService` ويلغي عبر `ReversalService`.
+- **محرك التقارير**: كل تقرير صنف يرث `App\Reports\Report` (key, group, permissions, filters, columns, rows, notes, allows) ويُسجَّل في `ReportRegistry`. شاشة عامة واحدة `Livewire\Reports\Viewer` (الفلاتر في الرابط `?f[...]`) و`ReportController` للتصدير PDF/Excel، والجدول المشترك `resources/views/reports/table.blade.php`. صفوف التقرير قد تحمل `_style` (heading/subtotal/total) و`_indent`. تقرير جديد = صنف + سطر في السجل + ترجمات.
+- صلاحيات التقارير: `reports.financial` (القوائم المالية والأستاذ والذمم)، `reports.sales`، `reports.inventory`. تقارير التكلفة والربح تتطلب `vehicles.view_cost` أيضًا (`allows()`)، وموظف المبيعات يرى مبيعاته فقط بلا تكلفة، وأمين الخزينة يرى حركة خزائنه فقط.
+- **الميزانية**: صافي ربح الفترة غير المقفلة يظهر في حقوق الملكية كسطر "أرباح الفترة الحالية" (لا قيد إقفال سنوي). أعمار الديون FIFO (الدفعات تُطفئ الأقدم أولًا).
+- **لوحة التحكم** `App\Livewire\Dashboard` + `DashboardMetrics`: كل عنصر يرجع null إن لم يملك المستخدم صلاحيته.
+- **`DemoMonthSeeder`** (`php artisan db:seed --class=DemoMonthSeeder`): شهر كامل من النشاط (الشهر السابق) بكل أنواع المستندات؛ هو أساس اختبار بوابة المرحلة (`MonthGateTest`: الأصول = الخصوم + حقوق الملكية).
+
 ## هيكلة الكود
 
 - `app/Actions/<Module>/` منطق العمليات · `app/Services/{Accounting,Numbering,Currency}` · `app/Livewire/` شاشات رفيعة تستدعي Actions ولا تحتوي منطقًا ماليًا · `app/Policies` · `app/Support/{Money,Settings,Navigation,Labels}` · `app/Enums`.
