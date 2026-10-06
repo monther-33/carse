@@ -7,8 +7,10 @@ use App\Actions\Accounting\SaveCashbox;
 use App\Models\Branch;
 use App\Models\Cashbox;
 use App\Models\Currency;
+use App\Models\FiscalPeriod;
 use App\Models\Location;
 use App\Models\User;
+use App\Services\Numbering\SequenceService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -44,11 +46,15 @@ class FoundationSeeder extends Seeder
 
         $generateYear->handle((int) now()->year);
 
-        $admin = User::query()->firstOrCreate(['email' => 'admin@cars.local'], [
+        // Counters for every existing year (and for document types added since): see SequenceService::ensureYear.
+        foreach (FiscalPeriod::query()->selectRaw('DISTINCT YEAR(start_date) AS y')->pluck('y') as $year) {
+            app(SequenceService::class)->ensureYear((int) $year);
+        }
+
+        $admin = User::query()->firstOrCreate(['username' => 'admin'], [
             'branch_id' => $branch->id,
             'name' => 'مدير النظام',
             'password' => Hash::make((string) config('app.seed_admin_password')),
-            'email_verified_at' => now(),
             'is_active' => true,
         ]);
         $admin->assignRole('admin');

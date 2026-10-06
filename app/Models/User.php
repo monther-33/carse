@@ -13,12 +13,13 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
- * Users are never deleted; they are deactivated (is_active = false).
+ * Users are never deleted; they are deactivated (is_active = false). They sign in with a
+ * username (no email: owner's decision).
  *
  * @property int $id
  * @property int $branch_id
  * @property string $name
- * @property string $email
+ * @property string $username login name (lowercase Latin letters, digits, . _ -)
  * @property bool $is_active
  * @property string $max_discount
  */
@@ -30,7 +31,7 @@ class User extends Authenticatable
     protected $fillable = [
         'branch_id',
         'name',
-        'email',
+        'username',
         'password',
         'is_active',
         'max_discount',
@@ -44,7 +45,6 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
             'max_discount' => 'decimal:3',

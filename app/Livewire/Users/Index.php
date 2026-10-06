@@ -30,7 +30,7 @@ class Index extends Component
 
     public string $name = '';
 
-    public string $email = '';
+    public string $username = '';
 
     public string $password = '';
 
@@ -72,7 +72,7 @@ class Index extends Component
         $this->resetForm();
         $this->editingId = $user->id;
         $this->name = $user->name;
-        $this->email = $user->email;
+        $this->username = $user->username;
         $this->branch_id = $user->branch_id;
         $this->max_discount = (string) $user->max_discount;
         $this->is_active = $user->is_active;
@@ -88,7 +88,7 @@ class Index extends Component
 
         $data = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->editingId)],
+            'username' => ['required', 'string', 'min:3', 'max:50', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'username')->ignore($this->editingId)],
             'password' => [$user ? 'nullable' : 'required', Password::min(8)],
             'branch_id' => ['required', 'exists:branches,id'],
             'max_discount' => ['required', 'numeric', 'min:0', 'decimal:0,3'],
@@ -122,7 +122,7 @@ class Index extends Component
 
     private function resetForm(): void
     {
-        $this->reset(['editingId', 'name', 'email', 'password', 'branch_id', 'max_discount', 'is_active', 'roles', 'cashbox_ids']);
+        $this->reset(['editingId', 'name', 'username', 'password', 'branch_id', 'max_discount', 'is_active', 'roles', 'cashbox_ids']);
         $this->resetValidation();
     }
 
@@ -132,7 +132,7 @@ class Index extends Component
             ->with(['branch', 'roles'])
             ->when($this->search, fn ($q) => $q->where(fn ($q) => $q
                 ->where('name', 'like', "%{$this->search}%")
-                ->orWhere('email', 'like', "%{$this->search}%")))
+                ->orWhere('username', 'like', "%{$this->search}%")))
             ->orderBy('name')
             ->paginate(15);
 

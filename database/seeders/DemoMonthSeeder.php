@@ -58,7 +58,7 @@ class DemoMonthSeeder extends Seeder
         $this->start = CarbonImmutable::now()->subMonthNoOverflow()->startOfMonth();
         app(GenerateFiscalYear::class)->handle($this->start->year);
 
-        Auth::login(User::query()->where('email', 'admin@cars.local')->firstOrFail());
+        Auth::login(User::query()->where('username', 'admin')->firstOrFail());
         app(Settings::class)->set(['sales.commission_type' => 'percent', 'sales.commission_value' => '1']);
 
         try {

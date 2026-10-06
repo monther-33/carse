@@ -69,7 +69,7 @@ test('current-year monthly periods are open', function () {
 test('the five roles carry the spec permission matrix', function () {
     $can = fn (string $role, string $permission) => Role::findByName($role)->hasPermissionTo($permission);
 
-    expect(User::query()->where('email', 'admin@cars.local')->first()->hasRole('admin'))->toBeTrue();
+    expect(User::query()->where('username', 'admin')->first()->hasRole('admin'))->toBeTrue();
 
     // Admin: everything.
     expect(Role::findByName('admin')->permissions()->count())->toBe(Permission::query()->count());

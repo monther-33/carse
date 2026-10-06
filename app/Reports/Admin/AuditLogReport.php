@@ -80,7 +80,7 @@ class AuditLogReport extends Report
             $parts[] = array_key_exists($key, $old) ? "{$key}: {$this->scalar($old[$key])} → {$this->scalar($value)}" : "{$key}: {$this->scalar($value)}";
         }
 
-        foreach (['ip', 'email'] as $key) {
+        foreach (['ip', 'username', 'email'] as $key) {
             if (isset($activity->properties[$key])) {
                 $parts[] = "{$key}: {$activity->properties[$key]}";
             }

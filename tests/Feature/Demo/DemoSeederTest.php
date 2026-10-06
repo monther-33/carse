@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Hash;
 */
 beforeEach(function () {
     $this->seed(DemoSeeder::class);
-    $this->admin = User::query()->where('email', 'admin@cars.local')->firstOrFail();
+    $this->admin = User::query()->where('username', 'admin')->firstOrFail();
     $this->actingAs($this->admin);
 });
 
@@ -37,7 +37,7 @@ test('the demo books balance and the opening balances account is closed into cap
 
 test('there is an active user for every role, with the admin password', function () {
     foreach (['accountant', 'cashier', 'sales1', 'sales2', 'purchasing'] as $name) {
-        $user = User::query()->where('email', "{$name}@cars.local")->firstOrFail();
+        $user = User::query()->where('username', $name)->firstOrFail();
         expect($user->roles)->toHaveCount(1)
             ->and($user->is_active)->toBeTrue()
             ->and(Hash::check((string) config('app.seed_admin_password'), $user->password))->toBeTrue();
@@ -56,7 +56,7 @@ test('the dashboard and the bell have something to show today', function () {
         ->and($this->admin->unreadNotifications()->where('type', DailyAlerts::class)->count())->toBe(1);
 
     // Sales staff own their sales.
-    $seller = User::query()->where('email', 'sales1@cars.local')->firstOrFail();
+    $seller = User::query()->where('username', 'sales1')->firstOrFail();
     expect(SalesInvoice::query()->visibleTo($seller)->count())->toBeGreaterThan(0)
         ->and(SalesInvoice::query()->visibleTo($seller)->count())->toBeLessThan(SalesInvoice::query()->count());
 });

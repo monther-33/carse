@@ -13,6 +13,7 @@ use App\Livewire\Roles\Index as RolesIndex;
 use App\Livewire\Settings\Index as SettingsIndex;
 use App\Livewire\Users\Index as UsersIndex;
 use App\Models\Account;
+use App\Models\Branch;
 use App\Models\Brand;
 use App\Models\Cashbox;
 use App\Models\FiscalPeriod;
@@ -36,7 +37,7 @@ test('admin creates a user with roles and cashboxes, and the change is audited',
     Livewire::test(UsersIndex::class)
         ->call('create')
         ->set('name', 'سالم')
-        ->set('email', 'salem@cars.local')
+        ->set('username', 'Salem.T')
         ->set('password', 'secret-pass-1')
         ->set('max_discount', '500.5')
         ->set('roles', ['cashier'])
@@ -44,7 +45,7 @@ test('admin creates a user with roles and cashboxes, and the change is audited',
         ->call('save')
         ->assertHasNoErrors();
 
-    $user = User::query()->where('email', 'salem@cars.local')->firstOrFail();
+    $user = User::query()->where('username', 'salem.t')->firstOrFail();
     expect($user->hasRole('cashier'))->toBeTrue()
         ->and((string) $user->max_discount)->toBe('500.500')
         ->and($user->cashboxes->pluck('name')->all())->toBe(['خزينة دينار'])
@@ -215,3 +216,19 @@ test('brands and their models are managed together', function () {
 test('all setup screens render for the admin', function (string $url) {
     $this->get($url)->assertOk();
 })->with(['/dashboard', '/accounts', '/cashboxes', '/periods', '/currencies', '/references/brands', '/references/colors', '/references/locations', '/branches', '/settings', '/users', '/roles', '/profile']);
+
+test('usernames are Latin, without spaces, unique and stored in lowercase', function () {
+    $this->actingAs(userWithRole('admin'));
+    $form = fn (string $username) => Livewire::test(UsersIndex::class)
+        ->call('create')
+        ->set('name', 'موظف')->set('username', $username)->set('password', 'secret-pass-1')
+        ->set('branch_id', Branch::query()->value('id'))->set('roles', ['sales'])
+        ->call('save');
+
+    $form('علي')->assertHasErrors('username');
+    $form('ali hassan')->assertHasErrors('username');
+    $form('Ali.Hassan')->assertHasNoErrors();
+    $form('ALI.HASSAN')->assertHasErrors('username');
+
+    expect(User::query()->where('username', 'ali.hassan')->exists())->toBeTrue();
+});

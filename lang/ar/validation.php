@@ -104,8 +104,8 @@ return [
 
     'attributes' => [
         'name' => 'الاسم',
-        'email' => 'البريد الإلكتروني',
-        'form.email' => 'البريد الإلكتروني',
+        'username' => 'اسم المستخدم',
+        'form.username' => 'اسم المستخدم',
         'password' => 'كلمة المرور',
         'form.password' => 'كلمة المرور',
         'current_password' => 'كلمة المرور الحالية',

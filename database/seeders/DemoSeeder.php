@@ -62,7 +62,7 @@ class DemoSeeder extends DemoMonthSeeder
 
     public function run(): void
     {
-        if (User::query()->where('email', 'sales1@cars.local')->exists()) {
+        if (User::query()->where('username', 'sales1')->exists()) {
             $this->command?->warn('Demo data already present — nothing to do.');
 
             return;
@@ -74,7 +74,7 @@ class DemoSeeder extends DemoMonthSeeder
             app(GenerateFiscalYear::class)->handle($year);
         }
 
-        Auth::login(User::query()->where('email', 'admin@cars.local')->firstOrFail());
+        Auth::login(User::query()->where('username', 'admin')->firstOrFail());
         app(Settings::class)->set(['sales.commission_type' => 'percent', 'sales.commission_value' => '1']);
 
         try {
@@ -93,7 +93,7 @@ class DemoSeeder extends DemoMonthSeeder
 
         parent::run(); // last month, day by day
 
-        Auth::login(User::query()->where('email', 'admin@cars.local')->firstOrFail());
+        Auth::login(User::query()->where('username', 'admin')->firstOrFail());
         try {
             $this->currentMonth();
             $this->resetClock();
@@ -108,16 +108,16 @@ class DemoSeeder extends DemoMonthSeeder
     {
         $password = (string) config('app.seed_admin_password');
         $people = [
-            'accountant' => ['accountant@cars.local', 'نوري الشريف', 'accountant', '0'],
-            'cashier' => ['cashier@cars.local', 'سامي الككلي', 'cashier', '0'],
-            'sales1' => ['sales1@cars.local', 'علي المبروك', 'sales', '2000'],
-            'sales2' => ['sales2@cars.local', 'رانية الحاسي', 'sales', '1500'],
-            'purchasing' => ['purchasing@cars.local', 'مراد بن غلبون', 'purchasing', '0'],
+            'accountant' => ['accountant', 'نوري الشريف', 'accountant', '0'],
+            'cashier' => ['cashier', 'سامي الككلي', 'cashier', '0'],
+            'sales1' => ['sales1', 'علي المبروك', 'sales', '2000'],
+            'sales2' => ['sales2', 'رانية الحاسي', 'sales', '1500'],
+            'purchasing' => ['purchasing', 'مراد بن غلبون', 'purchasing', '0'],
         ];
 
-        foreach ($people as $key => [$email, $name, $role, $discount]) {
+        foreach ($people as $key => [$username, $name, $role, $discount]) {
             $user = User::query()->create([
-                'branch_id' => $this->branchId(), 'name' => $name, 'email' => $email,
+                'branch_id' => $this->branchId(), 'name' => $name, 'username' => $username,
                 'password' => $password, 'is_active' => true, 'max_discount' => $discount,
             ]);
             $user->assignRole($role);
@@ -271,7 +271,7 @@ class DemoSeeder extends DemoMonthSeeder
             'cashbox_id' => $cash->id, 'deposit' => '10000',
             'expires_at' => $this->realNow->addDays(2)->toDateString(), 'notes' => 'تنتظر تحويل المصرف',
         ]);
-        Auth::login(User::query()->where('email', 'admin@cars.local')->firstOrFail());
+        Auth::login(User::query()->where('username', 'admin')->firstOrFail());
 
         // Installment sale whose first installment falls due this week.
         $day(3, 12);

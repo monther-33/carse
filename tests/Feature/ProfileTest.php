@@ -12,7 +12,7 @@ test('profile page is displayed', function () {
         ->assertSeeVolt('profile.update-password-form');
 });
 
-test('users can update their name but not their login email', function () {
+test('users can update their name but not their username', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
 
@@ -23,5 +23,5 @@ test('users can update their name but not their login email', function () {
 
     $fresh = $user->fresh();
     expect($fresh->name)->toBe('Test User')
-        ->and($fresh->email)->toBe($user->email);
+        ->and($fresh->username)->toBe($user->username);
 });

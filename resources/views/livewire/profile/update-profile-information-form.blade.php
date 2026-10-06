@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Volt\Component;
 
 /*
- * Users may change their display name only. The login email is managed by the admin.
+ * Users may change their display name only. The username is managed by the admin.
  */
 new class extends Component
 {
@@ -30,7 +30,7 @@ new class extends Component
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900">{{ __('Profile Information') }}</h2>
-        <p class="mt-1 text-sm text-gray-600">{{ __('app.profile.email_managed', ['email' => auth()->user()->email]) }}</p>
+        <p class="mt-1 text-sm text-gray-600">{{ __('app.profile.username_managed', ['username' => auth()->user()->username]) }}</p>
     </header>
 
     <form wire:submit="updateProfileInformation" class="mt-6 space-y-6">

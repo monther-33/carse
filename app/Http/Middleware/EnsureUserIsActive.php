@@ -21,7 +21,7 @@ class EnsureUserIsActive
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('login')->withErrors(['form.email' => __('app.auth.inactive')]);
+            return redirect()->route('login')->withErrors(['form.username' => __('app.auth.inactive')]);
         }
 
         return $next($request);

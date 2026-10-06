@@ -10,7 +10,7 @@
 - تشغيل MariaDB: `C:\xampp\mysql\bin\mysqld.exe --defaults-file=C:\xampp\mysql\bin\my.ini --standalone`
 - `composer test` (Pest) · `composer analyse` (Larastan مستوى 6) · `composer lint` (Pint) · `npm run build`
 - المهام المجدولة: `php artisan schedule:list` (reservations:expire، alerts:daily، backup:*). التثبيت والتشغيل: `docs/DEPLOYMENT.md`.
-- `php artisan migrate:fresh --seed` — كل Seeders متكررة الأمان (idempotent). المدير الأول: `admin@cars.local` / قيمة `ADMIN_PASSWORD` (افتراضيًا `password`).
+- `php artisan migrate:fresh --seed` — كل Seeders متكررة الأمان (idempotent). المدير الأول: اسم المستخدم `admin` / قيمة `ADMIN_PASSWORD` (افتراضيًا `password`).
 
 ## قواعد صارمة
 
@@ -103,7 +103,7 @@
 - **التنبيهات**: جدول `notifications` (database channel). `alerts:daily` الساعة 07:00 (`SendDailyAlerts` + `AlertDigest`): أقساط متأخرة ومستحقة خلال 7 أيام (`vouchers.view`/`sales.view_all`/`reports.financial`)، حجوزات تنتهي خلال 3 أيام (`reservations.view`)، سيارات راكدة فوق حدّي الإعدادات (`reports.inventory`/`vehicles.update`). الملخص غير المقروء يُستبدل ولا يتراكم. النص يُبنى عند العرض (`Notification::lines()`) بلغة القارئ. الجرس `Livewire\Notifications\Bell` في الشريط العلوي.
 - **النسخ الاحتياطي** (spatie/laravel-backup): قاعدة البيانات + `storage/app/{public,private}` إلى قرص `backups` (`BACKUP_PATH`)، الجدولة: clean 01:30، run 02:00، monitor 08:00. `DB_DUMP_PATH` لمسار mysqldump (XAMPP: `C:/xampp/mysql/bin`). الفشل يصل لمن يملك `backups.manage` عبر `NotifyBackupProblems` (البريد فقط إن ضُبط `BACKUP_MAIL_TO`). شاشة `backups.index` للقائمة والتنزيل والنسخ الفوري.
 - المنطقة الزمنية من `APP_TIMEZONE` (`Africa/Tripoli`).
-- **`DemoSeeder`** (`php artisan db:seed --class=DemoSeeder`، مرة واحدة على قاعدة فارغة): مستخدم لكل دور (`accountant@`, `cashier@`, `sales1@`, `sales2@`, `purchasing@cars.local` بكلمة `ADMIN_PASSWORD`)، بدء تشغيل قبل شهرين عبر المستوردات نفسها، ثم شهر بدء التشغيل، ثم `DemoMonthSeeder`، ثم الشهر الحالي حتى اليوم. لا يُشغَّل على الإنتاج.
+- **`DemoSeeder`** (`php artisan db:seed --class=DemoSeeder`، مرة واحدة على قاعدة فارغة): مستخدم لكل دور (`accountant`, `cashier`, `sales1`, `sales2`, `purchasing` بكلمة `ADMIN_PASSWORD`)، بدء تشغيل قبل شهرين عبر المستوردات نفسها، ثم شهر بدء التشغيل، ثم `DemoMonthSeeder`، ثم الشهر الحالي حتى اليوم. لا يُشغَّل على الإنتاج.
 - دليل التثبيت والنشر والاستعادة: `docs/DEPLOYMENT.md`.
 
 ## هيكلة الكود
@@ -127,4 +127,6 @@
 - الفترات المالية شهرية؛ تُنشأ سنة كاملة دفعة واحدة. لا يوجد "إعادة فتح" فترة (غير مذكور في المواصفة).
 - الخزينة الجديدة تُنشئ حسابها في الدليل تلقائيًا تحت الأب المحدد في الإعدادات؛ نوعها وعملتها ثابتان بعد الإنشاء.
 - صلاحيات غير محددة في جدول المواصفة: `exchange_rates.manage` للمدير والمحاسب؛ `references.manage` للمدير والمشتريات؛ `parties.manage` للمدير والمحاسب والمبيعات والمشتريات؛ اعتماد السندات والمصروفات للمدير والمحاسب (أمين الخزينة ينشئ فقط).
-- المستخدم يغيّر اسمه وكلمة مروره فقط؛ البريد يغيّره المدير. لا تسجيل ذاتي ولا تحقق بريد.
+- **الدخول باسم مستخدم لا ببريد** (قرار صاحب المشروع؛ migration `replace_email_with_username_on_users` حذف `email`): `users.username` فريد، حروف لاتينية وأرقام و`._-`، يُخزَّن بحروف صغيرة والدخول لا يفرّق بين الحالتين. لا استعادة كلمة مرور بالبريد: المدير يعيّنها من شاشة المستخدمين.
+- المستخدم يغيّر اسمه وكلمة مروره فقط؛ اسم المستخدم يغيّره المدير. لا تسجيل ذاتي.
+- **حد الائتمان تنبيه فقط ولا يمنع البيع** (قرار صاحب المشروع): `Services\Sales\CreditLimitCheck` في شاشة البيع وصفحة المسودة؛ الحد صفر = بلا حد.

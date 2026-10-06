@@ -25,7 +25,7 @@ class LogAuthenticationEvents
     public function failed(Failed $event): void
     {
         $this->log('login_failed', $event->user instanceof Model ? $event->user : null, [
-            'email' => $event->credentials['email'] ?? null,
+            'username' => $event->credentials['username'] ?? null,
         ]);
     }
 

@@ -58,12 +58,14 @@ return [
         'roles' => 'Roles & permissions',
     ],
 
+    'username_hint' => 'Latin letters, digits and . _ - only (3 to 50 characters), no spaces. Not case-sensitive.',
     'auth' => [
         'inactive' => 'This account is disabled. Contact the administrator.',
+        'forgot_hint' => 'Forgot your password? The administrator sets a new one.',
     ],
 
     'profile' => [
-        'email_managed' => 'Login email: :email (changed by the administrator only).',
+        'username_managed' => 'Login username: :username (changed by the administrator only).',
     ],
 
     'dashboard' => [
@@ -73,7 +75,7 @@ return [
 
     'fields' => [
         'name' => 'Name',
-        'email' => 'Email',
+        'username' => 'Username',
         'password' => 'Password',
         'branch' => 'Branch',
         'roles' => 'Roles',

@@ -14,7 +14,7 @@ test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
 
     Volt::test('pages.auth.login')
-        ->set('form.email', $user->email)
+        ->set('form.username', $user->username)
         ->set('form.password', 'password')
         ->call('login')
         ->assertHasNoErrors()
@@ -28,7 +28,7 @@ test('users can not authenticate with invalid password and the attempt is audite
     $user = User::factory()->create();
 
     Volt::test('pages.auth.login')
-        ->set('form.email', $user->email)
+        ->set('form.username', $user->username)
         ->set('form.password', 'wrong-password')
         ->call('login')
         ->assertHasErrors()
@@ -38,17 +38,17 @@ test('users can not authenticate with invalid password and the attempt is audite
 
     $failed = Activity::query()->where('log_name', 'auth')->where('event', 'login_failed')->latest('id')->first();
     expect($failed)->not->toBeNull()
-        ->and($failed->properties['email'])->toBe($user->email);
+        ->and($failed->properties['username'])->toBe($user->username);
 });
 
 test('inactive users cannot log in', function () {
     $user = User::factory()->inactive()->create();
 
     Volt::test('pages.auth.login')
-        ->set('form.email', $user->email)
+        ->set('form.username', $user->username)
         ->set('form.password', 'password')
         ->call('login')
-        ->assertHasErrors(['form.email' => __('app.auth.inactive')]);
+        ->assertHasErrors(['form.username' => __('app.auth.inactive')]);
 
     $this->assertGuest();
 });
@@ -82,4 +82,16 @@ test('users can logout', function () {
 
 test('there is no self registration', function () {
     $this->get('/register')->assertNotFound();
+});
+
+test('the username is not case-sensitive and surrounding spaces are ignored', function () {
+    $user = User::factory()->create(['username' => 'sales.ali']);
+
+    Volt::test('pages.auth.login')
+        ->set('form.username', '  Sales.ALI ')
+        ->set('form.password', 'password')
+        ->call('login')
+        ->assertHasNoErrors();
+
+    $this->assertAuthenticatedAs($user);
 });

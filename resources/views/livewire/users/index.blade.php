@@ -13,7 +13,7 @@
                 <thead>
                 <tr>
                     <th>{{ __('app.fields.name') }}</th>
-                    <th>{{ __('app.fields.email') }}</th>
+                    <th>{{ __('app.fields.username') }}</th>
                     <th>{{ __('app.fields.branch') }}</th>
                     <th>{{ __('app.fields.roles') }}</th>
                     <th>{{ __('app.fields.max_discount') }}</th>
@@ -25,7 +25,7 @@
                 @forelse ($users as $user)
                     <tr wire:key="user-{{ $user->id }}">
                         <td class="font-medium">{{ $user->name }}</td>
-                        <td class="num">{{ $user->email }}</td>
+                        <td class="num">{{ $user->username }}</td>
                         <td>{{ $user->branch->name }}</td>
                         <td>
                             @foreach ($user->roles as $role)
@@ -63,8 +63,8 @@
             <x-ui.field :label="__('app.fields.name')" for="name" error="name" required>
                 <input id="name" type="text" wire:model="name" class="form-input">
             </x-ui.field>
-            <x-ui.field :label="__('app.fields.email')" for="email" error="email" required>
-                <input id="email" type="email" dir="ltr" wire:model="email" class="form-input">
+            <x-ui.field :label="__('app.fields.username')" for="username" error="username" :hint="__('app.username_hint')" required>
+                <input id="username" type="text" dir="ltr" wire:model="username" class="form-input" autocapitalize="none" spellcheck="false">
             </x-ui.field>
             <x-ui.field :label="__('app.fields.password')" for="password" error="password" :required="! $editingId"
                         :hint="$editingId ? __('app.users.password_hint') : null">

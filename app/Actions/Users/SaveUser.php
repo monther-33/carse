@@ -5,21 +5,21 @@ namespace App\Actions\Users;
 use App\Models\User;
 use App\Support\Money;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class SaveUser
 {
     /**
-     * @param  array{name: string, email: string, password?: string|null, branch_id: int, max_discount: string, is_active: bool, roles: list<string>, cashbox_ids: list<int>}  $data
+     * @param  array{name: string, username: string, password?: string|null, branch_id: int, max_discount: string, is_active: bool, roles: list<string>, cashbox_ids: list<int>}  $data
      */
     public function handle(array $data, ?User $user = null): User
     {
         return DB::transaction(function () use ($data, $user) {
-            // Accounts are created by the admin, so the email counts as verified.
-            $user ??= (new User)->forceFill(['email_verified_at' => now()]);
+            $user ??= new User;
 
             $user->fill([
                 'name' => $data['name'],
-                'email' => $data['email'],
+                'username' => Str::lower(trim($data['username'])),
                 'branch_id' => $data['branch_id'],
                 'max_discount' => (string) Money::of($data['max_discount']),
                 'is_active' => $data['is_active'],
