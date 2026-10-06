@@ -82,7 +82,9 @@
                     @endif
                     <div class="flex flex-wrap justify-end gap-2 border-t border-gray-100 pt-3">
                         @can('viewStatement', $p)
-                            <x-ui.button variant="secondary" icon="document" :href="route('parties.statement', $p)" target="_blank">{{ __('party_search.statement') }}</x-ui.button>
+                            <span x-data="{ app: window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true }" x-show="! app" data-new-tab-only>
+                                <x-ui.button variant="secondary" icon="document" :href="route('parties.statement', $p)" target="_blank">{{ __('party_search.statement') }}</x-ui.button>
+                            </span>
                         @endcan
                         <x-ui.button icon="check" wire:click="choose({{ $p->id }})">{{ __('vehicle_search.choose') }}</x-ui.button>
                     </div>

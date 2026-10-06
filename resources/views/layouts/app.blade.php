@@ -19,8 +19,10 @@
     {{-- Sidebar: off-canvas on tablet/mobile, fixed on desktop --}}
     <div x-show="sidebarOpen" x-cloak x-transition.opacity class="fixed inset-0 z-30 bg-gray-900/40 lg:hidden" @click="sidebarOpen = false"></div>
 
-    <aside :class="sidebarOpen ? 'translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full'"
-           class="fixed inset-y-0 start-0 z-40 w-64 transform bg-brand-900 text-gray-100 transition-transform duration-200 lg:static lg:translate-x-0 rtl:lg:translate-x-0 ltr:lg:translate-x-0 flex flex-col">
+    {{-- Off-canvas on phones/tablets: hidden from the first paint (no flash, no invisible panel
+         catching taps while the page loads); opening adds the !important translate-x-0. --}}
+    <aside :class="sidebarOpen && '!translate-x-0'"
+           class="fixed inset-y-0 start-0 z-40 w-64 transform bg-brand-900 text-gray-100 transition-transform duration-200 ltr:-translate-x-full rtl:translate-x-full lg:static lg:translate-x-0 rtl:lg:translate-x-0 ltr:lg:translate-x-0 flex flex-col">
         <div class="flex h-16 items-center gap-3 border-b border-white/10 px-5">
             <x-brand-logo class="h-10 w-10 shrink-0 rounded-lg bg-white p-0.5 text-lg" />
             <span class="truncate text-base font-semibold">{{ app(\App\Support\Branding::class)->name() }}</span>

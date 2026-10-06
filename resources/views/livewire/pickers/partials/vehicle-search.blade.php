@@ -60,7 +60,14 @@
 
                 <div class="flex flex-wrap justify-end gap-2 border-t border-gray-100 pt-3">
                     @can('vehicles.view')
-                        <x-ui.button variant="secondary" icon="car" :href="route('vehicles.show', $p)" target="_blank">{{ __('vehicle_search.open_card') }}</x-ui.button>
+                        @if ($chooses)
+                            {{-- Inside a form: a new tab keeps it; the installed app has no tabs, so no button there. --}}
+                            <span x-data="{ app: window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true }" x-show="! app" data-new-tab-only>
+                                <x-ui.button variant="secondary" icon="car" :href="route('vehicles.show', $p)" target="_blank">{{ __('vehicle_search.open_card') }}</x-ui.button>
+                            </span>
+                        @else
+                            <x-ui.button variant="secondary" icon="car" :href="route('vehicles.show', $p)" wire:navigate>{{ __('vehicle_search.open_card') }}</x-ui.button>
+                        @endif
                     @endcan
                     @if ($chooses)
                         <x-ui.button icon="check" wire:click="choose({{ $p->id }})">{{ __('vehicle_search.choose') }}</x-ui.button>
@@ -134,7 +141,7 @@
                                     @if ($chooses)
                                         <x-ui.button size="sm" wire:click="choose({{ $v->id }})">{{ __('vehicle_search.choose') }}</x-ui.button>
                                     @else
-                                        <x-ui.button size="sm" variant="secondary" :href="route('vehicles.show', $v)">{{ __('vehicle_search.open_card') }}</x-ui.button>
+                                        <x-ui.button size="sm" variant="secondary" :href="route('vehicles.show', $v)" wire:navigate>{{ __('vehicle_search.open_card') }}</x-ui.button>
                                     @endif
                                 </td>
                             </tr>
