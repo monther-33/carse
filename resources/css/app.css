@@ -46,7 +46,7 @@
 /* Searchable select panel (resources/js/searchable-select.js). */
 @layer components {
     .ss-panel {
-        @apply fixed z-[60] hidden rounded-md border border-gray-200 bg-white p-2 shadow-xl;
+        @apply rounded-md border border-gray-200 bg-white p-2 shadow-xl;
     }
     .ss-search {
         @apply mb-2 block w-full rounded-md border-gray-300 text-sm focus:border-brand-500 focus:ring-brand-500;

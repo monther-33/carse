@@ -40,7 +40,12 @@ function buildPanel() {
     panel = document.createElement('div');
     panel.className = 'ss-panel';
     panel.setAttribute('role', 'listbox');
-    panel.innerHTML = '<input type="search" class="ss-search" autocomplete="off"><ul class="ss-list"></ul><p class="ss-empty"></p>';
+    // The essentials are inline so the panel always shows above any modal, even with a stale
+    // stylesheet; the classes in app.css only add the finishing touches.
+    panel.style.cssText = 'position:fixed;z-index:2147483000;display:none;background:#fff;border:1px solid #e5e7eb;'
+        + 'border-radius:.375rem;padding:.5rem;box-shadow:0 20px 25px -5px rgb(0 0 0/.15),0 8px 10px -6px rgb(0 0 0/.1);';
+    panel.innerHTML = '<input type="search" class="ss-search" autocomplete="off" style="display:block;width:100%;margin-bottom:.5rem">'
+        + '<ul class="ss-list" style="max-height:16rem;overflow-y:auto;margin:0;padding:0;list-style:none"></ul><p class="ss-empty"></p>';
     document.body.appendChild(panel);
 
     const input = panel.querySelector('.ss-search');
@@ -84,6 +89,7 @@ function render(query) {
         }
         const li = document.createElement('li');
         li.className = 'ss-item' + (o.selected ? ' ss-selected' : '') + (o.disabled ? ' ss-disabled' : '');
+        li.style.cursor = o.disabled ? 'not-allowed' : 'pointer';
         li.dataset.index = o.index;
         li.textContent = o.text;
         list.appendChild(li);
