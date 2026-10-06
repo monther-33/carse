@@ -35,14 +35,14 @@ return [
         'audit' => ['view'],
         'imports' => ['run'],
         'backups' => ['manage'],
-        'system' => ['locks'],
+        'system' => ['locks', 'features'],
     ],
 
     /*
     | Held by the developer role only, never by the admin or any other role: the developer
     | locks permissions away from everyone else (App\Support\PermissionLocks).
     */
-    'developer_only' => ['system.locks'],
+    'developer_only' => ['system.locks', 'system.features'],
 
     'roles' => [
         // Above the admin: every permission, always; cannot be edited, locked or seen by others.

@@ -80,7 +80,7 @@ Route::middleware('auth')->group(function () {
     });
     Route::get('branches', Livewire\Branches\Index::class)->middleware('can:branches.manage')->name('branches.index');
     Route::get('settings', Livewire\Settings\Index::class)->middleware('can:settings.manage')->name('settings.index');
-    Route::get('settings/features', Livewire\Settings\Features::class)->middleware('can:settings.manage')->name('settings.features');
+    Route::get('settings/features', Livewire\Settings\Features::class)->middleware('can:system.features')->name('settings.features');
 
     // Administration
     Route::get('users', Livewire\Users\Index::class)->middleware('can:users.manage')->name('users.index');

@@ -10,7 +10,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 /**
- * Switch the optional parts of the system on or off (App\Support\Features).
+ * Developer only: switch the optional parts of the system on or off (App\Support\Features).
  */
 #[Layout('layouts.app')]
 class Features extends Component
@@ -19,12 +19,12 @@ class Features extends Component
 
     public function mount(): void
     {
-        $this->authorize('settings.manage');
+        $this->authorize('system.features');
     }
 
     public function toggle(string $feature, FeatureSwitches $features): void
     {
-        $this->authorize('settings.manage');
+        $this->authorize('system.features');
         abort_unless(in_array($feature, FeatureSwitches::ALL, true), 404);
 
         $on = ! $features->enabled($feature);

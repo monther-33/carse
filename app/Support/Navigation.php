@@ -88,7 +88,6 @@ class Navigation
                     ['label' => 'app.nav.locations', 'route' => 'references.locations', 'icon' => 'pin', 'can' => 'references.manage'],
                     ['label' => 'app.nav.branches', 'route' => 'branches.index', 'icon' => 'building', 'can' => 'branches.manage'],
                     ['label' => 'app.nav.settings', 'route' => 'settings.index', 'icon' => 'cog', 'can' => 'settings.manage'],
-                    ['label' => 'app.nav.features', 'route' => 'settings.features', 'icon' => 'power', 'can' => 'settings.manage'],
                 ],
             ],
             [
@@ -99,6 +98,7 @@ class Navigation
                     ['label' => 'app.nav.imports', 'route' => 'imports.index', 'icon' => 'upload', 'can' => 'imports.run', 'feature' => 'imports'],
                     ['label' => 'app.nav.backups', 'route' => 'backups.index', 'icon' => 'database', 'can' => 'backups.manage'],
                     ['label' => 'app.nav.system_locks', 'route' => 'system.locks', 'icon' => 'lock', 'can' => 'system.locks'],
+                    ['label' => 'app.nav.features', 'route' => 'settings.features', 'icon' => 'power', 'can' => 'system.features'],
                 ],
             ],
         ];

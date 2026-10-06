@@ -24,9 +24,10 @@ function reportKeys(User $user): array
 
 test('switching reservations off hides them everywhere and the server refuses them; on brings them back', function () {
     $admin = userWithRole('admin');
-    $this->actingAs($admin);
+    $this->actingAs(userWithRole('developer'));
 
     Livewire::test(FeaturesScreen::class)->call('toggle', 'reservations')->assertHasNoErrors();
+    $this->actingAs($admin);
     expect(app(Features::class)->enabled('reservations'))->toBeFalse()
         ->and(navLabels($admin))->not->toContain(__('app.nav.reservations'));
 
@@ -36,7 +37,9 @@ test('switching reservations off hides them everywhere and the server refuses th
         'cashbox_id' => cashbox('خزينة دينار')->id, 'deposit' => '1000', 'expires_at' => today()->addWeek()->toDateString(),
     ]))->toThrow(BusinessRuleException::class);
 
+    $this->actingAs(userWithRole('developer'));
     Livewire::test(FeaturesScreen::class)->call('toggle', 'reservations');
+    $this->actingAs($admin);
     expect(navLabels($admin))->toContain(__('app.nav.reservations'));
     $this->get(route('reservations.index'))->assertOk();
 });
@@ -58,6 +61,7 @@ test('a feature with open business cannot be switched off', function () {
         ->and($features->blocker('trade_in'))->toBeNull()
         ->and(fn () => $features->set('installments', false))->toThrow(BusinessRuleException::class);
 
+    $this->actingAs(userWithRole('developer'));
     Livewire::test(FeaturesScreen::class)->call('toggle', 'reservations')->assertHasErrors('feature_reservations');
     expect($features->enabled('reservations'))->toBeTrue();
 });
@@ -93,7 +97,13 @@ test('commissions off: sales create no commission and the commission screens dis
     $this->get(route('commissions.index'))->assertNotFound();
 });
 
-test('only settings managers reach the features screen', function () {
+test('only the developer reaches the features screen, not even the admin', function () {
     $this->actingAs(userWithRole('accountant'))->get(route('settings.features'))->assertForbidden();
-    $this->actingAs(userWithRole('admin'))->get(route('settings.features'))->assertOk()->assertSee(__('features.names.trade_in'));
+    $this->actingAs(userWithRole('admin'))->get(route('settings.features'))->assertForbidden();
+    Livewire::test(FeaturesScreen::class)->assertForbidden();
+    expect(navLabels(userWithRole('admin')))->not->toContain(__('app.nav.features'))
+        ->and(userWithRole('admin')->can('system.features'))->toBeFalse();
+
+    $this->actingAs(userWithRole('developer'))->get(route('settings.features'))->assertOk()->assertSee(__('features.names.trade_in'));
+    expect(navLabels(userWithRole('developer')))->toContain(__('app.nav.features'));
 });

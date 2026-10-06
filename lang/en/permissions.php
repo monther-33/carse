@@ -71,6 +71,6 @@ return [
         'audit' => ['view' => 'View audit log'],
         'imports' => ['run' => 'Import opening data from Excel'],
         'backups' => ['manage' => 'Manage backups'],
-        'system' => ['locks' => 'Lock permissions (developer only)'],
+        'system' => ['locks' => 'Lock permissions (developer only)', 'features' => 'Switch system features on and off (developer only)'],
     ],
 ];
