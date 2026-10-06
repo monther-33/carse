@@ -103,22 +103,22 @@
                         <table class="table-base">
                             <thead class="sticky top-0"><tr>
                                 <th>{{ __('app.fields.name') }}</th>
-                                <th>{{ __('app.fields.type') }}</th>
+                                <th class="hidden sm:table-cell">{{ __('app.fields.type') }}</th>
                                 <th>{{ __('app.fields.phone') }}</th>
-                                <th>{{ __('parties.national_id') }}</th>
-                                <th>{{ __('app.fields.address') }}</th>
+                                <th class="hidden sm:table-cell">{{ __('parties.national_id') }}</th>
+                                <th class="hidden md:table-cell">{{ __('app.fields.address') }}</th>
                                 <th></th>
                             </tr></thead>
                             <tbody class="divide-y divide-gray-100">
                             @forelse ($ps['results'] as $party)
                                 <tr wire:key="ps-{{ $party->id }}">
-                                    <td class="font-medium">{{ $party->name }}</td>
-                                    <td class="text-xs">{{ $party->type->label() }}</td>
+                                    <td class="font-medium"><button type="button" wire:click="preview({{ $party->id }})" class="text-start hover:text-brand-700 hover:underline">{{ $party->name }}</button></td>
+                                    <td class="hidden text-xs sm:table-cell">{{ $party->type->label() }}</td>
                                     <td class="num">{{ $party->phone }}</td>
-                                    <td class="num">{{ $party->national_id }}</td>
-                                    <td class="text-xs">{{ $party->address }}</td>
+                                    <td class="num hidden sm:table-cell">{{ $party->national_id }}</td>
+                                    <td class="hidden text-xs md:table-cell">{{ $party->address }}</td>
                                     <td class="whitespace-nowrap text-end">
-                                        <x-ui.button variant="ghost" size="sm" icon="eye" wire:click="preview({{ $party->id }})" />
+                                        <x-ui.button variant="ghost" size="sm" icon="eye" wire:click="preview({{ $party->id }})" class="hidden sm:inline-flex" />
                                         <x-ui.button size="sm" wire:click="choose({{ $party->id }})">{{ __('vehicle_search.choose') }}</x-ui.button>
                                     </td>
                                 </tr>

@@ -85,19 +85,21 @@
 
     @if ($vouchers->isNotEmpty())
         <x-ui.card :title="__('purchases.payments')" :padding="false">
-            <table class="table-base">
-                <tbody class="divide-y divide-gray-100">
-                @foreach ($vouchers as $voucher)
-                    <tr>
-                        <td class="num font-mono text-xs">{{ $voucher->displayNumber() }}</td>
-                        <td class="num">{{ $voucher->date->format('Y-m-d') }}</td>
-                        <td>{{ $voucher->cashbox->name }}</td>
-                        <td class="num">{{ \App\Support\Money::format($voucher->amount) }}</td>
-                        <td><x-ui.badge :color="$voucher->status->color()">{{ $voucher->status->label() }}</x-ui.badge></td>
-                    </tr>
-                @endforeach
-                </tbody>
-            </table>
+            <div class="overflow-x-auto">
+                <table class="table-base">
+                    <tbody class="divide-y divide-gray-100">
+                    @foreach ($vouchers as $voucher)
+                        <tr>
+                            <td class="num font-mono text-xs">{{ $voucher->displayNumber() }}</td>
+                            <td class="num">{{ $voucher->date->format('Y-m-d') }}</td>
+                            <td>{{ $voucher->cashbox->name }}</td>
+                            <td class="num">{{ \App\Support\Money::format($voucher->amount) }}</td>
+                            <td><x-ui.badge :color="$voucher->status->color()">{{ $voucher->status->label() }}</x-ui.badge></td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
         </x-ui.card>
     @endif
 

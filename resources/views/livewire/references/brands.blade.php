@@ -6,23 +6,25 @@
         <div class="border-b border-gray-200 p-4">
             <input type="search" wire:model.live.debounce.300ms="search" placeholder="{{ __('app.search') }}" class="form-input">
         </div>
-        <table class="table-base">
-            <thead><tr><th>{{ __('app.fields.name') }}</th><th>{{ __('app.brands.models_count') }}</th><th></th></tr></thead>
-            <tbody class="divide-y divide-gray-100">
-            @forelse ($records as $record)
-                <tr wire:key="brand-{{ $record->id }}" @class(['bg-brand-50' => $record->id === $brandId])>
-                    <td><button type="button" class="hover:underline" wire:click="selectBrand({{ $record->id }})">{{ $record->name }}</button></td>
-                    <td class="num">{{ $record->models_count }}</td>
-                    <td class="text-end whitespace-nowrap">
-                        <x-ui.button variant="ghost" size="sm" icon="pencil" wire:click="edit({{ $record->id }})">{{ __('app.edit') }}</x-ui.button>
-                        <x-ui.button variant="ghost" size="sm" icon="trash" wire:click="delete({{ $record->id }})" wire:confirm="{{ __('app.confirm_delete') }}">{{ __('app.delete') }}</x-ui.button>
-                    </td>
-                </tr>
-            @empty
-                <tr><td colspan="3" class="text-center text-gray-500 py-8">{{ __('app.no_records') }}</td></tr>
-            @endforelse
-            </tbody>
-        </table>
+        <div class="overflow-x-auto">
+            <table class="table-base">
+                <thead><tr><th>{{ __('app.fields.name') }}</th><th>{{ __('app.brands.models_count') }}</th><th></th></tr></thead>
+                <tbody class="divide-y divide-gray-100">
+                @forelse ($records as $record)
+                    <tr wire:key="brand-{{ $record->id }}" @class(['bg-brand-50' => $record->id === $brandId])>
+                        <td><button type="button" class="hover:underline" wire:click="selectBrand({{ $record->id }})">{{ $record->name }}</button></td>
+                        <td class="num">{{ $record->models_count }}</td>
+                        <td class="text-end whitespace-nowrap">
+                            <x-ui.button variant="ghost" size="sm" icon="pencil" wire:click="edit({{ $record->id }})">{{ __('app.edit') }}</x-ui.button>
+                            <x-ui.button variant="ghost" size="sm" icon="trash" wire:click="delete({{ $record->id }})" wire:confirm="{{ __('app.confirm_delete') }}">{{ __('app.delete') }}</x-ui.button>
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="3" class="text-center text-gray-500 py-8">{{ __('app.no_records') }}</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
         <div class="p-4">{{ $records->links() }}</div>
     </x-ui.card>
 

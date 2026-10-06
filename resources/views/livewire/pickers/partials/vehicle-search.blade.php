@@ -99,7 +99,7 @@
                             @endforeach
                         </select>
                     @endif
-                    <div class="flex gap-2">
+                    <div class="col-span-2 flex gap-2 sm:col-span-1">
                         <input type="number" dir="ltr" wire:model.live.debounce.500ms="filter.year_from" placeholder="{{ __('vehicle_search.year_from') }}" class="form-input min-w-0">
                         <input type="number" dir="ltr" wire:model.live.debounce.500ms="filter.year_to" placeholder="{{ __('vehicle_search.year_to') }}" class="form-input min-w-0">
                     </div>
@@ -111,26 +111,26 @@
                     <table class="table-base">
                         <thead class="sticky top-0"><tr>
                             <th>{{ __('vehicles.vehicle') }}</th>
-                            <th>{{ __('vehicles.vin') }}</th>
-                            <th>{{ __('vehicles.color') }}</th>
-                            <th>{{ __('vehicles.mileage') }}</th>
+                            <th class="hidden sm:table-cell">{{ __('vehicles.vin') }}</th>
+                            <th class="hidden sm:table-cell">{{ __('vehicles.color') }}</th>
+                            <th class="hidden sm:table-cell">{{ __('vehicles.mileage') }}</th>
                             <th>{{ __('vehicles.asking_price') }}</th>
-                            @if ($vs['canSeeCost'])<th>{{ __('vehicles.total_cost') }}</th>@endif
-                            <th>{{ __('app.fields.status') }}</th>
+                            @if ($vs['canSeeCost'])<th class="hidden md:table-cell">{{ __('vehicles.total_cost') }}</th>@endif
+                            <th class="hidden sm:table-cell">{{ __('app.fields.status') }}</th>
                             <th></th>
                         </tr></thead>
                         <tbody class="divide-y divide-gray-100">
                         @forelse ($vs['results'] as $v)
                             <tr wire:key="vs-{{ $v->id }}">
-                                <td class="font-medium">{{ $v->title() }}</td>
-                                <td class="num font-mono text-xs">{{ $v->vin }}@if ($v->plate_no)<br><span class="text-gray-500">{{ $v->plate_no }}</span>@endif</td>
-                                <td>{{ $v->color?->name }}</td>
-                                <td class="num">{{ $v->mileage !== null ? number_format($v->mileage) : '' }}</td>
+                                <td class="font-medium"><button type="button" wire:click="preview({{ $v->id }})" class="text-start hover:text-brand-700 hover:underline">{{ $v->title() }}</button><span class="num block font-mono text-xs font-normal text-gray-500 sm:hidden">{{ $v->vin }}</span></td>
+                                <td class="num hidden font-mono text-xs sm:table-cell">{{ $v->vin }}@if ($v->plate_no)<br><span class="text-gray-500">{{ $v->plate_no }}</span>@endif</td>
+                                <td class="hidden sm:table-cell">{{ $v->color?->name }}</td>
+                                <td class="num hidden sm:table-cell">{{ $v->mileage !== null ? number_format($v->mileage) : '' }}</td>
                                 <td class="num">{{ $v->asking_price !== null ? \App\Support\Money::format($v->asking_price) : '' }}</td>
-                                @if ($vs['canSeeCost'])<td class="num">{{ \App\Support\Money::format($v->total_cost) }}</td>@endif
-                                <td><x-ui.badge :color="$v->status->color()">{{ $v->status->label() }}</x-ui.badge></td>
+                                @if ($vs['canSeeCost'])<td class="num hidden md:table-cell">{{ \App\Support\Money::format($v->total_cost) }}</td>@endif
+                                <td class="hidden sm:table-cell"><x-ui.badge :color="$v->status->color()">{{ $v->status->label() }}</x-ui.badge></td>
                                 <td class="whitespace-nowrap text-end">
-                                    <x-ui.button variant="ghost" size="sm" icon="eye" wire:click="preview({{ $v->id }})" :title="__('vehicle_search.details')" />
+                                    <x-ui.button variant="ghost" size="sm" icon="eye" wire:click="preview({{ $v->id }})" :title="__('vehicle_search.details')" class="hidden sm:inline-flex" />
                                     @if ($chooses)
                                         <x-ui.button size="sm" wire:click="choose({{ $v->id }})">{{ __('vehicle_search.choose') }}</x-ui.button>
                                     @else

@@ -102,7 +102,7 @@
                 <x-slot name="trigger">
                     <button class="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100">
                         <x-ui.icon name="user" class="h-5 w-5" />
-                        <span>{{ auth()->user()->name }}</span>
+                        <span class="hidden sm:inline">{{ auth()->user()->name }}</span>
                     </button>
                 </x-slot>
                 <x-slot name="content">

@@ -6,24 +6,26 @@
         <div class="border-b border-gray-200 p-4">
             <input type="search" wire:model.live.debounce.300ms="search" placeholder="{{ __('app.search') }}" class="form-input sm:max-w-xs">
         </div>
-        <table class="table-base">
-            <thead><tr><th>{{ __('app.fields.name') }}</th><th>{{ __('app.fields.account') }}</th><th>{{ __('app.fields.status') }}</th><th></th></tr></thead>
-            <tbody class="divide-y divide-gray-100">
-            @forelse ($records as $category)
-                <tr wire:key="cat-{{ $category->id }}">
-                    <td>{{ $category->name }}</td>
-                    <td class="text-sm text-gray-600">{{ $category->account->label() }}</td>
-                    <td><x-ui.badge :color="$category->is_active ? 'green' : 'red'">{{ $category->is_active ? __('app.active') : __('app.inactive') }}</x-ui.badge></td>
-                    <td class="text-end whitespace-nowrap">
-                        <x-ui.button variant="ghost" size="sm" icon="pencil" wire:click="edit({{ $category->id }})">{{ __('app.edit') }}</x-ui.button>
-                        <x-ui.button variant="ghost" size="sm" icon="trash" wire:click="delete({{ $category->id }})" wire:confirm="{{ __('app.confirm_delete') }}">{{ __('app.delete') }}</x-ui.button>
-                    </td>
-                </tr>
-            @empty
-                <tr><td colspan="4" class="py-8 text-center text-gray-500">{{ __('app.no_records') }}</td></tr>
-            @endforelse
-            </tbody>
-        </table>
+        <div class="overflow-x-auto">
+            <table class="table-base">
+                <thead><tr><th>{{ __('app.fields.name') }}</th><th>{{ __('app.fields.account') }}</th><th>{{ __('app.fields.status') }}</th><th></th></tr></thead>
+                <tbody class="divide-y divide-gray-100">
+                @forelse ($records as $category)
+                    <tr wire:key="cat-{{ $category->id }}">
+                        <td>{{ $category->name }}</td>
+                        <td class="text-sm text-gray-600">{{ $category->account->label() }}</td>
+                        <td><x-ui.badge :color="$category->is_active ? 'green' : 'red'">{{ $category->is_active ? __('app.active') : __('app.inactive') }}</x-ui.badge></td>
+                        <td class="text-end whitespace-nowrap">
+                            <x-ui.button variant="ghost" size="sm" icon="pencil" wire:click="edit({{ $category->id }})">{{ __('app.edit') }}</x-ui.button>
+                            <x-ui.button variant="ghost" size="sm" icon="trash" wire:click="delete({{ $category->id }})" wire:confirm="{{ __('app.confirm_delete') }}">{{ __('app.delete') }}</x-ui.button>
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="4" class="py-8 text-center text-gray-500">{{ __('app.no_records') }}</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
         <div class="p-4">{{ $records->links() }}</div>
     </x-ui.card>
 

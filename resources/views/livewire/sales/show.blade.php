@@ -129,46 +129,50 @@
                 <span>{{ __('sales.months') }}: <strong class="num">{{ $plan->months }}</strong></span>
                 <span>{{ __('sales.guarantor') }}: <strong>{{ $plan->guarantor?->name }}</strong> <span class="num">{{ $plan->guarantor?->phone }}</span></span>
             </div>
-            <table class="table-base">
-                <thead><tr>
-                    <th>#</th><th>{{ __('sales.due_date') }}</th><th>{{ __('documents.amount') }}</th><th>{{ __('documents.paid') }}</th><th>{{ __('app.fields.status') }}</th>
-                </tr></thead>
-                <tbody class="divide-y divide-gray-100">
-                @foreach ($plan->installments as $inst)
-                    <tr @class(['bg-red-50' => $inst->isOverdue()])>
-                        <td class="num">{{ $inst->sequence }}</td>
-                        <td class="num">{{ $inst->due_date->format('Y-m-d') }}</td>
-                        <td class="num">{{ \App\Support\Money::format($inst->amount) }}</td>
-                        <td class="num">{{ \App\Support\Money::format($inst->paid_amount) }}</td>
-                        <td><x-ui.badge :color="$inst->isOverdue() ? 'red' : ($inst->status === \App\Enums\InstallmentStatus::Paid ? 'green' : 'gray')">{{ $inst->isOverdue() ? __('installments.overdue') : $inst->status->label() }}</x-ui.badge></td>
-                    </tr>
-                @endforeach
-                </tbody>
-            </table>
+            <div class="overflow-x-auto">
+                <table class="table-base">
+                    <thead><tr>
+                        <th>#</th><th>{{ __('sales.due_date') }}</th><th>{{ __('documents.amount') }}</th><th>{{ __('documents.paid') }}</th><th>{{ __('app.fields.status') }}</th>
+                    </tr></thead>
+                    <tbody class="divide-y divide-gray-100">
+                    @foreach ($plan->installments as $inst)
+                        <tr @class(['bg-red-50' => $inst->isOverdue()])>
+                            <td class="num">{{ $inst->sequence }}</td>
+                            <td class="num">{{ $inst->due_date->format('Y-m-d') }}</td>
+                            <td class="num">{{ \App\Support\Money::format($inst->amount) }}</td>
+                            <td class="num">{{ \App\Support\Money::format($inst->paid_amount) }}</td>
+                            <td><x-ui.badge :color="$inst->isOverdue() ? 'red' : ($inst->status === \App\Enums\InstallmentStatus::Paid ? 'green' : 'gray')">{{ $inst->isOverdue() ? __('installments.overdue') : $inst->status->label() }}</x-ui.badge></td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
         </x-ui.card>
     @endif
 
     @if ($vouchers->isNotEmpty())
         <x-ui.card :title="__('sales.receipts')" :padding="false">
-            <table class="table-base">
-                <tbody class="divide-y divide-gray-100">
-                @foreach ($vouchers as $voucher)
-                    <tr>
-                        <td class="num font-mono text-xs">{{ $voucher->displayNumber() }}</td>
-                        <td class="num">{{ $voucher->date->format('Y-m-d') }}</td>
-                        <td>{{ $voucher->cashbox->name }}</td>
-                        <td>{{ $voucher->description }}</td>
-                        <td class="num">{{ \App\Support\Money::format($voucher->amount) }}</td>
-                        <td><x-ui.badge :color="$voucher->status->color()">{{ $voucher->status->label() }}</x-ui.badge></td>
-                        <td class="text-end">
-                            @if ($voucher->isPosted())
-                                <x-ui.button variant="ghost" size="sm" icon="printer" :href="route('print.voucher', $voucher)" target="_blank" />
-                            @endif
-                        </td>
-                    </tr>
-                @endforeach
-                </tbody>
-            </table>
+            <div class="overflow-x-auto">
+                <table class="table-base">
+                    <tbody class="divide-y divide-gray-100">
+                    @foreach ($vouchers as $voucher)
+                        <tr>
+                            <td class="num font-mono text-xs">{{ $voucher->displayNumber() }}</td>
+                            <td class="num">{{ $voucher->date->format('Y-m-d') }}</td>
+                            <td>{{ $voucher->cashbox->name }}</td>
+                            <td>{{ $voucher->description }}</td>
+                            <td class="num">{{ \App\Support\Money::format($voucher->amount) }}</td>
+                            <td><x-ui.badge :color="$voucher->status->color()">{{ $voucher->status->label() }}</x-ui.badge></td>
+                            <td class="text-end">
+                                @if ($voucher->isPosted())
+                                    <x-ui.button variant="ghost" size="sm" icon="printer" :href="route('print.voucher', $voucher)" target="_blank" />
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
         </x-ui.card>
     @endif
 

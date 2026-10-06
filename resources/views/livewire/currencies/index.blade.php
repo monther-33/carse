@@ -5,37 +5,39 @@
                 <x-ui.button size="sm" icon="plus" wire:click="create">{{ __('app.add') }}</x-ui.button>
             @endcan
         </x-slot:actions>
-        <table class="table-base">
-            <thead>
-            <tr>
-                <th>{{ __('app.fields.code') }}</th>
-                <th>{{ __('app.fields.name') }}</th>
-                <th>{{ __('app.currencies.symbol') }}</th>
-                <th>{{ __('app.fields.status') }}</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-            @foreach ($currencies as $currency)
-                <tr wire:key="cur-{{ $currency->id }}" @class(['bg-brand-50' => $currency->id === $selectedId])>
-                    <td class="num font-mono">{{ $currency->code }}</td>
-                    <td>
-                        <button type="button" class="text-start hover:underline" wire:click="select({{ $currency->id }})">{{ $currency->name }}</button>
-                        @if ($currency->is_base)
-                            <x-ui.badge color="blue">{{ __('app.currencies.base') }}</x-ui.badge>
-                        @endif
-                    </td>
-                    <td>{{ $currency->symbol }}</td>
-                    <td><x-ui.badge :color="$currency->is_active ? 'green' : 'red'">{{ $currency->is_active ? __('app.active') : __('app.inactive') }}</x-ui.badge></td>
-                    <td class="text-end">
-                        @can('update', $currency)
-                            <x-ui.button variant="ghost" size="sm" icon="pencil" wire:click="edit({{ $currency->id }})">{{ __('app.edit') }}</x-ui.button>
-                        @endcan
-                    </td>
+        <div class="overflow-x-auto">
+            <table class="table-base">
+                <thead>
+                <tr>
+                    <th>{{ __('app.fields.code') }}</th>
+                    <th>{{ __('app.fields.name') }}</th>
+                    <th>{{ __('app.currencies.symbol') }}</th>
+                    <th>{{ __('app.fields.status') }}</th>
+                    <th></th>
                 </tr>
-            @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                @foreach ($currencies as $currency)
+                    <tr wire:key="cur-{{ $currency->id }}" @class(['bg-brand-50' => $currency->id === $selectedId])>
+                        <td class="num font-mono">{{ $currency->code }}</td>
+                        <td>
+                            <button type="button" class="text-start hover:underline" wire:click="select({{ $currency->id }})">{{ $currency->name }}</button>
+                            @if ($currency->is_base)
+                                <x-ui.badge color="blue">{{ __('app.currencies.base') }}</x-ui.badge>
+                            @endif
+                        </td>
+                        <td>{{ $currency->symbol }}</td>
+                        <td><x-ui.badge :color="$currency->is_active ? 'green' : 'red'">{{ $currency->is_active ? __('app.active') : __('app.inactive') }}</x-ui.badge></td>
+                        <td class="text-end">
+                            @can('update', $currency)
+                                <x-ui.button variant="ghost" size="sm" icon="pencil" wire:click="edit({{ $currency->id }})">{{ __('app.edit') }}</x-ui.button>
+                            @endcan
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+        </div>
     </x-ui.card>
 
     <x-ui.card :title="$selected ? __('app.currencies.rates_of', ['currency' => $selected->name]) : __('app.currencies.rates')" :padding="false">
@@ -53,26 +55,28 @@
                     <x-ui.button type="submit" icon="check">{{ __('app.save') }}</x-ui.button>
                 </form>
             @endcan
-            <table class="table-base">
-                <thead>
-                <tr>
-                    <th>{{ __('app.fields.date') }}</th>
-                    <th>{{ __('app.currencies.rate') }}</th>
-                    <th>{{ __('app.fields.user') }}</th>
-                </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                @forelse ($rates as $rate)
-                    <tr wire:key="rate-{{ $rate->id }}">
-                        <td class="num">{{ $rate->date->format('Y-m-d') }}</td>
-                        <td class="num font-mono">{{ \App\Support\Money::format($rate->rate, 6) }}</td>
-                        <td class="text-xs text-gray-600">{{ $rate->creator?->name }}</td>
+            <div class="overflow-x-auto">
+                <table class="table-base">
+                    <thead>
+                    <tr>
+                        <th>{{ __('app.fields.date') }}</th>
+                        <th>{{ __('app.currencies.rate') }}</th>
+                        <th>{{ __('app.fields.user') }}</th>
                     </tr>
-                @empty
-                    <tr><td colspan="3" class="text-center text-gray-500 py-6">{{ __('app.no_records') }}</td></tr>
-                @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                    @forelse ($rates as $rate)
+                        <tr wire:key="rate-{{ $rate->id }}">
+                            <td class="num">{{ $rate->date->format('Y-m-d') }}</td>
+                            <td class="num font-mono">{{ \App\Support\Money::format($rate->rate, 6) }}</td>
+                            <td class="text-xs text-gray-600">{{ $rate->creator?->name }}</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="3" class="text-center text-gray-500 py-6">{{ __('app.no_records') }}</td></tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
         @endif
     </x-ui.card>
 
