@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Backups;
 
+use App\Livewire\Concerns\HandlesBusinessErrors;
 use App\Livewire\Concerns\Notifies;
+use App\Support\BackupDestinations;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\View\View;
@@ -19,16 +21,62 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 #[Layout('layouts.app')]
 class Index extends Component
 {
-    use Notifies;
+    use HandlesBusinessErrors, Notifies;
 
-    public function mount(): void
+    public string $extraPath = '';
+
+    public function mount(BackupDestinations $destinations): void
     {
         $this->authorize('backups.manage');
+        $this->extraPath = (string) $destinations->extraPath();
+    }
+
+    public function saveExtraPath(BackupDestinations $destinations): void
+    {
+        $this->authorize('backups.manage');
+        $this->validate(['extraPath' => ['nullable', 'string', 'max:500']]);
+
+        $saved = $this->attempt(function () use ($destinations) {
+            $destinations->setExtraPath($this->extraPath);
+
+            return true;
+        }, 'extraPath');
+
+        if ($saved !== null) {
+            $this->notify(__($this->extraPath === '' ? 'backups.extra_removed' : 'backups.extra_saved'));
+        }
+    }
+
+    public function removeExtraPath(BackupDestinations $destinations): void
+    {
+        $this->authorize('backups.manage');
+        $destinations->setExtraPath(null);
+        $this->extraPath = '';
+        $this->notify(__('backups.extra_removed'));
+    }
+
+    /** @return array{count: int, latest: CarbonImmutable|null, reachable: bool}|null */
+    private function extraStatus(BackupDestinations $destinations): ?array
+    {
+        $path = $destinations->extraPath();
+        if ($path === null) {
+            return null;
+        }
+
+        $folder = $path.DIRECTORY_SEPARATOR.$this->folder();
+        $files = is_dir($folder) ? (glob($folder.DIRECTORY_SEPARATOR.'*.zip') ?: []) : [];
+        $latest = $files === [] ? null : max(array_map('filemtime', $files));
+
+        return [
+            'count' => count($files),
+            'latest' => $latest ? CarbonImmutable::createFromTimestamp($latest, config('app.timezone')) : null,
+            'reachable' => is_dir($path) && is_writable($path),
+        ];
     }
 
     private function disk(): Filesystem
     {
-        return Storage::disk((string) config('backup.backup.destination.disks.0', 'backups'));
+        return Storage::disk('backups');
     }
 
     private function folder(): string
@@ -56,6 +104,7 @@ class Index extends Component
         $this->authorize('backups.manage');
         set_time_limit(900);
 
+        app(BackupDestinations::class)->register(); // the extra folder, if any
         $code = Artisan::call('backup:run');
 
         if ($code === 0) {
@@ -75,7 +124,7 @@ class Index extends Component
         return $this->disk()->download($this->folder().'/'.$backup['name']);
     }
 
-    public function render(): View
+    public function render(BackupDestinations $destinations): View
     {
         $backups = $this->backups();
 
@@ -84,6 +133,7 @@ class Index extends Component
             'totalSize' => array_sum(array_column($backups, 'size')),
             'stale' => $backups === [] || $backups[0]['date']->lt(now()->subDay()),
             'location' => $this->disk()->path($this->folder()),
+            'extra' => $this->extraStatus($destinations),
         ])->title(__('app.nav.backups'));
     }
 }

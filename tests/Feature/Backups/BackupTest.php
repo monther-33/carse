@@ -2,7 +2,9 @@
 
 use App\Livewire\Backups\Index;
 use App\Notifications\BackupProblem;
+use App\Support\BackupDestinations;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Spatie\Backup\Events\BackupHasFailed;
@@ -66,4 +68,63 @@ test('backups, cleanup and the health check are scheduled daily', function () {
     $commands = collect(app(Schedule::class)->events())->map(fn ($event) => $event->command)->implode("\n");
 
     expect($commands)->toContain('backup:run')->toContain('backup:clean')->toContain('backup:monitor');
+});
+
+test('the extra backup folder must be a full, writable path outside the public folder', function () {
+    $this->actingAs(userWithRole('admin'));
+
+    Livewire::test(Index::class)->set('extraPath', 'backups')->call('saveExtraPath')->assertHasErrors('extraPath');
+    Livewire::test(Index::class)->set('extraPath', public_path('copies'))->call('saveExtraPath')->assertHasErrors('extraPath');
+    expect(app(BackupDestinations::class)->extraPath())->toBeNull();
+
+    $dir = storage_path('framework/testing/extra-'.uniqid());
+    Livewire::test(Index::class)->set('extraPath', $dir)->call('saveExtraPath')->assertHasNoErrors()
+        ->assertSee(__('backups.extra_reachable'));
+    expect(app(BackupDestinations::class)->extraPath())->toBe($dir)
+        ->and(is_dir($dir))->toBeTrue();
+
+    Livewire::test(Index::class)->call('removeExtraPath');
+    expect(app(BackupDestinations::class)->extraPath())->toBeNull();
+    File::deleteDirectory($dir);
+});
+
+test('every backup is written to the extra folder too', function () {
+    $binary = rtrim((string) config('database.connections.mysql.dump.dump_binary_path'), '/\\');
+    if (! is_file($binary.'/mysqldump.exe') && ! is_file($binary.'/mysqldump') && trim((string) shell_exec('which mysqldump 2>/dev/null')) === '') {
+        $this->markTestSkipped('mysqldump is not available on this machine.');
+    }
+
+    $this->actingAs(userWithRole('admin'));
+    $dir = storage_path('framework/testing/extra-'.uniqid());
+    app(BackupDestinations::class)->setExtraPath($dir);
+    expect(config('backup.backup.destination.disks'))->not->toContain('backups_extra');
+
+    Livewire::test(Index::class)->call('runNow')->assertDispatched('notify', type: 'success')
+        ->assertSee(__('backups.extra_count', ['count' => 1]));
+
+    expect(Storage::disk('backups')->files(config('backup.backup.name')))->toHaveCount(1)
+        ->and(glob($dir.'/'.config('backup.backup.name').'/*.zip'))->toHaveCount(1)
+        ->and(config('backup.backup.destination.disks'))->toContain('backups_extra');   // added by the backup command itself
+
+    File::deleteDirectory($dir);
+});
+
+test('an unreachable extra folder (drive unplugged) raises the backup alert, the main copy still made', function () {
+    if (! is_file(rtrim((string) config('database.connections.mysql.dump.dump_binary_path'), '/\\').'/mysqldump.exe')) {
+        $this->markTestSkipped('mysqldump is not available on this machine.');
+    }
+
+    $admin = userWithRole('admin');
+    $this->actingAs($admin);
+    $dir = storage_path('framework/testing/extra-'.uniqid());
+    app(BackupDestinations::class)->setExtraPath($dir);
+    File::deleteDirectory($dir);
+    file_put_contents($dir, 'not a folder');   // the "drive" is gone: the path cannot be used
+
+    Livewire::test(Index::class)->call('runNow')->assertSee(__('backups.extra_unreachable'));
+
+    expect(Storage::disk('backups')->files(config('backup.backup.name')))->toHaveCount(1)
+        ->and($admin->unreadNotifications()->where('type', BackupProblem::class)->count())->toBeGreaterThan(0);
+
+    @unlink($dir);
 });

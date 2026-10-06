@@ -22,6 +22,33 @@
         </x-ui.card>
     </div>
 
+    <x-ui.card :title="__('backups.extra_title')">
+        <p class="mb-3 text-sm text-gray-600">{{ __('backups.extra_intro') }}</p>
+        <form wire:submit="saveExtraPath" class="flex flex-col gap-2 sm:flex-row sm:items-start">
+            <div class="flex-1">
+                <input type="text" dir="ltr" wire:model="extraPath" placeholder="D:\Backups" class="form-input font-mono">
+                @error('extraPath')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+            </div>
+            <x-ui.button type="submit" icon="check">{{ __('app.save') }}</x-ui.button>
+            @if ($extra)
+                <x-ui.button variant="secondary" wire:click="removeExtraPath" wire:confirm="{{ __('backups.extra_confirm_remove') }}">{{ __('backups.extra_remove') }}</x-ui.button>
+            @endif
+        </form>
+        @if ($extra)
+            <div class="mt-3 flex flex-wrap items-center gap-3 text-sm">
+                @if ($extra['reachable'])
+                    <x-ui.badge color="green">{{ __('backups.extra_reachable') }}</x-ui.badge>
+                @else
+                    <x-ui.badge color="red">{{ __('backups.extra_unreachable') }}</x-ui.badge>
+                @endif
+                <span class="text-gray-600">{{ __('backups.extra_count', ['count' => $extra['count']]) }}</span>
+                @if ($extra['latest'])
+                    <span class="text-gray-600">{{ __('backups.latest') }}: <span class="num">{{ $extra['latest']->format('Y-m-d H:i') }}</span></span>
+                @endif
+            </div>
+        @endif
+    </x-ui.card>
+
     <x-ui.card :title="__('backups.list')" :padding="false">
         <x-slot:actions>
             <x-ui.button icon="database" wire:click="runNow" wire:confirm="{{ __('backups.confirm_run') }}" wire:loading.attr="disabled" wire:target="runNow">

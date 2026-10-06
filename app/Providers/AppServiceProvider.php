@@ -15,6 +15,7 @@ use App\Models\SalesInvoice;
 use App\Models\Vehicle;
 use App\Models\Voucher;
 use App\Services\Currency\ExchangeRateService;
+use App\Support\BackupDestinations;
 use App\Support\Features;
 use App\Support\PermissionLocks;
 use App\Support\Settings;
@@ -28,6 +29,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
+use Spatie\Backup\Config\Config as BackupConfig;
 use Spatie\Backup\Events\BackupHasFailed;
 use Spatie\Backup\Events\CleanupHasFailed;
 use Spatie\Backup\Events\UnhealthyBackupWasFound;
@@ -60,6 +62,11 @@ class AppServiceProvider extends ServiceProvider
 
         // Arabic field names in validation messages, however the field is nested (App\Validation\Validator).
         Validator::resolver(fn ($translator, $data, $rules, $messages, $attributes) => new AppValidator($translator, $data, $rules, $messages, $attributes));
+
+        // Optional second backup folder chosen by the admin (App\Support\BackupDestinations), added
+        // just before the backup package builds its configuration: backups, cleanup and monitoring
+        // from the scheduler, the command line or the screen all see it.
+        $this->app->beforeResolving(BackupConfig::class, fn () => app(BackupDestinations::class)->register());
 
         // @feature('reservations') ... @endfeature
         Blade::if('feature', fn (string $feature) => app(Features::class)->enabled($feature));

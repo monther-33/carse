@@ -36,6 +36,10 @@ class SettingsSeeder extends Seeder
 
     public function run(Settings $settings): void
     {
+        // Read the table as it is now: values cached earlier in this process (e.g. before a
+        // migrate:fresh) must not hide missing settings.
+        $settings->flush();
+
         $accountIds = Account::query()->pluck('id', 'code');
 
         $defaults = [
