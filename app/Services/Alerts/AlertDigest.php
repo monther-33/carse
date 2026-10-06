@@ -7,6 +7,7 @@ use App\Models\Installment;
 use App\Models\Reservation;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Support\Features;
 use App\Support\Money;
 use App\Support\Settings;
 use Carbon\CarbonImmutable;
@@ -32,7 +33,9 @@ class AlertDigest
         $today ??= CarbonImmutable::today();
         $sections = [];
 
-        if ($user->canAny(['vouchers.view', 'sales.view_all', 'reports.financial'])) {
+        $features = app(Features::class);
+
+        if ($user->canAny(['vouchers.view', 'sales.view_all', 'reports.financial']) && $features->enabled(Features::INSTALLMENTS)) {
             $open = fn () => Installment::query()
                 ->whereIn('status', [InstallmentStatus::Pending, InstallmentStatus::Partial])
                 ->whereHas('plan.invoice', fn ($q) => $q->posted());
@@ -48,7 +51,7 @@ class AlertDigest
             }
         }
 
-        if ($user->can('reservations.view')) {
+        if ($user->can('reservations.view') && $features->enabled(Features::RESERVATIONS)) {
             $expiring = Reservation::query()->active()
                 ->whereDate('expires_at', '<=', $today->addDays(self::RESERVATION_DAYS))
                 ->count();

@@ -102,7 +102,7 @@
                 [route('reservations.index', ['new' => 1]), 'reservations.create', 'quick.links.reservation'],
                 [route('vouchers.index', ['new' => 1]), 'vouchers.create', 'quick.links.voucher'],
                 [route('expenses.index', ['new' => 1]), 'expenses.create', 'quick.links.expense'],
-            ], fn ($l) => auth()->user()->can($l[1]))))
+            ], fn ($l) => auth()->user()->can($l[1]) && ($l[1] !== 'reservations.create' || app(\App\Support\Features::class)->enabled('reservations')))))
             @if ($quickTypes !== [] || $quickLinks !== [])
                 <div x-data="{ open: false }" class="relative">
                     <button type="button" @click="open = ! open" class="inline-flex items-center gap-1 rounded-md bg-brand-700 px-3 py-2 text-sm font-medium text-white hover:bg-brand-900">

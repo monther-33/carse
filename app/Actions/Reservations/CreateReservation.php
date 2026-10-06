@@ -11,6 +11,7 @@ use App\Models\Reservation;
 use App\Models\Vehicle;
 use App\Services\Numbering\SequenceService;
 use App\Services\Vehicles\VehicleStateMachine;
+use App\Support\Features;
 use App\Support\Money;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
@@ -35,6 +36,8 @@ class CreateReservation
      */
     public function handle(array $data): Reservation
     {
+        app(Features::class)->ensure(Features::RESERVATIONS);
+
         return DB::transaction(function () use ($data) {
             $vehicle = Vehicle::query()->lockForUpdate()->findOrFail($data['vehicle_id']);
             $cashbox = Cashbox::query()->findOrFail($data['cashbox_id']);

@@ -24,6 +24,7 @@ use App\Services\Currency\ExchangeRateService;
 use App\Services\Installments\InstallmentScheduleService;
 use App\Services\Sales\DepositService;
 use App\Services\Vehicles\DraftVehicleResolver;
+use App\Support\Features;
 use App\Support\Money;
 use Brick\Math\BigDecimal;
 use Carbon\CarbonImmutable;
@@ -61,6 +62,16 @@ class SaveSalesInvoice
             /** @var User $user */
             $user = Auth::user();
             $type = PaymentType::from($data['payment_type']);
+            $features = app(Features::class);
+            if ($type === PaymentType::Installment) {
+                $features->ensure(Features::INSTALLMENTS);
+            }
+            if (! empty($data['trade_in'])) {
+                $features->ensure(Features::TRADE_IN);
+            }
+            if (! empty($data['reservation_id']) || Money::of($data['deposit_applied'] ?? '0')->isPositive()) {
+                $features->ensure(Features::RESERVATIONS);
+            }
             $currencyId = (int) $data['currency_id'];
             $rate = $this->rates->isBase($currencyId) ? Money::rate(1) : Money::rate((string) $data['rate']);
             $reservation = $this->reservation($data);

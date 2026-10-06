@@ -10,6 +10,7 @@ use App\Models\Installment;
 use App\Models\Reservation;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Support\Features;
 use App\Support\Money;
 use App\Support\Settings;
 use Brick\Math\BigDecimal;
@@ -97,7 +98,7 @@ class DashboardMetrics
      */
     public function installments(User $user): ?array
     {
-        if (! $user->canAny(['vouchers.view', 'sales.view_all', 'reports.financial'])) {
+        if (! $user->canAny(['vouchers.view', 'sales.view_all', 'reports.financial']) || ! app(Features::class)->enabled(Features::INSTALLMENTS)) {
             return null;
         }
 
@@ -142,7 +143,7 @@ class DashboardMetrics
      */
     public function expiringReservations(User $user): ?Collection
     {
-        if (! $user->can('reservations.view')) {
+        if (! $user->can('reservations.view') || ! app(Features::class)->enabled(Features::RESERVATIONS)) {
             return null;
         }
 

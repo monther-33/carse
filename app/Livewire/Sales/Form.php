@@ -26,6 +26,7 @@ use App\Services\Currency\ExchangeRateService;
 use App\Services\Installments\InstallmentScheduleService;
 use App\Services\Sales\CreditLimitCheck;
 use App\Services\Sales\DepositService;
+use App\Support\Features;
 use App\Support\Money;
 use App\Support\Settings;
 use Carbon\CarbonImmutable;
@@ -359,7 +360,7 @@ class Form extends Component
             'cashboxes' => Cashbox::query()->where('is_active', true)->where('currency_id', $this->currency_id)->orderBy('name')->get(),
             'currencies' => Currency::query()->active()->orderByDesc('is_base')->get(),
             'salespeople' => auth()->user()->can('sales.view_all') ? User::query()->where('is_active', true)->orderBy('name')->get() : collect(),
-            'paymentTypes' => PaymentType::cases(),
+            'paymentTypes' => array_values(array_filter(PaymentType::cases(), fn (PaymentType $t) => $t !== PaymentType::Installment || app(Features::class)->enabled(Features::INSTALLMENTS))),
             'brands' => Brand::query()->orderBy('name')->get(),
             'tradeInModels' => CarModel::query()->where('brand_id', $this->tradeIn['brand_id'] ?? 0)->orderBy('name')->get(),
             'colors' => Color::query()->orderBy('name')->get(),

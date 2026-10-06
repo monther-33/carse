@@ -61,6 +61,7 @@
             </div>
         </x-ui.card>
 
+        @feature('trade_in')
         <x-ui.card :title="__('sales.trade_in')">
             <x-slot:actions>
                 <label class="inline-flex items-center gap-2 text-sm">
@@ -88,6 +89,7 @@
                 <p class="text-sm text-gray-500">{{ __('sales.trade_in_hint') }}</p>
             @endif
         </x-ui.card>
+        @endfeature
 
         <x-ui.card :title="__('sales.payment')">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">

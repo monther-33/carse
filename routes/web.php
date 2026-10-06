@@ -41,9 +41,9 @@ Route::middleware('auth')->group(function () {
         Route::get('sales/{invoice}/edit', Livewire\Sales\Form::class)->middleware('can:sales.create')->name('sales.edit');
         Route::get('sales/{invoice}', Livewire\Sales\Show::class)->name('sales.show');
     });
-    Route::get('reservations', Livewire\Reservations\Index::class)->middleware('can:reservations.view')->name('reservations.index');
-    Route::get('installments', Livewire\Installments\Index::class)->middleware('can_any:vouchers.view,sales.view_all')->name('installments.index');
-    Route::get('commissions', Livewire\Commissions\Index::class)->middleware('can:commissions.view')->name('commissions.index');
+    Route::get('reservations', Livewire\Reservations\Index::class)->middleware(['feature:reservations', 'can:reservations.view'])->name('reservations.index');
+    Route::get('installments', Livewire\Installments\Index::class)->middleware(['feature:installments', 'can_any:vouchers.view,sales.view_all'])->name('installments.index');
+    Route::get('commissions', Livewire\Commissions\Index::class)->middleware(['feature:commissions', 'can:commissions.view'])->name('commissions.index');
 
     // Printing (A4 PDF with the showroom letterhead)
     Route::prefix('print')->name('print.')->group(function () {
@@ -80,11 +80,12 @@ Route::middleware('auth')->group(function () {
     });
     Route::get('branches', Livewire\Branches\Index::class)->middleware('can:branches.manage')->name('branches.index');
     Route::get('settings', Livewire\Settings\Index::class)->middleware('can:settings.manage')->name('settings.index');
+    Route::get('settings/features', Livewire\Settings\Features::class)->middleware('can:settings.manage')->name('settings.features');
 
     // Administration
     Route::get('users', Livewire\Users\Index::class)->middleware('can:users.manage')->name('users.index');
     Route::get('roles', Livewire\Roles\Index::class)->middleware('can:roles.manage')->name('roles.index');
-    Route::get('imports', Livewire\Imports\Index::class)->middleware('can:imports.run')->name('imports.index');
+    Route::get('imports', Livewire\Imports\Index::class)->middleware(['feature:imports', 'can:imports.run'])->name('imports.index');
     Route::get('backups', Livewire\Backups\Index::class)->middleware('can:backups.manage')->name('backups.index');
     Route::get('system/locks', Livewire\System\Locks::class)->middleware('can:system.locks')->name('system.locks');
 });

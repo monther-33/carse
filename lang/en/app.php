@@ -47,6 +47,7 @@ return [
         'imports' => 'Data import',
         'backups' => 'Backups',
         'system_locks' => 'Lock permissions',
+        'features' => 'Features',
         'notifications' => 'Notifications',
         'selling' => 'Sales',
         'sales' => 'Sales invoices',

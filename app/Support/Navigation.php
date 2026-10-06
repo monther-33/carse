@@ -28,12 +28,12 @@ class Navigation
                         ['label' => 'app.nav_actions.view_sales', 'route' => 'sales.index'],
                         ['label' => 'app.nav_actions.new_sale', 'route' => 'sales.create', 'can' => 'sales.create'],
                     ]],
-                    ['label' => 'app.nav.reservations', 'route' => 'reservations.index', 'icon' => 'calendar', 'can' => 'reservations.view', 'children' => [
+                    ['label' => 'app.nav.reservations', 'route' => 'reservations.index', 'icon' => 'calendar', 'can' => 'reservations.view', 'feature' => 'reservations', 'children' => [
                         ['label' => 'app.nav_actions.view_reservations', 'route' => 'reservations.index'],
                         ['label' => 'app.nav_actions.new_reservation', 'route' => 'reservations.index', 'new' => '1', 'can' => 'reservations.create'],
                     ]],
-                    ['label' => 'app.nav.installments', 'route' => 'installments.index', 'icon' => 'receipt', 'can' => ['vouchers.view', 'sales.view_all']],
-                    ['label' => 'app.nav.commissions', 'route' => 'commissions.index', 'icon' => 'currency', 'can' => 'commissions.view'],
+                    ['label' => 'app.nav.installments', 'route' => 'installments.index', 'icon' => 'receipt', 'can' => ['vouchers.view', 'sales.view_all'], 'feature' => 'installments'],
+                    ['label' => 'app.nav.commissions', 'route' => 'commissions.index', 'icon' => 'currency', 'can' => 'commissions.view', 'feature' => 'commissions'],
                 ],
             ],
             [
@@ -88,6 +88,7 @@ class Navigation
                     ['label' => 'app.nav.locations', 'route' => 'references.locations', 'icon' => 'pin', 'can' => 'references.manage'],
                     ['label' => 'app.nav.branches', 'route' => 'branches.index', 'icon' => 'building', 'can' => 'branches.manage'],
                     ['label' => 'app.nav.settings', 'route' => 'settings.index', 'icon' => 'cog', 'can' => 'settings.manage'],
+                    ['label' => 'app.nav.features', 'route' => 'settings.features', 'icon' => 'power', 'can' => 'settings.manage'],
                 ],
             ],
             [
@@ -95,7 +96,7 @@ class Navigation
                 'items' => [
                     ['label' => 'app.nav.users', 'route' => 'users.index', 'icon' => 'users', 'can' => 'users.manage'],
                     ['label' => 'app.nav.roles', 'route' => 'roles.index', 'icon' => 'shield', 'can' => 'roles.manage'],
-                    ['label' => 'app.nav.imports', 'route' => 'imports.index', 'icon' => 'upload', 'can' => 'imports.run'],
+                    ['label' => 'app.nav.imports', 'route' => 'imports.index', 'icon' => 'upload', 'can' => 'imports.run', 'feature' => 'imports'],
                     ['label' => 'app.nav.backups', 'route' => 'backups.index', 'icon' => 'database', 'can' => 'backups.manage'],
                     ['label' => 'app.nav.system_locks', 'route' => 'system.locks', 'icon' => 'lock', 'can' => 'system.locks'],
                 ],
@@ -108,6 +109,9 @@ class Navigation
             $items = [];
 
             foreach ($section['items'] as $item) {
+                if (isset($item['feature']) && ! app(Features::class)->enabled($item['feature'])) {
+                    continue;
+                }
                 if ($item['can'] === null || $user->canAny((array) $item['can'])) {
                     $items[] = [
                         'label' => __($item['label']),

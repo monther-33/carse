@@ -6,6 +6,7 @@ use App\Enums\DocumentStatus;
 use App\Enums\InstallmentStatus;
 use App\Models\User;
 use App\Reports\Report;
+use App\Support\Features;
 use App\Support\Money;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,11 @@ class InstallmentsReport extends Report
     public static function key(): string
     {
         return 'installments';
+    }
+
+    public function feature(): ?string
+    {
+        return Features::INSTALLMENTS;
     }
 
     public function group(): string

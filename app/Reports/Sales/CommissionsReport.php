@@ -5,6 +5,7 @@ namespace App\Reports\Sales;
 use App\Enums\CommissionStatus;
 use App\Models\User;
 use App\Reports\Report;
+use App\Support\Features;
 use App\Support\Money;
 use Illuminate\Support\Facades\DB;
 
@@ -16,6 +17,11 @@ class CommissionsReport extends Report
     public static function key(): string
     {
         return 'commissions';
+    }
+
+    public function feature(): ?string
+    {
+        return Features::COMMISSIONS;
     }
 
     public function group(): string

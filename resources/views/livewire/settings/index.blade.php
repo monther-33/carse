@@ -54,6 +54,7 @@
                     <span class="block text-xs text-gray-500">{{ __('app.settings.require_approval_hint') }}</span>
                 </span>
             </label>
+            @feature('commissions')
             <x-ui.field :label="__('app.settings.commission_type')" for="commission_type" error="commission_type">
                 <select id="commission_type" wire:model="commission_type" class="form-input">
                     <option value="percent">{{ __('app.settings.commission_percent') }}</option>
@@ -63,12 +64,15 @@
             <x-ui.field :label="__('app.settings.commission_value')" for="commission_value" error="commission_value">
                 <input id="commission_value" type="text" inputmode="decimal" dir="ltr" wire:model="commission_value" class="form-input">
             </x-ui.field>
+            @endfeature
+            @feature('reservations')
             <x-ui.field :label="__('app.settings.expiry_action')" for="expiry_action" error="expiry_action" class="sm:col-span-2" :hint="__('app.settings.expiry_action_hint')">
                 <select id="expiry_action" wire:model="expiry_action" class="form-input">
                     <option value="credit">{{ __('app.settings.expiry_credit') }}</option>
                     <option value="forfeit">{{ __('app.settings.expiry_forfeit') }}</option>
                 </select>
             </x-ui.field>
+            @endfeature
             <x-ui.field :label="__('app.settings.stale_warning')" for="stale_warning" error="stale_warning">
                 <input id="stale_warning" type="number" dir="ltr" wire:model="stale_warning" class="form-input">
             </x-ui.field>

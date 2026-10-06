@@ -47,6 +47,7 @@ return [
         'imports' => 'استيراد البيانات',
         'backups' => 'النسخ الاحتياطي',
         'system_locks' => 'قفل الصلاحيات',
+        'features' => 'ميزات النظام',
         'notifications' => 'التنبيهات',
         'selling' => 'المبيعات',
         'sales' => 'فواتير البيع',

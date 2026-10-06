@@ -15,6 +15,7 @@ use App\Models\SalesInvoice;
 use App\Models\Vehicle;
 use App\Models\Voucher;
 use App\Services\Currency\ExchangeRateService;
+use App\Support\Features;
 use App\Support\PermissionLocks;
 use App\Support\Settings;
 use App\Validation\Validator as AppValidator;
@@ -23,6 +24,7 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
@@ -37,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(Settings::class);
         $this->app->scoped(ExchangeRateService::class);
         $this->app->scoped(PermissionLocks::class);
+        $this->app->scoped(Features::class);
     }
 
     public function boot(): void
@@ -57,6 +60,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Arabic field names in validation messages, however the field is nested (App\Validation\Validator).
         Validator::resolver(fn ($translator, $data, $rules, $messages, $attributes) => new AppValidator($translator, $data, $rules, $messages, $attributes));
+
+        // @feature('reservations') ... @endfeature
+        Blade::if('feature', fn (string $feature) => app(Features::class)->enabled($feature));
 
         Model::preventLazyLoading(! $this->app->isProduction());
         Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());

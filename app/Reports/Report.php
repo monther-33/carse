@@ -3,6 +3,7 @@
 namespace App\Reports;
 
 use App\Models\User;
+use App\Support\Features;
 use Carbon\CarbonImmutable;
 
 /**
@@ -87,8 +88,18 @@ abstract class Report
         return __('reports.titles.'.static::key());
     }
 
+    /** The optional feature this report belongs to (App\Support\Features), if any. */
+    public function feature(): ?string
+    {
+        return null;
+    }
+
     public function allows(User $user): bool
     {
+        if ($this->feature() !== null && ! app(Features::class)->enabled($this->feature())) {
+            return false;
+        }
+
         return $user->canAny($this->permissions());
     }
 
