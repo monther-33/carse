@@ -115,6 +115,7 @@
 - **البحث عن سيارة**: trait `SearchesVehicles` + `pickers/partials/vehicle-search` (فلاتر ماركة/موديل/لون/سنة/حالة/سعر، وتفاصيل السيارة؛ التكلفة فقط مع `vehicles.view_cost`). يستخدمه `VehiclePicker` (زر "بحث" بجانب الحقل، والاختيار مقيد بـ `statuses`) و`VehicleFinder` في الشريط العلوي (يفتح بطاقة السيارة). لا تسمِّ بيانات العرض بأسماء خصائص عامة للمكوّن (`$search` مثلًا): الخاصية تطغى عليها.
 - **بحث الأطراف**: `PartyPicker` فيه زر "بحث" ومودال (نص/نوع، تفاصيل مع رابط كشف الحساب)، والاختيار مقيد بنوع المنتقي والأطراف النشطة.
 - **قوائم select قابلة للبحث تلقائيًا**: `resources/js/searchable-select.js` يفتح لوحة بحث عائمة لأي select فيه 8 خيارات فأكثر (أو `data-searchable="on"`، والإلغاء بـ `off`) دون تعديل DOM الـ select (Livewire يعيد رسمه)، ويختار بإطلاق input/change فيعمل `wire:model` كما هو. بحث عربي يوحّد الهمزات والتاء المربوطة والياء.
+- **هوية المعرض**: `App\Support\Branding` (الاسم، الشعار `company.logo`، صورة المعرض `company.cover`) بروابط نسبية `/storage/...`. المكوّن `<x-brand-logo>` يعرض الشعار أو شارة بأول حرف من الاسم. صفحة الدخول (`layouts/guest`) بعمودين على الشاشات الكبيرة مع صورة المعرض، وبانر ترحيب في لوحة التحكم. لا شعار Laravel في أي مكان.
 - الـ select في RTL: سهم `@tailwindcss/forms` منقول لليسار في `resources/css/app.css`.
 - شاشات الإعداد البسيطة ترث `App\Livewire\Concerns\CrudComponent`. رسائل النجاح عبر trait `Notifies`، ومكوّنات الواجهة في `resources/views/components/ui/*`.
 - عنصر قائمة جانبية جديد: `App\Support\Navigation` مع صلاحيته.

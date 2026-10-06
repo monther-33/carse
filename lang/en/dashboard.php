@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'greeting' => 'Welcome, :name',
     'sales_today' => 'Sales today',
     'sales_month' => 'Sales this month',
     'vehicles_sold' => ':count vehicle(s)',

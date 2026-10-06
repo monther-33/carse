@@ -15,9 +15,25 @@
                     @if ($logo)
                         <img src="{{ $logo->temporaryUrl() }}" class="h-14 w-14 rounded object-contain ring-1 ring-gray-200" alt="">
                     @elseif ($company_logo)
-                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($company_logo) }}" class="h-14 w-14 rounded object-contain ring-1 ring-gray-200" alt="">
+                        <img src="/storage/{{ $company_logo }}" class="h-14 w-14 rounded object-contain ring-1 ring-gray-200" alt="">
                     @endif
                     <input id="logo" type="file" accept="image/*" wire:model="logo" class="text-sm">
+                    @if ($company_logo || $logo)
+                        <button type="button" wire:click="$set('company_logo', null); $set('logo', null)" class="text-xs text-red-600 hover:underline">{{ __('app.settings.remove_image') }}</button>
+                    @endif
+                </div>
+            </x-ui.field>
+            <x-ui.field :label="__('app.settings.cover')" for="cover" error="cover" :hint="__('app.settings.cover_hint')" class="sm:col-span-2">
+                <div class="flex flex-wrap items-center gap-4">
+                    @if ($cover)
+                        <img src="{{ $cover->temporaryUrl() }}" class="h-20 w-36 rounded object-cover ring-1 ring-gray-200" alt="">
+                    @elseif ($company_cover)
+                        <img src="/storage/{{ $company_cover }}" class="h-20 w-36 rounded object-cover ring-1 ring-gray-200" alt="">
+                    @endif
+                    <input id="cover" type="file" accept="image/*" wire:model="cover" class="text-sm">
+                    @if ($company_cover || $cover)
+                        <button type="button" wire:click="$set('company_cover', null); $set('cover', null)" class="text-xs text-red-600 hover:underline">{{ __('app.settings.remove_image') }}</button>
+                    @endif
                 </div>
             </x-ui.field>
         </div>

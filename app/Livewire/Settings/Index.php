@@ -29,6 +29,11 @@ class Index extends Component
     /** @var TemporaryUploadedFile|null */
     public $logo = null;
 
+    public ?string $company_cover = null;
+
+    /** @var TemporaryUploadedFile|null */
+    public $cover = null;
+
     public string $contract_terms = '';
 
     public bool $require_approval = true;
@@ -59,6 +64,7 @@ class Index extends Component
         $this->company_phone = (string) $settings->get('company.phone', '');
         $this->company_address = (string) $settings->get('company.address', '');
         $this->company_logo = $settings->get('company.logo');
+        $this->company_cover = $settings->get('company.cover');
         $this->contract_terms = (string) $settings->get('print.contract_terms', '');
         $this->require_approval = $settings->bool('documents.require_approval', true);
         $this->commission_type = (string) $settings->get('sales.commission_type', 'percent');
@@ -86,6 +92,7 @@ class Index extends Component
             'company_phone' => ['nullable', 'string', 'max:100'],
             'company_address' => ['nullable', 'string', 'max:255'],
             'logo' => ['nullable', 'image', 'max:1024'],
+            'cover' => ['nullable', 'image', 'max:5120'],
             'contract_terms' => ['nullable', 'string', 'max:10000'],
             'require_approval' => ['boolean'],
             'commission_type' => ['required', 'in:percent,fixed'],
@@ -105,12 +112,17 @@ class Index extends Component
             $this->company_logo = $this->logo->store('branding', 'public');
             $this->logo = null;
         }
+        if ($this->cover !== null) {
+            $this->company_cover = $this->cover->store('branding', 'public');
+            $this->cover = null;
+        }
 
         $values = [
             'company.name' => $this->company_name,
             'company.phone' => $this->company_phone,
             'company.address' => $this->company_address,
             'company.logo' => $this->company_logo,
+            'company.cover' => $this->company_cover,
             'print.contract_terms' => $this->contract_terms,
             'documents.require_approval' => $this->require_approval,
             'sales.commission_type' => $this->commission_type,

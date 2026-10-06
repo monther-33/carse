@@ -7,6 +7,10 @@
 
     <title>{{ isset($title) ? $title.' — ' : '' }}{{ app(\App\Support\Settings::class)->get('company.name', config('app.name')) }}</title>
 
+    @if ($favicon = app(\App\Support\Branding::class)->logoUrl())
+        <link rel="icon" href="{{ $favicon }}">
+    @endif
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased bg-gray-100 text-gray-900">
@@ -17,8 +21,8 @@
     <aside :class="sidebarOpen ? 'translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full'"
            class="fixed inset-y-0 start-0 z-40 w-64 transform bg-brand-900 text-gray-100 transition-transform duration-200 lg:static lg:translate-x-0 rtl:lg:translate-x-0 ltr:lg:translate-x-0 flex flex-col">
         <div class="flex h-16 items-center gap-3 border-b border-white/10 px-5">
-            <x-application-logo class="h-8 w-8 fill-current text-white" />
-            <span class="truncate text-base font-semibold">{{ app(\App\Support\Settings::class)->get('company.name', config('app.name')) }}</span>
+            <x-brand-logo class="h-10 w-10 shrink-0 rounded-lg bg-white p-0.5 text-lg" />
+            <span class="truncate text-base font-semibold">{{ app(\App\Support\Branding::class)->name() }}</span>
         </div>
 
         <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-5">

@@ -25,43 +25,50 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form wire:submit="login">
-        <!-- Username -->
+    <form wire:submit="login" class="space-y-5">
         <div>
-            <x-input-label for="username" :value="__('app.fields.username')" />
-            <x-text-input wire:model="form.username" id="username" class="block mt-1 w-full" type="text" name="username" dir="ltr" required autofocus autocomplete="username" autocapitalize="none" spellcheck="false" />
+            <label for="username" class="mb-1.5 block text-sm font-medium text-gray-700">{{ __('app.fields.username') }}</label>
+            <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-gray-400">
+                    <x-ui.icon name="user" class="h-5 w-5" />
+                </span>
+                <input wire:model="form.username" id="username" name="username" type="text" dir="ltr" required autofocus
+                       autocomplete="username" autocapitalize="none" spellcheck="false"
+                       class="block w-full rounded-lg border-gray-300 py-2.5 ps-10 text-start shadow-sm focus:border-brand-500 focus:ring-brand-500">
+            </div>
             <x-input-error :messages="$errors->get('form.username')" class="mt-2" />
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
+        <div x-data="{ show: false }">
+            <label for="password" class="mb-1.5 block text-sm font-medium text-gray-700">{{ __('Password') }}</label>
+            <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-gray-400">
+                    <x-ui.icon name="lock" class="h-5 w-5" />
+                </span>
+                <input wire:model="form.password" id="password" name="password" :type="show ? 'text' : 'password'" type="password" dir="ltr" required
+                       autocomplete="current-password"
+                       class="block w-full rounded-lg border-gray-300 py-2.5 pe-10 ps-10 text-start shadow-sm focus:border-brand-500 focus:ring-brand-500">
+                <button type="button" @click="show = ! show" class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600"
+                        :aria-label="show ? @js(__('app.auth.hide_password')) : @js(__('app.auth.show_password'))">
+                    <x-ui.icon name="eye" class="h-5 w-5" />
+                </button>
+            </div>
             <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember" class="inline-flex items-center">
-                <input wire:model="form.remember" id="remember" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
+        <label for="remember" class="inline-flex cursor-pointer items-center gap-2">
+            <input wire:model="form.remember" id="remember" type="checkbox" name="remember" class="rounded border-gray-300 text-brand-600 shadow-sm focus:ring-brand-500">
+            <span class="text-sm text-gray-600">{{ __('Remember me') }}</span>
+        </label>
 
-        <div class="flex items-center justify-between mt-4">
-            <span class="text-xs text-gray-500">{{ __('app.auth.forgot_hint') }}</span>
+        <button type="submit" wire:loading.attr="disabled"
+                class="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-60">
+            <span wire:loading.remove wire:target="login">{{ __('Log in') }}</span>
+            <span wire:loading wire:target="login">{{ __('app.auth.signing_in') }}</span>
+        </button>
 
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
+        <p class="text-center text-xs text-gray-500">{{ __('app.auth.forgot_hint') }}</p>
     </form>
 </div>

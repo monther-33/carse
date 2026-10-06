@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'greeting' => 'مرحبًا، :name',
     'sales_today' => 'مبيعات اليوم',
     'sales_month' => 'مبيعات الشهر',
     'vehicles_sold' => ':count سيارة',

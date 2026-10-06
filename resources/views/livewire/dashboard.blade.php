@@ -1,4 +1,21 @@
 <div class="space-y-4">
+    @php($brand = app(\App\Support\Branding::class))
+    <div class="relative overflow-hidden rounded-2xl shadow-sm">
+        @if ($cover = $brand->coverUrl())
+            <img src="{{ $cover }}" alt="{{ $brand->name() }}" class="absolute inset-0 h-full w-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-l from-brand-900/90 via-brand-900/60 to-brand-900/20 rtl:bg-gradient-to-r"></div>
+        @else
+            <div class="absolute inset-0 bg-gradient-to-br from-brand-700 via-brand-900 to-gray-900"></div>
+            <x-ui.icon name="car" class="absolute -bottom-10 end-4 h-48 w-48 text-white/5" />
+        @endif
+        <div class="relative flex items-center gap-4 p-5 text-white sm:p-6">
+            <x-brand-logo class="hidden h-14 w-14 shrink-0 rounded-xl bg-white/95 p-1 text-2xl sm:inline-flex" />
+            <div class="min-w-0">
+                <p class="text-xl font-bold sm:text-2xl">{{ __('dashboard.greeting', ['name' => auth()->user()->name]) }}</p>
+                <p class="mt-1 truncate text-sm text-white/80">{{ $brand->name() }} · {{ now()->translatedFormat('l j F Y') }}</p>
+            </div>
+        </div>
+    </div>
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         @if ($today)
             <x-ui.card>
