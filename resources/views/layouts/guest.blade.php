@@ -11,6 +11,7 @@
         <link rel="icon" href="{{ $brand->logoUrl() }}">
     @endif
 
+    @include('partials.pwa-head')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans text-gray-900 antialiased">
@@ -54,6 +55,8 @@
             <div class="rounded-2xl bg-white p-6 shadow-xl ring-1 ring-gray-900/5 sm:p-8">
                 {{ $slot }}
             </div>
+
+            <x-pwa-install class="mt-4 text-center" buttonClass="text-sm font-medium text-brand-700 hover:underline" />
 
             <p class="mt-6 text-center text-xs text-gray-400">© {{ now()->year }} {{ $brand->name() }}</p>
         </div>

@@ -1,11 +1,17 @@
 <?php
 
 use App\Http\Controllers\PrintController;
+use App\Http\Controllers\PwaController;
 use App\Http\Controllers\ReportController;
 use App\Livewire;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
+
+// Progressive web app (public: fetched by the browser before sign-in).
+Route::get('manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');
+Route::get('pwa/icon-{size}-{purpose}.png', [PwaController::class, 'icon'])->whereNumber('size')->whereIn('purpose', ['any', 'maskable'])->name('pwa.icon');
+Route::get('offline', [PwaController::class, 'offline'])->name('pwa.offline');
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', Livewire\Dashboard::class)->name('dashboard');

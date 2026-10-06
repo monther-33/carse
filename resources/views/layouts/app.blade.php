@@ -11,6 +11,7 @@
         <link rel="icon" href="{{ $favicon }}">
     @endif
 
+    @include('partials.pwa-head')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased bg-gray-100 text-gray-900">
@@ -111,6 +112,7 @@
                 </x-slot>
                 <x-slot name="content">
                     <x-dropdown-link :href="route('profile')" wire:navigate>{{ __('Profile') }}</x-dropdown-link>
+                    <x-pwa-install buttonClass="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 hover:bg-gray-100" />
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
