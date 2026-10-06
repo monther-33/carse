@@ -12,6 +12,8 @@ use App\Livewire\Concerns\Notifies;
 use App\Models\SalesInvoice;
 use App\Models\SalesInvoiceItem;
 use App\Models\Voucher;
+use App\Services\Sales\CreditLimitCheck;
+use App\Support\Money;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -108,7 +110,7 @@ class Show extends Component
         }
     }
 
-    public function render(): View
+    public function render(CreditLimitCheck $credit): View
     {
         $this->invoice->load([
             'party', 'salesperson', 'currency', 'reservation', 'items.vehicle.brand', 'items.vehicle.carModel', 'items.returnDocument',
@@ -118,7 +120,15 @@ class Show extends Component
 
         $plan = $this->invoice->installmentPlan;
 
+        // Credit limit (warning only): for a draft, the part of this sale that would stay owed.
+        $i = $this->invoice;
+        $creditWarning = $i->isDraft() ? $credit->warning($i->party, Money::toBase(
+            Money::of($i->total)->minus(Money::of($i->trade_in_value))->minus(Money::of($i->deposit_applied))->minus(Money::of($i->paid)),
+            $i->rate,
+        )) : null;
+
         return view('livewire.sales.show', [
+            'creditWarning' => $creditWarning,
             'canViewCost' => auth()->user()->can('vehicles.view_cost'),
             'vouchers' => Voucher::query()
                 ->where(fn ($q) => $q->whereMorphedTo('reference', $this->invoice)

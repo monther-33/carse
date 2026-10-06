@@ -17,12 +17,14 @@ use App\Models\Color;
 use App\Models\Currency;
 use App\Models\Guarantor;
 use App\Models\Location;
+use App\Models\Party;
 use App\Models\Reservation;
 use App\Models\SalesInvoice;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\Currency\ExchangeRateService;
 use App\Services\Installments\InstallmentScheduleService;
+use App\Services\Sales\CreditLimitCheck;
 use App\Services\Sales\DepositService;
 use App\Support\Money;
 use App\Support\Settings;
@@ -339,9 +341,11 @@ class Form extends Component
         );
     }
 
-    public function render(InstallmentScheduleService $schedule, DepositService $deposits): View
+    public function render(InstallmentScheduleService $schedule, DepositService $deposits, CreditLimitCheck $credit): View
     {
         $terms = $this->terms();
+        $party = $this->party_id ? Party::query()->find($this->party_id) : null;
+        $rate = is_numeric($this->rate) && (float) $this->rate > 0 ? (string) $this->rate : '1';
         $vehicles = Vehicle::query()->with(['brand', 'carModel'])->findMany(array_column($this->items, 'vehicle_id'))->keyBy('id');
 
         return view('livewire.sales.form', [
@@ -361,6 +365,7 @@ class Form extends Component
             'colors' => Color::query()->orderBy('name')->get(),
             'locations' => Location::query()->orderBy('name')->get(),
             'canViewCost' => auth()->user()->can('vehicles.view_cost'),
+            'creditWarning' => $party ? $credit->warning($party, Money::toBase($terms->due->minus($terms->paid), $rate)) : null,
             'availableDeposit' => $this->party_id ? $deposits->availableCredit($this->party_id, (int) $this->currency_id) : Money::zero(),
         ])->title($this->invoice ? __('sales.edit', ['ref' => $this->invoice->displayNumber()]) : __('sales.new'));
     }

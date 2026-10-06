@@ -1,6 +1,7 @@
 <form wire:submit="save" class="grid grid-cols-1 gap-4 xl:grid-cols-3">
     <div class="space-y-4 xl:col-span-2">
         @error('document')<div class="rounded-md bg-red-50 p-3 text-sm text-red-700">{{ $message }}</div>@enderror
+        @include('livewire.sales.partials.credit-warning', ['warning' => $creditWarning])
 
         <x-ui.card :title="__('sales.customer_and_car')">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">

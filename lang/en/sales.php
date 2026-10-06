@@ -88,4 +88,8 @@ return [
         'cannot_cancel_vehicle' => 'Vehicle :vin is no longer recorded on this invoice.',
         'cannot_cancel_trade_in' => 'The trade-in vehicle :vin has changed (sold, reserved or costs added).',
     ],
+    'credit_limit_warning' => [
+        'title' => 'Warning: credit limit exceeded',
+        'body' => 'Customer credit limit :limit, current balance :balance, after this invoice :after (over by :over). This is a warning only; the sale is not blocked.',
+    ],
 ];
