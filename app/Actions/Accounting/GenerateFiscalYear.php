@@ -3,6 +3,7 @@
 namespace App\Actions\Accounting;
 
 use App\Models\FiscalPeriod;
+use App\Services\Numbering\SequenceService;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\DB;
  */
 class GenerateFiscalYear
 {
+    public function __construct(private readonly SequenceService $sequences) {}
+
     public function handle(int $year): int
     {
         return DB::transaction(function () use ($year) {
@@ -26,6 +29,9 @@ class GenerateFiscalYear
 
                 $created += $period->wasRecentlyCreated ? 1 : 0;
             }
+
+            // The year's document counters, created now rather than inside concurrent postings.
+            $this->sequences->ensureYear($year);
 
             return $created;
         });

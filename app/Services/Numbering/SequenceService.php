@@ -14,6 +14,10 @@ use LogicException;
  * Must be called inside the same DB transaction that saves the document: the
  * row lock serialises concurrent callers, and a rollback also rolls back the
  * counter, so no number is ever burned.
+ *
+ * The counter rows of a year are created ahead of time with the fiscal year (ensureYear):
+ * creating a missing row inside concurrent transactions makes InnoDB deadlock (both take a
+ * gap lock with SELECT ... FOR UPDATE, then both insert). The insert below is only a fallback.
  */
 class SequenceService
 {
@@ -28,7 +32,7 @@ class SequenceService
         $sequence = $this->lockRow($type, $year);
 
         if ($sequence === null) {
-            // First number of the year. INSERT IGNORE makes concurrent first-callers safe.
+            // Fallback only (rows come from ensureYear): first number of a year nobody prepared.
             DB::table('sequences')->insertOrIgnore([
                 'type' => $type->value,
                 'prefix' => $type->defaultPrefix(),
@@ -47,6 +51,24 @@ class SequenceService
         $sequence->save();
 
         return $this->format($sequence->prefix, $year, $number);
+    }
+
+    /**
+     * Creates the counter rows of every document type for a year, if missing (idempotent).
+     * Call it outside any document transaction: GenerateFiscalYear and the seeders do.
+     */
+    public function ensureYear(int $year): void
+    {
+        $now = now();
+
+        DB::table('sequences')->insertOrIgnore(array_map(fn (SequenceType $type) => [
+            'type' => $type->value,
+            'prefix' => $type->defaultPrefix(),
+            'year' => $year,
+            'next_number' => 1,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ], SequenceType::cases()));
     }
 
     public function format(string $prefix, int $year, int $number): string

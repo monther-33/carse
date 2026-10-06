@@ -4,6 +4,7 @@
  * Standalone worker for the sequence concurrency test.
  *
  *   php sequence-worker.php reset <year>
+ *   php sequence-worker.php prepare <year>   (reset, then create the year's counters)
  *   php sequence-worker.php run <year> <count>
  *
  * Each "run" takes <count> numbers, each in its own transaction with a small random
@@ -31,7 +32,14 @@ if (config('database.connections.mysql.database') !== 'cars_test') {
 $date = CarbonImmutable::create((int) $year, 6, 1);
 
 if ($mode === 'reset') {
-    DB::table('sequences')->where('type', SequenceType::JournalEntry->value)->where('year', (int) $year)->delete();
+    DB::table('sequences')->where('year', (int) $year)->delete();
+    exit(0);
+}
+
+// Like GenerateFiscalYear: the year's counters exist before anything is numbered.
+if ($mode === 'prepare') {
+    DB::table('sequences')->where('year', (int) $year)->delete();
+    $app->make(SequenceService::class)->ensureYear((int) $year);
     exit(0);
 }
 

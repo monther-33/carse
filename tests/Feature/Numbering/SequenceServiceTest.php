@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Accounting\GenerateFiscalYear;
 use App\Enums\SequenceType;
 use App\Services\Numbering\SequenceService;
 use Carbon\CarbonImmutable;
@@ -58,7 +59,7 @@ test('parallel processes never get the same number and leave no gaps', function 
     $env = ['APP_ENV' => 'testing', 'DB_CONNECTION' => 'mysql', 'DB_DATABASE' => 'cars_test'];
 
     // The workers commit in their own connections, outside this test's transaction.
-    (new Process([$php, $script, 'reset', (string) $year], base_path(), $env))->mustRun();
+    (new Process([$php, $script, 'prepare', (string) $year], base_path(), $env))->mustRun();
 
     $processes = [];
     for ($i = 0; $i < $workers; $i++) {
@@ -85,4 +86,13 @@ test('parallel processes never get the same number and leave no gaps', function 
     expect($numbers)->toHaveCount($workers * $perWorker, implode(PHP_EOL, $diagnostics))
         ->and(array_unique($numbers))->toHaveCount($workers * $perWorker)
         ->and($numbers)->toBe($expected);
+});
+
+test('generating a fiscal year creates the counters of every document type, once', function () {
+    app(GenerateFiscalYear::class)->handle(2097);
+    app(GenerateFiscalYear::class)->handle(2097);
+
+    $rows = DB::table('sequences')->where('year', 2097)->get();
+    expect($rows)->toHaveCount(count(SequenceType::cases()))
+        ->and($rows->pluck('next_number')->unique()->all())->toBe([1]);
 });

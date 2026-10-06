@@ -55,7 +55,7 @@ test('an unbalanced entry is rejected and nothing is written, not even a sequenc
     expect($post)->toThrow(UnbalancedEntryException::class);
     expect(JournalEntry::query()->count())->toBe(0)
         ->and(JournalLine::query()->count())->toBe(0)
-        ->and(Sequence::query()->count())->toBe(0);
+        ->and(Sequence::query()->where('next_number', '>', 1)->count())->toBe(0);   // no number consumed
 });
 
 test('balance is checked on base amounts across currencies', function () {
