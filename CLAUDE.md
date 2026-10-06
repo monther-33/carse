@@ -34,7 +34,9 @@
 
 ## الصلاحيات (القسم 7)
 
-- كتالوج الصلاحيات ومصفوفة الأدوار الخمسة (`admin`, `accountant`, `cashier`, `sales`, `purchasing`) في `config/permissions.php`، والتسميات في `lang/{ar,en}/permissions.php`. الـ Seeder يملأ صلاحيات الدور عند إنشائه فقط (لا يدهس تعديلات الواجهة)، ودور `admin` يملك كل شيء دائمًا ولا يُعدَّل من الواجهة.
+- كتالوج الصلاحيات ومصفوفة الأدوار (`developer`, `admin`, `accountant`, `cashier`, `sales`, `purchasing`) في `config/permissions.php`، والتسميات في `lang/{ar,en}/permissions.php`. الـ Seeder يملأ صلاحيات الدور عند إنشائه فقط (لا يدهس تعديلات الواجهة).
+- **دور المبرمج `developer`** (طلب صاحب المشروع) فوق المدير: يملك كل الصلاحيات دائمًا ومنها `system.locks` (قائمة `developer_only` لا تُعطى لأي دور آخر). شاشة `system.locks` يقفل منها أي صلاحية عن الجميع بمن فيهم المدير (`App\Support\PermissionLocks`، مخزنة في الإعداد `system.locked_permissions`). الفرض في `User::hasPermissionTo()` (كل `can`/`@can`/`can:` يمر منه؛ `Gate::before` لا يكفي لأن Spatie يسجّل before قبلنا). حسابات المبرمج ودوره مخفية عن غيره ولا يعدّلها/يعطّلها/يمنحها إلا المبرمج. المستخدم `developer` يُنشأ بكلمة `DEVELOPER_PASSWORD`.
+- دور `admin` يملك كل شيء عدا `developer_only` وما يقفله المبرمج، ولا يُعدَّل من شاشة الأدوار.
 - صلاحية جديدة: أضفها في `config/permissions.php` + تسميتها في اللغتين (اختبار `TranslationParityTest` يتحقق) + أعد تشغيل `RolesAndPermissionsSeeder`.
 - الفرض في الخادم دائمًا: middleware على المسار (`can:` أو `can_any:`) **و** `$this->authorize()` في كل method من Livewire (الإجراءات طلبات مستقلة). إخفاء الزر ليس حماية.
 - أمين الخزينة يرى خزائنه فقط: جدول `cashbox_user` + `Cashbox::scopeVisibleTo()` + `CashboxPolicy::view` (من يملك `cashboxes.view_all` يرى الكل). موظف المبيعات يرى فواتيره فقط (`sales.view` مقابل `sales.view_all`، يُطبَّق في المرحلة 3).

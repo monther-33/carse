@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\Auditable;
 use App\Models\Concerns\HasUserstamps;
+use App\Support\PermissionLocks;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,7 +27,11 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use Auditable, HasFactory, HasRoles, HasUserstamps, Notifiable;
+    use Auditable, HasFactory, HasUserstamps, Notifiable;
+
+    use HasRoles {
+        hasPermissionTo as protected roleHasPermissionTo;
+    }
 
     protected $fillable = [
         'branch_id',
@@ -49,6 +54,29 @@ class User extends Authenticatable
             'is_active' => 'boolean',
             'max_discount' => 'decimal:3',
         ];
+    }
+
+    /**
+     * Spatie's permission check, minus the permissions the developer locked
+     * (App\Support\PermissionLocks). Every Gate / can() / @can check goes through here.
+     *
+     * @param  mixed  $permission
+     * @param  string|null  $guardName
+     */
+    public function hasPermissionTo($permission, $guardName = null): bool
+    {
+        $name = is_object($permission) && isset($permission->name) ? $permission->name : $permission;
+
+        if (is_string($name) && app(PermissionLocks::class)->isLocked($name) && ! $this->isDeveloper()) {
+            return false;
+        }
+
+        return $this->roleHasPermissionTo($permission, $guardName);
+    }
+
+    public function isDeveloper(): bool
+    {
+        return $this->hasRole(PermissionLocks::DEVELOPER_ROLE);
     }
 
     /** @return BelongsTo<Branch, $this> */

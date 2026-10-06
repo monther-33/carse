@@ -2,6 +2,7 @@
 
 namespace App\Actions\Users;
 
+use App\Support\PermissionLocks;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
@@ -19,9 +20,11 @@ class SaveRolePermissions
      */
     public function handle(Role $role, array $permissions): void
     {
-        if ($role->name === self::ADMIN_ROLE) {
+        if (in_array($role->name, [self::ADMIN_ROLE, PermissionLocks::DEVELOPER_ROLE], true)) {
             throw ValidationException::withMessages(['permissions' => __('app.roles.admin_locked')]);
         }
+
+        $permissions = array_values(array_diff($permissions, config('permissions.developer_only')));
 
         DB::transaction(function () use ($role, $permissions) {
             $before = $role->permissions()->pluck('name')->all();

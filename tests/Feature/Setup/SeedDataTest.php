@@ -71,8 +71,10 @@ test('the five roles carry the spec permission matrix', function () {
 
     expect(User::query()->where('username', 'admin')->first()->hasRole('admin'))->toBeTrue();
 
-    // Admin: everything.
-    expect(Role::findByName('admin')->permissions()->count())->toBe(Permission::query()->count());
+    // Developer: everything. Admin: everything except the developer-only permissions.
+    expect(Role::findByName('developer')->permissions()->count())->toBe(Permission::query()->count())
+        ->and(Role::findByName('admin')->permissions()->count())->toBe(Permission::query()->count() - count(config('permissions.developer_only')))
+        ->and($can('admin', 'system.locks'))->toBeFalse();
 
     // Cost and profit: admin, accountant, purchasing only.
     expect($can('accountant', 'vehicles.view_cost'))->toBeTrue()

@@ -5,7 +5,8 @@ namespace App\Policies;
 use App\Models\User;
 
 /**
- * Users are never deleted, only deactivated (and never yourself).
+ * Users are never deleted, only deactivated (and never yourself). Developer accounts are
+ * invisible to, and untouchable by, everyone but the developer.
  */
 class UserPolicy
 {
@@ -21,12 +22,12 @@ class UserPolicy
 
     public function update(User $user, User $target): bool
     {
-        return $user->can('users.manage');
+        return $user->can('users.manage') && (! $target->isDeveloper() || $user->isDeveloper());
     }
 
     public function toggleActive(User $user, User $target): bool
     {
-        return $user->can('users.manage') && ! $user->is($target);
+        return $this->update($user, $target) && ! $user->is($target);
     }
 
     public function delete(User $user, User $target): bool

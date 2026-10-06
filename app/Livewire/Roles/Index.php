@@ -4,6 +4,7 @@ namespace App\Livewire\Roles;
 
 use App\Actions\Users\SaveRolePermissions;
 use App\Livewire\Concerns\Notifies;
+use App\Support\PermissionLocks;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -24,7 +25,7 @@ class Index extends Component
     public function mount(): void
     {
         $this->authorize('roles.manage');
-        $this->select((int) Role::query()->orderBy('id')->value('id'));
+        $this->select((int) Role::query()->where('name', '!=', PermissionLocks::DEVELOPER_ROLE)->orderBy('id')->value('id'));
     }
 
     public function select(int $roleId): void
@@ -32,6 +33,7 @@ class Index extends Component
         $this->authorize('roles.manage');
 
         $role = Role::query()->with('permissions')->findOrFail($roleId);
+        abort_if($role->name === PermissionLocks::DEVELOPER_ROLE && ! auth()->user()->isDeveloper(), 404);
         $this->roleId = $role->id;
         $this->permissions = $role->permissions->pluck('name')->all();
         $this->resetValidation();
@@ -67,19 +69,21 @@ class Index extends Component
         $this->authorize('roles.manage');
 
         $action->delete(Role::query()->findOrFail($this->roleId));
-        $this->select((int) Role::query()->orderBy('id')->value('id'));
+        $this->select((int) Role::query()->where('name', '!=', PermissionLocks::DEVELOPER_ROLE)->orderBy('id')->value('id'));
         $this->notify(__('app.deleted'));
     }
 
     public function render(): View
     {
-        $roles = Role::query()->withCount('users')->orderBy('id')->get();
+        $roles = Role::query()->withCount('users')->orderBy('id')
+            ->when(! auth()->user()->isDeveloper(), fn ($q) => $q->where('name', '!=', PermissionLocks::DEVELOPER_ROLE))
+            ->get();
 
         return view('livewire.roles.index', [
             'roles' => $roles,
             'current' => $roles->firstWhere('id', $this->roleId),
-            'modules' => config('permissions.permissions'),
-            'isAdmin' => $roles->firstWhere('id', $this->roleId)?->name === SaveRolePermissions::ADMIN_ROLE,
+            'modules' => array_diff_key(config('permissions.permissions'), ['system' => true]),
+            'isAdmin' => in_array($roles->firstWhere('id', $this->roleId)?->name, [SaveRolePermissions::ADMIN_ROLE, PermissionLocks::DEVELOPER_ROLE], true),
             'isSystem' => array_key_exists((string) $roles->firstWhere('id', $this->roleId)?->name, config('permissions.roles')),
         ])->title(__('app.nav.roles'));
     }

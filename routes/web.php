@@ -80,6 +80,7 @@ Route::middleware('auth')->group(function () {
     Route::get('roles', Livewire\Roles\Index::class)->middleware('can:roles.manage')->name('roles.index');
     Route::get('imports', Livewire\Imports\Index::class)->middleware('can:imports.run')->name('imports.index');
     Route::get('backups', Livewire\Backups\Index::class)->middleware('can:backups.manage')->name('backups.index');
+    Route::get('system/locks', Livewire\System\Locks::class)->middleware('can:system.locks')->name('system.locks');
 });
 
 require __DIR__.'/auth.php';

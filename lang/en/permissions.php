@@ -2,6 +2,7 @@
 
 return [
     'roles' => [
+        'developer' => 'Developer',
         'admin' => 'Administrator',
         'accountant' => 'Accountant',
         'cashier' => 'Treasurer',
@@ -34,6 +35,7 @@ return [
         'audit' => 'Audit log',
         'imports' => 'Imports',
         'backups' => 'Backups',
+        'system' => 'System',
     ],
 
     'actions' => [
@@ -69,5 +71,6 @@ return [
         'audit' => ['view' => 'View audit log'],
         'imports' => ['run' => 'Import opening data from Excel'],
         'backups' => ['manage' => 'Manage backups'],
+        'system' => ['locks' => 'Lock permissions (developer only)'],
     ],
 ];

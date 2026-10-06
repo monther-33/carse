@@ -99,6 +99,7 @@ return [
 
     // Password given to the first admin user created by the seeder.
     'seed_admin_password' => env('ADMIN_PASSWORD', 'password'),
+    'seed_developer_password' => env('DEVELOPER_PASSWORD', 'password'),
 
     'key' => env('APP_KEY'),
 

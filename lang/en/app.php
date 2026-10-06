@@ -28,6 +28,7 @@ return [
         'journals' => 'Manual entries',
         'imports' => 'Data import',
         'backups' => 'Backups',
+        'system_locks' => 'Lock permissions',
         'notifications' => 'Notifications',
         'selling' => 'Sales',
         'sales' => 'Sales invoices',
@@ -112,7 +113,7 @@ return [
         'list' => 'Roles',
         'new' => 'New role',
         'permissions_of' => 'Permissions: :role',
-        'admin_locked' => 'The admin role always has every permission and cannot be edited.',
+        'admin_locked' => 'The admin role always has every permission (except those the developer locks) and cannot be edited here.',
         'cannot_delete' => 'A built-in role or a role assigned to users cannot be deleted.',
     ],
 

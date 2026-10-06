@@ -15,6 +15,7 @@ use App\Models\SalesInvoice;
 use App\Models\Vehicle;
 use App\Models\Voucher;
 use App\Services\Currency\ExchangeRateService;
+use App\Support\PermissionLocks;
 use App\Support\Settings;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
@@ -33,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->scoped(Settings::class);
         $this->app->scoped(ExchangeRateService::class);
+        $this->app->scoped(PermissionLocks::class);
     }
 
     public function boot(): void

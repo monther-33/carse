@@ -11,6 +11,7 @@ use App\Models\FiscalPeriod;
 use App\Models\Location;
 use App\Models\User;
 use App\Services\Numbering\SequenceService;
+use App\Support\PermissionLocks;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -58,5 +59,14 @@ class FoundationSeeder extends Seeder
             'is_active' => true,
         ]);
         $admin->assignRole('admin');
+
+        // The developer (above the admin, can lock permissions away from everyone else).
+        $developer = User::query()->firstOrCreate(['username' => 'developer'], [
+            'branch_id' => $branch->id,
+            'name' => 'المبرمج',
+            'password' => Hash::make((string) config('app.seed_developer_password')),
+            'is_active' => true,
+        ]);
+        $developer->assignRole(PermissionLocks::DEVELOPER_ROLE);
     }
 }

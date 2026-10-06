@@ -20,7 +20,7 @@ test('arabic and english translation files have the same keys', function (string
 
     expect(array_values(array_diff($ar, $en)))->toBe([], "missing in en/{$file}")
         ->and(array_values(array_diff($en, $ar)))->toBe([], "missing in ar/{$file}");
-})->with(['app', 'accounting', 'enums', 'permissions', 'documents', 'vehicles', 'purchases', 'expenses', 'vouchers', 'parties', 'reports', 'sales', 'reservations', 'installments', 'commissions', 'print', 'journals', 'dashboard', 'imports', 'notifications', 'backups', 'quick', 'vehicle_search', 'party_search']);
+})->with(['app', 'accounting', 'enums', 'permissions', 'documents', 'vehicles', 'purchases', 'expenses', 'vouchers', 'parties', 'reports', 'sales', 'reservations', 'installments', 'commissions', 'print', 'journals', 'dashboard', 'imports', 'notifications', 'backups', 'quick', 'vehicle_search', 'party_search', 'system']);
 
 test('every configured permission has a label in both languages', function () {
     $config = require __DIR__.'/../../config/permissions.php';

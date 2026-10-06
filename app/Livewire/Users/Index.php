@@ -7,6 +7,7 @@ use App\Livewire\Concerns\Notifies;
 use App\Models\Branch;
 use App\Models\Cashbox;
 use App\Models\User;
+use App\Support\PermissionLocks;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -94,7 +95,7 @@ class Index extends Component
             'max_discount' => ['required', 'numeric', 'min:0', 'decimal:0,3'],
             'is_active' => ['boolean'],
             'roles' => ['array', 'min:1'],
-            'roles.*' => ['string', 'exists:roles,name'],
+            'roles.*' => ['string', Rule::in($this->assignableRoles())],
             'cashbox_ids' => ['array'],
             'cashbox_ids.*' => ['integer', 'exists:cashboxes,id'],
         ]);
@@ -126,10 +127,20 @@ class Index extends Component
         $this->resetValidation();
     }
 
+    /** @return list<string> roles this user may give; only the developer gives the developer role */
+    private function assignableRoles(): array
+    {
+        return Role::query()->orderBy('id')->pluck('name')
+            ->reject(fn (string $name) => $name === PermissionLocks::DEVELOPER_ROLE && ! auth()->user()->isDeveloper())
+            ->values()->all();
+    }
+
     public function render(): View
     {
         $users = User::query()
             ->with(['branch', 'roles'])
+            // Developer accounts are visible to the developer only.
+            ->when(! auth()->user()->isDeveloper(), fn ($q) => $q->whereDoesntHave('roles', fn ($r) => $r->where('name', PermissionLocks::DEVELOPER_ROLE)))
             ->when($this->search, fn ($q) => $q->where(fn ($q) => $q
                 ->where('name', 'like', "%{$this->search}%")
                 ->orWhere('username', 'like', "%{$this->search}%")))
@@ -139,7 +150,7 @@ class Index extends Component
         return view('livewire.users.index', [
             'users' => $users,
             'branches' => Branch::query()->where('is_active', true)->orderBy('name')->get(),
-            'allRoles' => Role::query()->orderBy('id')->pluck('name'),
+            'allRoles' => $this->assignableRoles(),
             'cashboxes' => Cashbox::query()->where('is_active', true)->orderBy('name')->get(),
         ])->title(__('app.nav.users'));
     }

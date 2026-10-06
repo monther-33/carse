@@ -74,6 +74,7 @@ class Navigation
                     ['label' => 'app.nav.roles', 'route' => 'roles.index', 'icon' => 'shield', 'can' => 'roles.manage'],
                     ['label' => 'app.nav.imports', 'route' => 'imports.index', 'icon' => 'upload', 'can' => 'imports.run'],
                     ['label' => 'app.nav.backups', 'route' => 'backups.index', 'icon' => 'database', 'can' => 'backups.manage'],
+                    ['label' => 'app.nav.system_locks', 'route' => 'system.locks', 'icon' => 'lock', 'can' => 'system.locks'],
                 ],
             ],
         ];
