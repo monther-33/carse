@@ -66,8 +66,9 @@ class Index extends Component
         $this->authorize('viewAny', Voucher::class);
 
         // ?new=1 (quick-add menu) opens the form straight away.
-        if (request()->boolean('new') && auth()->user()->can('create', Voucher::class)) {
-            $this->create();
+        $new = (string) request()->query('new', '');
+        if ($new !== '' && auth()->user()->can('create', Voucher::class)) {
+            $this->create(in_array($new, ['receipt', 'payment', 'transfer'], true) ? $new : 'receipt');
         }
     }
 

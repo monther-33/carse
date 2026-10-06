@@ -35,17 +35,44 @@
                     <ul class="space-y-1">
                         @foreach ($section['items'] as $item)
                             @php($active = request()->routeIs($item['active']))
-                            <li>
-                                <a href="{{ route($item['route']) }}" wire:navigate
-                                   @class([
-                                       'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition',
-                                       'bg-white/15 text-white font-medium' => $active,
-                                       'text-gray-300 hover:bg-white/10 hover:text-white' => ! $active,
-                                   ])>
-                                    <x-ui.icon :name="$item['icon']" class="h-5 w-5 shrink-0" />
-                                    <span>{{ $item['label'] }}</span>
-                                </a>
-                            </li>
+                            @if ($item['children'] !== [])
+                                <li x-data="{ open: @js($active) }">
+                                    <button type="button" @click="open = ! open" :aria-expanded="open"
+                                            @class([
+                                                'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition',
+                                                'bg-white/15 text-white font-medium' => $active,
+                                                'text-gray-300 hover:bg-white/10 hover:text-white' => ! $active,
+                                            ])>
+                                        <x-ui.icon :name="$item['icon']" class="h-5 w-5 shrink-0" />
+                                        <span class="flex-1 text-start">{{ $item['label'] }}</span>
+                                        <x-ui.icon name="chevron" class="h-4 w-4 shrink-0 transition-transform rtl:rotate-180" ::class="open && 'rotate-90 rtl:rotate-90'" />
+                                    </button>
+                                    <ul x-show="open" x-cloak x-transition.opacity class="mt-1 space-y-0.5 border-s border-white/10 ms-5 ps-3">
+                                        @foreach ($item['children'] as $child)
+                                            <li>
+                                                <a href="{{ $child['url'] }}" wire:navigate
+                                                   @class([
+                                                       'block rounded-md px-3 py-1.5 text-sm transition',
+                                                       'bg-white/10 text-white' => $child['current'],
+                                                       'text-gray-400 hover:bg-white/10 hover:text-white' => ! $child['current'],
+                                                   ])>{{ $child['label'] }}</a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </li>
+                            @else
+                                <li>
+                                    <a href="{{ route($item['route']) }}" wire:navigate
+                                       @class([
+                                           'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition',
+                                           'bg-white/15 text-white font-medium' => $active,
+                                           'text-gray-300 hover:bg-white/10 hover:text-white' => ! $active,
+                                       ])>
+                                        <x-ui.icon :name="$item['icon']" class="h-5 w-5 shrink-0" />
+                                        <span>{{ $item['label'] }}</span>
+                                    </a>
+                                </li>
+                            @endif
                         @endforeach
                     </ul>
                 </div>

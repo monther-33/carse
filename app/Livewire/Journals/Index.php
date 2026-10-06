@@ -52,6 +52,11 @@ class Index extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', ManualJournal::class);
+
+        // ?new=1 (sidebar / quick-add menu) opens the form straight away.
+        if (request()->boolean('new') && auth()->user()->can('create', ManualJournal::class)) {
+            $this->create();
+        }
     }
 
     /** @return array{account_id: int|null, party_id: int|null, debit: string, credit: string, currency_id: int|null, rate: string, memo: string} */

@@ -39,6 +39,11 @@ class Index extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Party::class);
+
+        // ?new=1 (sidebar / quick-add menu) opens the form straight away.
+        if (request()->boolean('new') && auth()->user()->can('create', Party::class)) {
+            $this->create();
+        }
     }
 
     public function updatedSearch(): void
