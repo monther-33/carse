@@ -6,4 +6,10 @@ return [
     'retry' => 'Try again',
     'install' => 'Install app',
     'installed' => 'App installed.',
+    'hint_title' => 'Install the app on this device',
+    'hint_body' => 'Open the system from an icon on your home screen, full screen and faster.',
+    'ios_step1' => 'Tap the Share button in the Safari bar',
+    'ios_step2' => 'Then choose “Add to Home Screen”',
+    'not_now' => 'Not now',
+    'got_it' => 'Got it',
 ];

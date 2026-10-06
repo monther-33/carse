@@ -47,3 +47,8 @@ test('the offline page needs no sign-in and every layout links the manifest and 
     $sw = file_get_contents(public_path('sw.js'));
     expect($sw)->toContain("request.method !== 'GET'")->toContain("startsWith('/build/')")->toContain('OFFLINE_URL');
 });
+
+test('the one-time install hint is on the sign-in page and inside the app', function () {
+    $this->get('/login')->assertSee('data-pwa-hint', false)->assertSee(__('pwa.ios_step2'))->assertSee('pwa-install-hint-v1', false);
+    $this->actingAs(userWithRole('cashier'))->get(route('dashboard'))->assertSee('data-pwa-hint', false);
+});

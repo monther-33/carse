@@ -62,5 +62,6 @@
         </div>
     </main>
 </div>
+<x-pwa-hint />
 </body>
 </html>

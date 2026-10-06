@@ -131,5 +131,6 @@
 
 <livewire:quick-create />
 <x-ui.toasts />
+<x-pwa-hint />
 </body>
 </html>
