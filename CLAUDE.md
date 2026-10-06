@@ -121,7 +121,7 @@
 - عنصر قائمة جانبية جديد: `App\Support\Navigation` مع صلاحيته.
 - Enums بدل النصوص الحرة، مع `label()` من `lang/*/enums.php`.
 - `Model::preventLazyLoading()` و`preventSilentlyDiscardingAttributes()` مفعّلان خارج الإنتاج: استخدم eager loading و`$fillable` صحيحًا.
-- كل نص واجهة عبر `__()`؛ مفاتيح `lang/ar` و`lang/en` متطابقة. رسائل التحقق عربية مع أسماء الحقول في `validation.attributes`.
+- كل نص واجهة عبر `__()`؛ مفاتيح `lang/ar` و`lang/en` متطابقة. رسائل التحقق عربية مع أسماء الحقول في `validation.attributes`: يكفي اسم الحقل نفسه (`account_id`)، و`App\Validation\Validator` يستخدمه لأي مفتاح متداخل (`form.account_id`، `items.*.price`، `roles.0`). حقل جديد = سطر واحد هناك.
 - Factory لكل Model (عدا قيود اليومية). الاختبارات Pest على MySQL؛ البذور الأساسية تُحمَّل مرة لكل تشغيل (`TestCase::$seed`). مساعدات الاختبار في `tests/Pest.php` (`account('14')`, `cashbox(...)`, `posting()`, `baseBalance()`, `ledgerIsBalanced()`).
 
 ## قرارات متخذة

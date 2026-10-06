@@ -17,12 +17,14 @@ use App\Models\Voucher;
 use App\Services\Currency\ExchangeRateService;
 use App\Support\PermissionLocks;
 use App\Support\Settings;
+use App\Validation\Validator as AppValidator;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Backup\Events\BackupHasFailed;
 use Spatie\Backup\Events\CleanupHasFailed;
@@ -52,6 +54,9 @@ class AppServiceProvider extends ServiceProvider
             'manual_journal' => ManualJournal::class,
             'opening_stock' => OpeningStock::class,
         ]);
+
+        // Arabic field names in validation messages, however the field is nested (App\Validation\Validator).
+        Validator::resolver(fn ($translator, $data, $rules, $messages, $attributes) => new AppValidator($translator, $data, $rules, $messages, $attributes));
 
         Model::preventLazyLoading(! $this->app->isProduction());
         Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
