@@ -19,6 +19,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $net
  * @property string $cost_base
  * @property int|null $return_id
+ * @property list<array{party_id: int, share: string}>|null $partners partnership: the other owners and their shares
+ * @property PayoutTiming|null $partner_payout
  */
 class PurchaseInvoiceItem extends Model
 {

@@ -12,6 +12,7 @@ use App\Models\PurchaseInvoice;
 use App\Models\Vehicle;
 use App\Models\Voucher;
 use App\Services\Accounting\ReversalService;
+use App\Services\Ownership\PartnershipPurchase;
 use App\Services\Vehicles\VehicleStateMachine;
 use App\Support\Money;
 use Illuminate\Support\Facades\DB;
@@ -32,6 +33,7 @@ class CancelPurchaseInvoice
         private readonly ReversalService $reversal,
         private readonly CancelVoucher $cancelVoucher,
         private readonly VehicleStateMachine $vehicles,
+        private readonly PartnershipPurchase $partnership,
     ) {}
 
     public function handle(PurchaseInvoice $invoice, string $reason): PurchaseInvoice
@@ -68,6 +70,7 @@ class CancelPurchaseInvoice
 
             foreach ($invoice->items as $item) {
                 $this->vehicles->transition($vehicles[$item->vehicle_id], VehicleStatus::ReturnedToSupplier, $invoice, $reason);
+                $this->partnership->close($vehicles[$item->vehicle_id], $reason);
             }
 
             return $invoice;

@@ -2,7 +2,9 @@
 
 return [
     'return_entry' => 'Showroom costs of a consignment car returned to its owner :number — :vin',
+    'contribution' => 'Partner share of the cost of :vin',
     'errors' => [
+        'partners_total' => 'The partners\' shares must add up to less than 100% (the rest is the showroom\'s).',
         'entry_status' => 'Invalid entry status for the vehicle.',
         'percent' => 'The showroom commission percent must be above zero and below 100.',
         'amount' => 'The agreed amount must be above zero.',

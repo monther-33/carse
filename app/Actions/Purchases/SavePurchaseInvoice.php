@@ -11,6 +11,7 @@ use App\Models\PurchaseInvoice;
 use App\Models\PurchaseInvoiceItem;
 use App\Models\Vehicle;
 use App\Services\Currency\ExchangeRateService;
+use App\Services\Ownership\PartnershipPurchase;
 use App\Services\Vehicles\DraftVehicleResolver;
 use App\Support\Money;
 use Brick\Math\BigDecimal;
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\DB;
  * Each line describes a vehicle by VIN. A new VIN creates a vehicle in status "pending"
  * (not in stock). A VIN we already know is re-used only if the car is out of stock
  * (sold before, or returned to its supplier) — e.g. buying back a car we once sold.
+ * A line may name partners who own a share of the car with the showroom (PartnershipPurchase).
  */
 class SavePurchaseInvoice
 {
@@ -31,6 +33,7 @@ class SavePurchaseInvoice
     public function __construct(
         private readonly ExchangeRateService $rates,
         private readonly DraftVehicleResolver $vehicles,
+        private readonly PartnershipPurchase $partnership,
     ) {}
 
     /**
@@ -100,6 +103,7 @@ class SavePurchaseInvoice
             $keptVehicleIds[] = $vehicle->id;
 
             $price = Money::of((string) $item['price']);
+            $partnership = $this->partnership->normalize($item['partners'] ?? null, $item['partner_payout'] ?? null);
             PurchaseInvoiceItem::query()->updateOrCreate(
                 ['invoice_id' => $invoice->id, 'vehicle_id' => $vehicle->id],
                 [
@@ -108,6 +112,8 @@ class SavePurchaseInvoice
                     'discount' => (string) $discounts[$i],
                     'net' => (string) $price->minus($discounts[$i]),
                     'cost_base' => (string) Money::toBase($price->minus($discounts[$i]), $invoice->rate),
+                    'partners' => $partnership['partners'],
+                    'partner_payout' => $partnership['payout'],
                 ],
             );
         }

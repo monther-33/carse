@@ -16,6 +16,7 @@ use App\Services\Accounting\AccountResolver;
 use App\Services\Accounting\JournalBuilder;
 use App\Services\Accounting\PostingService;
 use App\Services\Numbering\SequenceService;
+use App\Services\Ownership\PartnershipPurchase;
 use App\Services\Vehicles\VehicleStateMachine;
 use App\Support\Money;
 use Carbon\CarbonImmutable;
@@ -25,6 +26,8 @@ use Illuminate\Support\Facades\DB;
 /**
  * Returns one vehicle of a posted purchase invoice to its supplier:
  *   Dr supplier payables (item net, invoice currency and rate) / Cr stock account (item cost).
+ * A car bought with partners: Cr stock the showroom's part and Cr each partner's contribution
+ * back on their account.
  * Any refund then comes through a receipt voucher from the supplier.
  *
  * The vehicle must be in stock, not reserved, and carry no capitalised expenses
@@ -37,6 +40,7 @@ class ReturnPurchaseItem
         private readonly AccountResolver $accounts,
         private readonly SequenceService $sequences,
         private readonly VehicleStateMachine $vehicles,
+        private readonly PartnershipPurchase $partnership,
     ) {}
 
     public function handle(PurchaseInvoiceItem $item, string $reason, ?string $date = null): ReturnDocument
@@ -78,17 +82,18 @@ class ReturnPurchaseItem
                 'approved_at' => now(),
             ]);
 
-            $entry = $this->posting->post(
-                JournalBuilder::make($date, __('purchases.return_entry', ['number' => $number, 'invoice' => $invoice->number, 'vin' => $vehicle->vin]))
-                    ->source($return)
-                    ->branch($invoice->branch_id)
-                    ->debit($this->accounts->idFor(AccountRole::Payables), $item->net, $invoice->currency_id, $invoice->rate, partyId: $invoice->party_id, vehicleId: $vehicle->id)
-                    ->credit($this->accounts->idFor($vehicle->status->stockRole()), $item->cost_base, vehicleId: $vehicle->id)
-            );
+            $builder = JournalBuilder::make($date, __('purchases.return_entry', ['number' => $number, 'invoice' => $invoice->number, 'vin' => $vehicle->vin]))
+                ->source($return)
+                ->branch($invoice->branch_id)
+                ->debit($this->accounts->idFor(AccountRole::Payables), $item->net, $invoice->currency_id, $invoice->rate, partyId: $invoice->party_id, vehicleId: $vehicle->id)
+                ->credit($this->accounts->idFor($vehicle->status->stockRole()), $vehicle->total_cost, vehicleId: $vehicle->id);
+            $this->partnership->creditContributions($builder, $vehicle);
+            $entry = $this->posting->post($builder);
             $return->update(['journal_entry_id' => $entry->id]);
 
             $item->update(['return_id' => $return->id]);
             $this->vehicles->transition($vehicle, VehicleStatus::ReturnedToSupplier, $return, $reason);
+            $this->partnership->close($vehicle, $reason);
 
             return $return;
         });

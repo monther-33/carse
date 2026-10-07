@@ -16,6 +16,7 @@ use App\Services\Accounting\AccountResolver;
 use App\Services\Accounting\JournalBuilder;
 use App\Services\Accounting\PostingService;
 use App\Services\Numbering\SequenceService;
+use App\Services\Ownership\PartnershipPurchase;
 use App\Services\Vehicles\VehicleStateMachine;
 use App\Support\Money;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +26,8 @@ use Illuminate\Support\Facades\DB;
  *  - one entry: per vehicle Dr stock account (inventory, or "in transit" for cars still on
  *    the way) / Cr supplier payables in the invoice currency;
  *  - vehicles enter stock with their purchase cost;
+ *  - a car bought with partners: each partner's contribution is moved off the car onto their
+ *    account (PartnershipPurchase), so the car carries the showroom's part only;
  *  - the paid part becomes an automatic, posted payment voucher settled at the invoice rate.
  */
 class PostPurchaseInvoice
@@ -38,6 +41,7 @@ class PostPurchaseInvoice
         private readonly VehicleStateMachine $vehicles,
         private readonly SaveVoucher $saveVoucher,
         private readonly PostVoucher $postVoucher,
+        private readonly PartnershipPurchase $partnership,
     ) {}
 
     public function handle(PurchaseInvoice $invoice): PurchaseInvoice
@@ -57,6 +61,7 @@ class PostPurchaseInvoice
                 ->branch($invoice->branch_id);
 
             $vehicles = Vehicle::query()->lockForUpdate()->findMany($invoice->items->pluck('vehicle_id'))->keyBy('id');
+            $parts = $invoice->items->mapWithKeys(fn ($item) => [$item->id => $this->partnership->parts($item)])->all();
 
             foreach ($invoice->items as $item) {
                 $vehicle = $vehicles[$item->vehicle_id];
@@ -67,6 +72,10 @@ class PostPurchaseInvoice
                 $builder
                     ->debit($this->accounts->idFor($item->entry_status->stockRole()), $item->cost_base, vehicleId: $vehicle->id, memo: $vehicle->vin)
                     ->credit($payables, $item->net, $invoice->currency_id, $invoice->rate, partyId: $invoice->party_id, vehicleId: $vehicle->id, memo: $vehicle->vin);
+
+                if ($parts[$item->id] !== null) {
+                    $this->partnership->addLines($builder, $this->accounts->idFor($item->entry_status->stockRole()), $vehicle, $parts[$item->id]);
+                }
             }
 
             $entry = $this->posting->post($builder);
@@ -74,10 +83,11 @@ class PostPurchaseInvoice
 
             foreach ($invoice->items as $item) {
                 $vehicle = $vehicles[$item->vehicle_id];
+                $cost = $parts[$item->id]['showroom'] ?? Money::of($item->cost_base);
                 $vehicle->forceFill([
-                    'purchase_cost' => $item->cost_base,
+                    'purchase_cost' => (string) $cost,
                     'extra_cost' => '0',
-                    'total_cost' => $item->cost_base,
+                    'total_cost' => (string) $cost,
                     'purchase_invoice_id' => $invoice->id,
                     'sale_invoice_id' => null,
                     'ownership_id' => null,
@@ -85,6 +95,9 @@ class PostPurchaseInvoice
                     'sold_at' => null,
                 ])->save();
 
+                if ($parts[$item->id] !== null) {
+                    $this->partnership->open($invoice, $item, $vehicle, $parts[$item->id]);
+                }
                 $this->vehicles->transition($vehicle, $item->entry_status, $invoice);
             }
 
