@@ -2,8 +2,11 @@
 
 return [
     'return_entry' => 'Showroom costs of a consignment car returned to its owner :number — :vin',
+    'available_to_pay' => 'Available to pay the owner now (LYD)',
     'contribution' => 'Partner share of the cost of :vin',
     'errors' => [
+        'base_cashbox' => 'Vehicle owners and partners are settled in dinars only: choose a dinar cashbox.',
+        'over_available' => 'The amount is more than may be paid to the owner now (:available).',
         'partners_total' => 'The partners\' shares must add up to less than 100% (the rest is the showroom\'s).',
         'entry_status' => 'Invalid entry status for the vehicle.',
         'percent' => 'The showroom commission percent must be above zero and below 100.',

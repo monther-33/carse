@@ -16,10 +16,12 @@ return [
         'customer' => 'Collection from customer',
         'deposit' => 'Customer deposit',
         'supplier_refund' => 'Refund from supplier',
+        'partner' => 'Receipt from a vehicle partner or owner',
         'supplier' => 'Payment to supplier',
         'customer_refund' => 'Refund to customer',
         'deposit_refund' => 'Deposit refund',
         'commissions' => 'Commission payout',
+        'owner' => 'Payment to a vehicle owner or partner',
         'other' => 'Other (choose account)',
     ],
 

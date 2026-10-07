@@ -3,6 +3,7 @@
 namespace App\Actions\Vouchers;
 
 use App\Actions\Concerns\ManagesDocumentLifecycle;
+use App\Enums\AccountRole;
 use App\Enums\DocumentStatus;
 use App\Enums\VoucherType;
 use App\Exceptions\BusinessRuleException;
@@ -77,6 +78,9 @@ class SaveVoucher
                 }
                 if ($partyId === null && in_array($account->id, $this->accounts->partyAccountIds(), true)) {
                     throw BusinessRuleException::make('vouchers.errors.party_required');
+                }
+                if ($account->id === $this->accounts->idFor(AccountRole::OwnersPayable) && ! $this->rates->isBase($cashbox->currency_id)) {
+                    throw BusinessRuleException::make('ownership.errors.base_cashbox');
                 }
             } else {
                 throw BusinessRuleException::make('vouchers.errors.type');

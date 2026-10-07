@@ -130,6 +130,9 @@
                     <x-ui.field :label="__('vouchers.party')" error="form.party_id" class="sm:col-span-2">
                         <livewire:pickers.party-picker wire:model.live="form.party_id" :allow-create="true" :kind="in_array($form['purpose'] ?? '', ['supplier', 'supplier_refund']) ? 'supplier' : 'any'" :key="'pp-'.($form['purpose'] ?? '')" />
                     </x-ui.field>
+                    @if ($ownerAvailable !== null)
+                        <p class="sm:col-span-2 -mt-2 rounded-md bg-brand-50 px-3 py-2 text-sm text-brand-800">{{ __('ownership.available_to_pay') }}: <span class="num font-semibold">{{ $ownerAvailable }}</span></p>
+                    @endif
                 @endif
                 @if ($referenceOptions->isNotEmpty())
                     <x-ui.field :label="__('vouchers.for_invoice')" for="v-ref" error="form.reference_id" class="sm:col-span-2" :hint="__('vouchers.for_invoice_hint')">

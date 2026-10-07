@@ -18,6 +18,8 @@ use App\Models\PurchaseInvoice;
 use App\Models\SalesInvoice;
 use App\Models\Voucher;
 use App\Services\Accounting\AccountResolver;
+use App\Services\Ownership\OwnerPayouts;
+use App\Support\Money;
 use App\Support\Settings;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -29,7 +31,7 @@ use Livewire\WithPagination;
 
 /**
  * Receipt, payment and transfer vouchers. The "purpose" picks the counter account
- * (receivables, payables, deposits, commissions or any account for "other").
+ * (receivables, payables, deposits, commissions, vehicle owners or any account for "other").
  */
 #[Layout('layouts.app')]
 class Index extends Component
@@ -38,8 +40,8 @@ class Index extends Component
 
     /** Purposes per voucher type → account role (null = choose an account). */
     public const PURPOSES = [
-        'receipt' => ['customer' => AccountRole::Receivables, 'deposit' => AccountRole::CustomerDeposits, 'supplier_refund' => AccountRole::Payables, 'other' => null],
-        'payment' => ['supplier' => AccountRole::Payables, 'customer_refund' => AccountRole::Receivables, 'deposit_refund' => AccountRole::CustomerDeposits, 'commissions' => AccountRole::AccruedCommissions, 'other' => null],
+        'receipt' => ['customer' => AccountRole::Receivables, 'deposit' => AccountRole::CustomerDeposits, 'supplier_refund' => AccountRole::Payables, 'partner' => AccountRole::OwnersPayable, 'other' => null],
+        'payment' => ['supplier' => AccountRole::Payables, 'customer_refund' => AccountRole::Receivables, 'deposit_refund' => AccountRole::CustomerDeposits, 'commissions' => AccountRole::AccruedCommissions, 'owner' => AccountRole::OwnersPayable, 'other' => null],
     ];
 
     #[Url]
@@ -230,6 +232,16 @@ class Index extends Component
         };
     }
 
+    /** What may be paid now to the owner chosen on an owner payment (LYD). */
+    private function ownerAvailable(): ?string
+    {
+        if (($this->form['type'] ?? '') !== 'payment' || ($this->form['purpose'] ?? '') !== 'owner' || empty($this->form['party_id'])) {
+            return null;
+        }
+
+        return Money::format(app(OwnerPayouts::class)->available((int) $this->form['party_id']));
+    }
+
     public function render(): View
     {
         $cashboxIds = $this->visibleCashboxIds();
@@ -248,6 +260,7 @@ class Index extends Component
             'purposes' => self::PURPOSES,
             'statuses' => DocumentStatus::cases(),
             'referenceOptions' => $this->referenceOptions(),
+            'ownerAvailable' => $this->ownerAvailable(),
         ])->title(__('app.nav.vouchers'));
     }
 }

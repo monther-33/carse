@@ -16,10 +16,12 @@ return [
         'customer' => 'تحصيل من عميل',
         'deposit' => 'عربون من عميل',
         'supplier_refund' => 'استرداد من مورّد',
+        'partner' => 'قبض من شريك أو مالك سيارة',
         'supplier' => 'دفع لمورّد',
         'customer_refund' => 'رد مبلغ لعميل',
         'deposit_refund' => 'رد عربون',
         'commissions' => 'صرف عمولات',
+        'owner' => 'صرف لمالك أو شريك سيارة',
         'other' => 'أخرى (اختيار حساب)',
     ],
 

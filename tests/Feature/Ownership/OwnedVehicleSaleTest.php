@@ -4,6 +4,7 @@ use App\Actions\Sales\CancelSalesInvoice;
 use App\Actions\Sales\ReturnSalesItem;
 use App\Enums\OwnershipStatus;
 use App\Enums\VehicleStatus;
+use App\Exceptions\BusinessRuleException;
 use App\Models\VehicleOwnerDue;
 use App\Services\Ownership\OwnerPayouts;
 
@@ -101,4 +102,23 @@ it('holds back what the customer has not paid when owners are paid as collected'
 
     expect((string) $payouts->available($this->a->id))->toBe('14400.000')   // half of 28,800
         ->and((string) $payouts->available($this->b->id))->toBe('9600.000');
+});
+
+it('pays an owner no more than is available now', function () {
+    $ownership = receiveConsignment(['earning_mode' => 'fixed', 'earning_amount' => '2000', 'owners' => owners($this)]);
+    sell($ownership->vehicle, ['price' => '50000']);   // A is due 28,800, payable on sale
+    $pay = fn (string $amount, string $box = 'خزينة دينار') => postVoucher([
+        'type' => 'payment', 'party_id' => $this->a->id, 'cashbox_id' => cashbox($box)->id,
+        'account_id' => account('24')->id, 'amount' => $amount, 'rate' => '4.8',
+    ]);
+
+    $pay('20000');
+    expect((string) app(OwnerPayouts::class)->available($this->a->id))->toBe('8800.000');
+
+    expect(fn () => $pay('8800.001'))->toThrow(BusinessRuleException::class)
+        ->and(fn () => $pay('100', 'خزينة دولار'))->toThrow(BusinessRuleException::class);
+
+    $pay('8800');
+    expect((string) app(OwnerPayouts::class)->balance($this->a->id))->toBe('0.000')
+        ->and(ledgerIsBalanced())->toBeTrue();
 });

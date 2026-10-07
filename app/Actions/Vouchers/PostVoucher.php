@@ -3,11 +3,14 @@
 namespace App\Actions\Vouchers;
 
 use App\Actions\Concerns\ManagesDocumentLifecycle;
+use App\Enums\AccountRole;
 use App\Enums\DocumentStatus;
 use App\Enums\SequenceType;
 use App\Enums\VoucherType;
+use App\Exceptions\BusinessRuleException;
 use App\Models\Cashbox;
 use App\Models\InstallmentPlan;
+use App\Models\Party;
 use App\Models\PurchaseInvoice;
 use App\Models\SalesInvoice;
 use App\Models\Voucher;
@@ -17,6 +20,7 @@ use App\Services\Accounting\PostingService;
 use App\Services\Accounting\SettlementLines;
 use App\Services\Installments\InstallmentAllocator;
 use App\Services\Numbering\SequenceService;
+use App\Services\Ownership\OwnerPayouts;
 use App\Support\Money;
 use Brick\Math\BigDecimal;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +31,7 @@ use LogicException;
  *  - receipt:  Dr cashbox  / Cr counter account (party settlement with FX difference)
  *  - payment:  Dr counter account (party settlement with FX difference) / Cr cashbox
  *  - transfer: Dr receiving cashbox / Cr sending cashbox (same currency)
+ * A payment to a vehicle owner may not exceed what is available to them now (OwnerPayouts).
  */
 class PostVoucher
 {
@@ -38,6 +43,7 @@ class PostVoucher
         private readonly AccountResolver $accounts,
         private readonly SettlementLines $settlement,
         private readonly InstallmentAllocator $installments,
+        private readonly OwnerPayouts $payouts,
     ) {}
 
     public function handle(Voucher $voucher): Voucher
@@ -45,6 +51,7 @@ class PostVoucher
         return DB::transaction(function () use ($voucher) {
             $voucher = $this->lockInStatus($voucher, DocumentStatus::Draft);
             $cashbox = Cashbox::query()->findOrFail($voucher->cashbox_id);
+            $this->assertOwnerPayable($voucher);
 
             $number = $this->sequences->next(SequenceType::forVoucher($voucher->type), $voucher->date);
             $builder = JournalBuilder::make($voucher->date, $number.' — '.$voucher->description)
@@ -71,6 +78,20 @@ class PostVoucher
 
             return $voucher;
         });
+    }
+
+    private function assertOwnerPayable(Voucher $voucher): void
+    {
+        if ($voucher->type !== VoucherType::Payment || $voucher->party_id === null || (int) $voucher->account_id !== $this->accounts->idFor(AccountRole::OwnersPayable)) {
+            return;
+        }
+
+        // Serialise payments to the same owner.
+        Party::query()->lockForUpdate()->findOrFail($voucher->party_id);
+        $available = $this->payouts->available($voucher->party_id);
+        if (Money::of($voucher->amount_base)->isGreaterThan($available)) {
+            throw BusinessRuleException::make('ownership.errors.over_available', ['available' => Money::format($available)]);
+        }
     }
 
     private function receipt(JournalBuilder $builder, Voucher $voucher, Cashbox $cashbox, BigDecimal $amount, BigDecimal $rate): void
