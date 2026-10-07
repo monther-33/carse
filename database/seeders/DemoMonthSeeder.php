@@ -277,13 +277,13 @@ class DemoMonthSeeder extends Seeder
         ];
     }
 
-    protected function expense(string $category, Cashbox $cashbox, string $amount, ?Vehicle $vehicle, string $description): void
+    protected function expense(string $category, Cashbox $cashbox, string $amount, ?Vehicle $vehicle, string $description, ?string $borneBy = null): void
     {
         $categoryId = ExpenseCategory::query()->where('name', 'like', "%{$category}%")->value('id') ?? ExpenseCategory::query()->value('id');
 
         $expense = app(SaveExpense::class)->handle([
             'date' => now()->toDateString(), 'category_id' => $categoryId, 'cashbox_id' => $cashbox->id,
-            'amount' => $amount, 'vehicle_id' => $vehicle?->id, 'description' => $description, 'recurs_every_months' => null,
+            'amount' => $amount, 'vehicle_id' => $vehicle?->id, 'borne_by' => $borneBy, 'description' => $description, 'recurs_every_months' => null,
         ]);
         app(PostExpense::class)->handle($expense);
     }

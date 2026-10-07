@@ -9,12 +9,19 @@ use App\Actions\Imports\ImportOpeningStock;
 use App\Actions\Imports\ImportParties;
 use App\Actions\Journals\PostManualJournal;
 use App\Actions\OpeningStock\PostOpeningStock;
+use App\Actions\Ownership\ReceiveConsignment;
+use App\Actions\Ownership\ReturnToOwner;
+use App\Actions\Purchases\PostPurchaseInvoice;
+use App\Actions\Purchases\SavePurchaseInvoice;
 use App\Actions\Reservations\CreateReservation;
 use App\Enums\AccountRole;
 use App\Enums\DocumentStatus;
 use App\Enums\VehicleStatus;
+use App\Models\CarModel;
 use App\Models\Cashbox;
+use App\Models\Color;
 use App\Models\Currency;
+use App\Models\Location;
 use App\Models\ManualJournal;
 use App\Models\OpeningStock;
 use App\Models\Party;
@@ -23,6 +30,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\Accounting\AccountResolver;
 use App\Services\Currency\ExchangeRateService;
+use App\Services\Ownership\OwnerPayouts;
 use App\Services\Vehicles\VehicleStateMachine;
 use App\Support\Money;
 use App\Support\Settings;
@@ -39,6 +47,9 @@ use Illuminate\Support\Facades\DB;
  *  - go-live two months ago: parties, 14 cars in stock and opening balances imported from
  *    the same importers as the Excel screen, then closed into capital;
  *  - the go-live month (sales, an installment plan, purchases, expenses, collections);
+ *  - consignment and partnership cars in every case: intake by percent, net price, fixed
+ *    commission and with no commission, expenses on the owners or the showroom, a car bought
+ *    with a partner, sales as agreed or with no commission, owners paid, a car handed back;
  *  - last month in full (DemoMonthSeeder);
  *  - this month up to today, so the dashboard and the bell have something to say: a sale
  *    today, an overdue installment and one due this week, a reservation ending soon and
@@ -144,6 +155,11 @@ class DemoSeeder extends DemoMonthSeeder
             ['name' => 'شركة النجم لتجارة السيارات', 'type' => 'مورّد', 'phone' => '0214445566', 'address' => 'طرابلس - طريق المطار'],
             ['name' => 'معرض الريان', 'type' => 'مورّد', 'phone' => '0512223344', 'address' => 'مصراتة'],
             ['name' => 'Emirates Auto Export', 'type' => 'مورّد', 'phone' => '+97142223344', 'address' => 'دبي - سوق العوير'],
+            // Owners of consignment cars and partners.
+            ['name' => 'حسين المصراتي', 'type' => 'عميل', 'phone' => '0915551122', 'national_id' => '119800067890', 'address' => 'طرابلس - تاجوراء'],
+            ['name' => 'فرج الطرابلسي', 'type' => 'عميل', 'phone' => '0926663344', 'national_id' => '119780078901', 'address' => 'طرابلس - الظهرة'],
+            ['name' => 'سالم بن عمران', 'type' => 'عميل', 'phone' => '0917778899', 'national_id' => '119830089012', 'address' => 'الزاوية'],
+            ['name' => 'هدى الكيلاني', 'type' => 'عميل', 'phone' => '0924445566', 'national_id' => '219880090123', 'address' => 'طرابلس - بن عاشور'],
         ]), $options);
 
         // [vin, brand, model, year, cost, asking, minimum, colour, mileage, days in stock before go-live, status]
@@ -206,6 +222,15 @@ class DemoSeeder extends DemoMonthSeeder
         app(ExchangeRateService::class)->setRate($this->usd(), now(), '4.820000');
         $this->expense('إيجار', $cash, '6000', null, 'إيجار المعرض');
 
+        // Consignment cars come in: one owner on a percentage, two owners on a net price.
+        $day(2, 11);
+        $this->consign('JTMRFREV0MD500001', 'تويوتا', 'راف 4', 2021, 'أبيض', 54000, '98000', [['حسين المصراتي', '100']], 'percent', '3', 'on_sale');
+        $this->consign('KMHL14JA5KA500002', 'هيونداي', 'سوناتا', 2019, 'فضي', 83000, '58000', [['فرج الطرابلسي', '50'], ['سالم بن عمران', '50']], 'net_price', '52000', 'on_collection');
+
+        $day(6);
+        $this->expense('متنوعة', $cash, '250', $car('JTMRFREV0MD500001'), 'غسيل وتلميع على حساب المالك', 'owners');
+        $this->expense('صيانة', $cash, '600', $car('KMHL14JA5KA500002'), 'تبديل إطارات على حساب المعرض', 'showroom');
+
         // The Tahoe arrives: customs, then preparation.
         $day(3);
         $machine->transition($car('1GNSKCKC8HR123414'), VehicleStatus::InCustoms, manual: true);
@@ -230,12 +255,24 @@ class DemoSeeder extends DemoMonthSeeder
         $day(12);
         $this->purchase($party('معرض الريان'), [['41000', 'available', '48000'], ['57000', 'available', '65000']]);
 
+        // A Land Cruiser bought with a partner (40%), who pays in his share the next day.
+        $this->partnershipPurchase($party('شركة النجم لتجارة السيارات'), 'JTMHV01J904500003', 'تويوتا', 'لاندكروزر', 2022, '300000', '345000', [['فرج الطرابلسي', '40']], 'on_sale');
+        $day(13);
+        $this->voucher('receipt', $bank, '120000', $party('فرج الطرابلسي'), $this->role(AccountRole::OwnersPayable), 'حصة الشريك في لاندكروزر 2022');
+
+        $day(16);
+        $this->sell($car('JTMRFREV0MD500001'), $party('محمد الزنتاني'), '98000', 'cash', [[$cash, '98000']], ['salesperson_id' => $this->staff['sales2']->id]);
+
         $day(15);
         $this->expense('رواتب', $bank, '16500', null, 'رواتب الموظفين');
         $this->expense('دعاية', $bank, '1800', null, 'إعلانات على وسائل التواصل');
 
         $day(20);
         $this->sell($car('KMHD841CBKU123406'), $party('محمد الزنتاني'), '54000', 'credit', [], ['salesperson_id' => $this->staff['sales1']->id]);
+
+        // The RAV4 owner collects his money (sale less 3% and the washing he bore).
+        $day(22);
+        $this->payOwner($party('حسين المصراتي'), $bank, 'تسليم ثمن راف 4 لمالكها');
 
         $day(25);
         $this->voucher('payment', $bank, '20000', $party('شركة النجم لتجارة السيارات'), $this->role(AccountRole::Payables), 'دفعة من رصيد أول المدة');
@@ -264,6 +301,13 @@ class DemoSeeder extends DemoMonthSeeder
         $plan = SalesInvoice::query()->where('party_id', $party('نجلاء الورفلي')->id)->where('payment_type', 'installment')->latest('id')->firstOrFail()->installmentPlan;
         $this->voucher('receipt', $cash, (string) $plan->monthly_amount, $party('نجلاء الورفلي'), $this->role(AccountRole::Receivables), 'قسط شهر سابق', reference: $plan);
 
+        // More consignment cars: a fixed commission, a car taken in free of commission, and one still on show.
+        $this->consign('KNAG34LA1M5500004', 'كيا', 'K5', 2021, 'أزرق', 41000, '76000', [['هدى الكيلاني', '100']], 'fixed', '2000', 'on_sale');
+        $this->consign('3N1AB7AP2JY500005', 'نيسان', 'صني', 2018, 'رمادي', 112000, '31000', [['سالم بن عمران', '100']], 'none', null, 'on_sale');
+        $this->consign('WDDWF4KB7KR500006', 'مرسيدس', 'C-Class', 2019, 'أسود', 67000, '118000', [['حسين المصراتي', '60'], ['هدى الكيلاني', '40']], 'percent', '4', 'on_sale');
+        // A Hilux bought half with a partner, paid as the customer pays, still in stock.
+        $this->partnershipPurchase($party('معرض الريان'), 'MR0HA3CD100500007', 'تويوتا', 'هايلكس', 2022, '120000', '138000', [['سالم بن عمران', '50']], 'on_collection');
+
         // A reservation ending in two days.
         Auth::login($this->staff['sales1']);
         app(CreateReservation::class)->handle([
@@ -284,10 +328,84 @@ class DemoSeeder extends DemoMonthSeeder
         $day(4, 10);
         $this->voucher('receipt', $bank, '15000', $party('محمد الزنتاني'), $this->role(AccountRole::Receivables), 'دفعة من حساب السيارة');
 
+        // The Sonata (two owners, net price, paid as collected) sold in installments.
+        $this->sell($car('KMHL14JA5KA500002'), $party('آمنة الفرجاني'), '58000', 'installment', [[$cash, '18000']], [
+            'salesperson_id' => $this->staff['sales1']->id,
+            'installment' => ['down_payment' => '18000', 'months' => 8, 'start_date' => $this->realNow->addMonth()->startOfMonth()->toDateString(),
+                'guarantor' => ['name' => 'عادل الفرجاني', 'phone' => '0913332211', 'relation' => 'أخ']],
+        ]);
+        // The K5: the showroom waives its commission on this sale.
+        $this->sell($car('KNAG34LA1M5500004'), $party('إبراهيم السويحلي'), '76000', 'cash', [[$bank, '76000']], [
+            'salesperson_id' => $this->staff['sales2']->id,
+            'items' => [['vehicle_id' => $car('KNAG34LA1M5500004')->id, 'price' => '76000', 'showroom_commission' => '0']],
+        ]);
+        // The partnership Land Cruiser sold; the partner gets part of his money now.
+        $this->sell($car('JTMHV01J904500003'), $party('عبد الرحمن القماطي'), '345000', 'cash', [[$bank, '345000']], ['salesperson_id' => $this->staff['sales1']->id]);
+        $this->voucher('payment', $bank, '60000', $party('فرج الطرابلسي'), $this->role(AccountRole::OwnersPayable), 'دفعة من نصيبه في لاندكروزر 2022');
+        // The Sunny goes back to its owner unsold.
+        app(ReturnToOwner::class)->handle($car('3N1AB7AP2JY500005')->ownership()->firstOrFail(), 'طلب المالك سحب السيارة');
+
         // Today: a cash sale and a small expense.
         $this->at($this->realNow, 11);
         $this->sell($car('MR0HA3CD800123404'), $party('شركة البناء الحديث'), '132000', 'cash', [[$cash, '82000'], [$bank, '50000']], ['salesperson_id' => $this->staff['sales1']->id]);
         $this->expense('متنوعة', $cash, '350', null, 'ضيافة ومستلزمات');
+    }
+
+    /**
+     * Receives a consignment car (status available).
+     *
+     * @param  list<array{0: string, 1: string}>  $owners  [party name, share]
+     */
+    private function consign(string $vin, string $brand, string $model, int $year, string $color, int $mileage, string $asking, array $owners, string $mode, ?string $value, string $payout): void
+    {
+        $carModel = CarModel::query()->where('name', $model)->whereHas('brand', fn ($q) => $q->where('name', $brand))->firstOrFail();
+
+        app(ReceiveConsignment::class)->handle([
+            'vin' => $vin, 'brand_id' => $carModel->brand_id, 'model_id' => $carModel->id, 'year' => $year,
+            'color_id' => Color::query()->where('name', $color)->value('id'), 'mileage' => $mileage,
+            'condition' => 'used', 'fuel' => 'petrol', 'transmission' => 'automatic',
+            'location_id' => Location::query()->value('id'), 'asking_price' => $asking,
+            'entry_status' => 'available', 'received_at' => now()->toDateString(),
+            'earning_mode' => $mode,
+            'earning_amount' => in_array($mode, ['net_price', 'fixed'], true) ? $value : null,
+            'earning_percent' => $mode === 'percent' ? $value : null,
+            'payout' => $payout,
+            'owners' => array_map(fn ($o) => ['party_id' => Party::query()->where('name', $o[0])->value('id'), 'share' => $o[1]], $owners),
+        ]);
+    }
+
+    /**
+     * Buys one car with partners (the rest is the showroom's), on credit.
+     *
+     * @param  list<array{0: string, 1: string}>  $partners  [party name, share]
+     */
+    private function partnershipPurchase(Party $supplier, string $vin, string $brand, string $model, int $year, string $price, string $asking, array $partners, string $payout): void
+    {
+        $carModel = CarModel::query()->where('name', $model)->whereHas('brand', fn ($q) => $q->where('name', $brand))->firstOrFail();
+
+        $invoice = app(SavePurchaseInvoice::class)->handle([
+            'date' => now()->toDateString(), 'party_id' => $supplier->id, 'source' => 'supplier',
+            'currency_id' => Currency::query()->where('is_base', true)->value('id'), 'rate' => '1',
+            'discount' => '0', 'paid' => '0', 'cashbox_id' => null, 'notes' => null,
+            'items' => [[
+                'vin' => $vin, 'brand_id' => $carModel->brand_id, 'model_id' => $carModel->id, 'year' => $year,
+                'condition' => 'used', 'fuel' => 'petrol', 'transmission' => 'automatic', 'mileage' => 30000,
+                'entry_status' => 'available', 'price' => $price, 'asking_price' => $asking,
+                'min_price' => (string) intdiv((int) $asking * 95, 100),
+                'partners' => array_map(fn ($p) => ['party_id' => Party::query()->where('name', $p[0])->value('id'), 'share' => $p[1]], $partners),
+                'partner_payout' => $payout,
+            ]],
+        ]);
+        app(PostPurchaseInvoice::class)->handle($invoice);
+    }
+
+    /** Pays an owner everything that may be paid to them now. */
+    private function payOwner(Party $owner, Cashbox $cashbox, string $description): void
+    {
+        $available = app(OwnerPayouts::class)->available($owner->id);
+        if ($available->isPositive()) {
+            $this->voucher('payment', $cashbox, (string) $available, $owner, $this->role(AccountRole::OwnersPayable), $description);
+        }
     }
 
     /**
