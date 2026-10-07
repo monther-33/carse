@@ -95,6 +95,7 @@ Route::middleware('auth')->group(function () {
     Route::get('imports', Livewire\Imports\Index::class)->middleware(['feature:imports', 'can:imports.run'])->name('imports.index');
     Route::get('backups', Livewire\Backups\Index::class)->middleware('can:backups.manage')->name('backups.index');
     Route::get('system/locks', Livewire\System\Locks::class)->middleware('can:system.locks')->name('system.locks');
+    Route::get('system/trash', Livewire\System\Trash::class)->middleware('can:system.trash')->name('system.trash');
 });
 
 require __DIR__.'/auth.php';

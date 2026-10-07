@@ -49,6 +49,7 @@ return [
         'imports' => 'Data import',
         'backups' => 'Backups',
         'system_locks' => 'Lock permissions',
+        'trash' => 'Recycle bin',
         'features' => 'Features',
         'notifications' => 'Notifications',
         'selling' => 'Sales',

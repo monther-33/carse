@@ -5,6 +5,7 @@ namespace App\Livewire\References;
 use App\Livewire\Concerns\CrudComponent;
 use App\Models\Brand;
 use App\Models\CarModel;
+use App\Services\Trash\RecycleBin;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rule;
@@ -84,7 +85,7 @@ class Brands extends CrudComponent
         $model = CarModel::query()->findOrFail($id);
         $this->authorize('delete', $model);
 
-        $model->delete();
+        app(RecycleBin::class)->keep($model, fn () => $model->delete());
         $this->notify(__('app.deleted'));
     }
 

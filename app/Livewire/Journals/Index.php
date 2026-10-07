@@ -154,7 +154,6 @@ class Index extends Component
         $journal = ManualJournal::query()->findOrFail($id);
         $this->authorize('delete', $journal);
 
-        $journal->lines()->delete();
         $action->handle($journal);
         $this->notify(__('app.deleted'));
     }

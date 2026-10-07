@@ -15,6 +15,7 @@ use App\Models\CarModel;
 use App\Models\Color;
 use App\Models\Location;
 use App\Models\Vehicle;
+use App\Services\Trash\RecycleBin;
 use App\Services\Vehicles\VehicleStateMachine;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
@@ -150,7 +151,8 @@ class Show extends Component
     {
         $this->authorize('update', $this->vehicle);
 
-        $this->vehicle->media()->whereKey($mediaId)->firstOrFail()->delete();
+        $media = $this->vehicle->media()->whereKey($mediaId)->firstOrFail();
+        app(RecycleBin::class)->keep($media, fn () => $media->delete());
         $this->notify(__('app.deleted'));
     }
 

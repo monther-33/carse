@@ -5,6 +5,7 @@ namespace App\Livewire\Parties;
 use App\Enums\PartyType;
 use App\Livewire\Concerns\Notifies;
 use App\Models\Party;
+use App\Services\Trash\RecycleBin;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -114,7 +115,7 @@ class Index extends Component
         $party = Party::query()->findOrFail($id);
         $this->authorize('delete', $party);
 
-        $party->delete();
+        app(RecycleBin::class)->keep($party, fn () => $party->delete());
         $this->notify(__('app.deleted'));
     }
 

@@ -4,8 +4,8 @@ namespace App\Actions\Accounting;
 
 use App\Models\Account;
 use App\Models\Cashbox;
+use App\Services\Trash\RecycleBin;
 use App\Support\Settings;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -13,11 +13,14 @@ use Illuminate\Validation\ValidationException;
  */
 class DeleteAccount
 {
-    public function __construct(private readonly Settings $settings) {}
+    public function __construct(
+        private readonly Settings $settings,
+        private readonly RecycleBin $bin,
+    ) {}
 
     public function handle(Account $account): void
     {
-        DB::transaction(function () use ($account) {
+        $this->bin->keep($account, function () use ($account) {
             $account = Account::query()->lockForUpdate()->findOrFail($account->getKey());
 
             $inUse = $account->is_system

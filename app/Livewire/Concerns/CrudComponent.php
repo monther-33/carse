@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Concerns;
 
+use App\Services\Trash\RecycleBin;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -94,7 +95,7 @@ abstract class CrudComponent extends Component
         $model = $this->modelClass()::query()->findOrFail($id);
         $this->authorize('delete', $model);
 
-        $model->delete();
+        app(RecycleBin::class)->keep($model, fn () => $model->delete());
         $this->notify(__('app.deleted'));
     }
 

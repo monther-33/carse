@@ -102,6 +102,7 @@ class Navigation
                     ['label' => 'app.nav.imports', 'route' => 'imports.index', 'icon' => 'upload', 'can' => 'imports.run', 'feature' => 'imports'],
                     ['label' => 'app.nav.backups', 'route' => 'backups.index', 'icon' => 'database', 'can' => 'backups.manage'],
                     ['label' => 'app.nav.system_locks', 'route' => 'system.locks', 'icon' => 'lock', 'can' => 'system.locks'],
+                    ['label' => 'app.nav.trash', 'route' => 'system.trash', 'icon' => 'trash', 'can' => 'system.trash'],
                     ['label' => 'app.nav.features', 'route' => 'settings.features', 'icon' => 'power', 'can' => 'system.features'],
                 ],
             ],

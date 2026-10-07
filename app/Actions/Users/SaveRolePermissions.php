@@ -2,6 +2,7 @@
 
 namespace App\Actions\Users;
 
+use App\Services\Trash\RecycleBin;
 use App\Support\PermissionLocks;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -54,6 +55,8 @@ class SaveRolePermissions
         }
 
         activity('Role')->performedOn($role)->event('deleted')->withProperties(['name' => $role->name])->log('deleted');
-        $role->delete();
+        // Loaded first: the permission library detaches them before the recycle bin sees the role.
+        $role->load('permissions');
+        app(RecycleBin::class)->keep($role, fn () => $role->delete());
     }
 }

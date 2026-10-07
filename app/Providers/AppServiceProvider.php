@@ -16,6 +16,7 @@ use App\Models\Vehicle;
 use App\Models\VehicleOwnership;
 use App\Models\Voucher;
 use App\Services\Currency\ExchangeRateService;
+use App\Services\Trash\RecycleBin;
 use App\Support\BackupDestinations;
 use App\Support\Features;
 use App\Support\PermissionLocks;
@@ -42,11 +43,19 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(Settings::class);
         $this->app->scoped(ExchangeRateService::class);
         $this->app->scoped(PermissionLocks::class);
+        $this->app->scoped(RecycleBin::class);
         $this->app->scoped(Features::class);
     }
 
     public function boot(): void
     {
+        // Recycle bin: every model deleted inside RecycleBin::keep() is kept for the developer to restore.
+        Event::listen('eloquent.deleting: *', function (string $event, array $payload) {
+            if (($payload[0] ?? null) instanceof Model) {
+                app(RecycleBin::class)->record($payload[0]);
+            }
+        });
+
         // Stable aliases for polymorphic references (journal sources, voucher references, returns).
         Relation::morphMap([
             'vehicle' => Vehicle::class,

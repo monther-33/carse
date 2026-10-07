@@ -1,0 +1,36 @@
+<?php
+
+return [
+    'intro' => 'Everything users delete is kept here with what was deleted with it (a draft\'s lines, payments, pending cars...), and you can put it back as it was. Posted documents are never deleted (they are cancelled with a reversing entry), so they never come here.',
+    'what' => 'Deleted',
+    'rows' => 'Records',
+    'deleted_by' => 'Deleted by',
+    'deleted_at' => 'Deleted at',
+    'restored' => 'Restored',
+    'restored_by' => 'Restored by :name at :at',
+    'restore' => 'Restore',
+    'confirm_restore' => 'Restore ":label" with all its records?',
+    'restored_ok' => ':count records restored.',
+    'show' => 'Show',
+    'pending' => 'In the bin',
+    'all' => 'All',
+    'search' => 'Search the bin',
+    'labels' => [
+        'sales' => 'Draft sales invoice :ref — :party',
+        'purchase' => 'Draft purchase invoice :ref — :party',
+        'voucher' => 'Draft :type :ref — :amount',
+        'expense' => 'Draft expense :ref — :text',
+        'journal' => 'Draft manual entry :ref — :text',
+        'opening_stock' => 'Draft opening stock :ref',
+        'account' => 'Account :name',
+        'party' => 'Party: :name',
+        'role' => 'Role: :name',
+        'media' => 'Attachment: :name',
+        'record' => ':name',
+    ],
+    'errors' => [
+        'nothing' => 'Nothing to restore: already restored or not found.',
+        'exists' => 'Cannot restore: ":label" already exists.',
+        'conflict' => 'Cannot restore ":label": it clashes with a record added since (e.g. a car with the same VIN).',
+    ],
+];
