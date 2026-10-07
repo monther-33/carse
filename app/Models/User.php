@@ -67,7 +67,8 @@ class User extends Authenticatable
     {
         $name = is_object($permission) && isset($permission->name) ? $permission->name : $permission;
 
-        if (is_string($name) && app(PermissionLocks::class)->isLocked($name) && ! $this->isDeveloper()) {
+        // Developer-only permissions and the ones the developer locked: nobody else, whatever their role holds.
+        if (is_string($name) && (in_array($name, config('permissions.developer_only'), true) || app(PermissionLocks::class)->isLocked($name)) && ! $this->isDeveloper()) {
             return false;
         }
 

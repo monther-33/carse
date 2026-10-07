@@ -41,9 +41,10 @@ return [
 
     /*
     | Held by the developer role only, never by the admin or any other role: the developer
-    | locks permissions away from everyone else (App\Support\PermissionLocks).
+    | locks permissions away from everyone else (App\Support\PermissionLocks), switches
+    | features, restores from the recycle bin and manages currencies (owner's request).
     */
-    'developer_only' => ['system.locks', 'system.features', 'system.trash'],
+    'developer_only' => ['system.locks', 'system.features', 'system.trash', 'currencies.manage'],
 
     'roles' => [
         // Above the admin: every permission, always; cannot be edited, locked or seen by others.

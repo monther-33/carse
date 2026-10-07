@@ -65,7 +65,7 @@ return [
         'exchange_rates' => ['manage' => 'Enter exchange rates'],
         'reports' => ['financial' => 'Financial reports', 'sales' => 'Sales and commission reports', 'inventory' => 'Stock and purchase reports'],
         'references' => ['manage' => 'Manage reference data'],
-        'currencies' => ['manage' => 'Manage currencies'],
+        'currencies' => ['manage' => 'Add and edit currencies (developer only)'],
         'branches' => ['manage' => 'Manage branches'],
         'settings' => ['manage' => 'Manage settings'],
         'users' => ['manage' => 'Manage users'],

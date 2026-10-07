@@ -65,7 +65,7 @@ return [
         'exchange_rates' => ['manage' => 'إدخال أسعار الصرف'],
         'reports' => ['financial' => 'التقارير المالية', 'sales' => 'تقارير المبيعات والعمولات', 'inventory' => 'تقارير المخزون والمشتريات'],
         'references' => ['manage' => 'إدارة البيانات المرجعية'],
-        'currencies' => ['manage' => 'إدارة العملات'],
+        'currencies' => ['manage' => 'إضافة العملات وتعديلها (المبرمج فقط)'],
         'branches' => ['manage' => 'إدارة الفروع'],
         'settings' => ['manage' => 'إدارة الإعدادات'],
         'users' => ['manage' => 'إدارة المستخدمين'],
