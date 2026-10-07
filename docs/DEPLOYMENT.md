@@ -22,6 +22,26 @@
 
 ## 2. التثبيت على خادم Linux (Ubuntu 24.04)
 
+### 2.0 التثبيت بأمر واحد (موصى به)
+
+على خادم Ubuntu 22.04 أو 24.04 جديد، بعد توجيه اسم النطاق إلى عنوان الخادم:
+
+```bash
+sudo apt-get install -y git
+sudo git clone https://github.com/monther-33/carse.git /var/www/cars
+sudo DOMAIN=cars.example.ly EMAIL=owner@example.ly bash /var/www/cars/deploy/install.sh
+```
+
+السكربت `deploy/install.sh` ينفّذ كل خطوات هذا القسم (2.1 إلى 2.6): PHP 8.2 وNginx وMariaDB وComposer وNode 20، قاعدة البيانات ومستخدمها، ملف `.env` للإنتاج، البناء، الجداول والبيانات الأساسية فقط (لا بيانات عرض)، Nginx مع HTTPS (إن أُعطي `EMAIL`)، المهام المجدولة، عامل الطوابير، ومجلد النسخ الاحتياطي. كلمات المرور تُولَّد عشوائيًا وتُحفظ في `/root/cars-credentials.txt` (للمدير `admin` والمبرمج `developer` وقاعدة البيانات).
+
+- المستودع خاص؟ أنشئ Deploy Key أو Personal Access Token من GitHub واستخدم `REPO_URL=https://<token>@github.com/monther-33/carse.git`.
+- متغيرات اختيارية: `APP_DIR` و`DB_NAME` و`DB_USER` و`BACKUP_PATH` (يُفضّل قرصًا آخر) و`ADMIN_PASSWORD` و`DEVELOPER_PASSWORD` و`BRANCH`.
+- جدار الحماية (إن استُخدم): `sudo ufw allow OpenSSH && sudo ufw allow 'Nginx Full' && sudo ufw enable`.
+
+**التحديث لاحقًا** (بعد دفع التعديلات إلى GitHub): `sudo bash /var/www/cars/deploy/update.sh` — يدخل وضع الصيانة، يأخذ نسخة احتياطية، يسحب الشيفرة ويبنيها، ينفّذ الـ migrations والـ seeders، ثم يعيد النظام. إن فشلت خطوة يبقى في وضع الصيانة حتى تُصلح.
+
+الأقسام التالية تشرح الخطوات نفسها يدويًا.
+
 ### 2.1 الحزم
 
 ```bash

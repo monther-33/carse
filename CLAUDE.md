@@ -107,7 +107,7 @@
 - **النسخ الاحتياطي** (spatie/laravel-backup): قاعدة البيانات + `storage/app/{public,private}` إلى قرص `backups` (`BACKUP_PATH`)، الجدولة: clean 01:30، run 02:00، monitor 08:00. `DB_DUMP_PATH` لمسار mysqldump (XAMPP: `C:/xampp/mysql/bin`). الفشل يصل لمن يملك `backups.manage` عبر `NotifyBackupProblems` (البريد فقط إن ضُبط `BACKUP_MAIL_TO`). شاشة `backups.index` للقائمة والتنزيل والنسخ الفوري، ومجلد نسخة إضافية يختاره المدير (`App\Support\BackupDestinations`، الإعداد `backup.extra_path`، يُقرأ من الجدول مباشرة) يُضاف كقرص `backups_extra` قبل بناء إعداد Spatie (`beforeResolving(Config::class)`) فيعمل من الجدولة والسطر والشاشة. ممنوع داخل `public`.
 - المنطقة الزمنية من `APP_TIMEZONE` (`Africa/Tripoli`).
 - **`DemoSeeder`** (`php artisan db:seed --class=DemoSeeder`، مرة واحدة على قاعدة فارغة): مستخدم لكل دور (`accountant`, `cashier`, `sales1`, `sales2`, `purchasing` بكلمة `ADMIN_PASSWORD`)، بدء تشغيل قبل شهرين عبر المستوردات نفسها، ثم شهر بدء التشغيل، ثم `DemoMonthSeeder`، ثم الشهر الحالي حتى اليوم. لا يُشغَّل على الإنتاج.
-- دليل التثبيت والنشر والاستعادة: `docs/DEPLOYMENT.md`.
+- دليل التثبيت والنشر والاستعادة: `docs/DEPLOYMENT.md`. خادم Linux: `deploy/install.sh` (تثبيت أول بأمر واحد) و`deploy/update.sh` (تحديث بصيانة ونسخة احتياطية)، مع قالبي `deploy/nginx.conf` و`deploy/cars-queue.service`.
 - **تصفير النظام**: `php artisan db:seed --class=ResetSystemSeeder --force` (تفاعلي فقط: كتابة اسم القاعدة + نسخة احتياطية اختيارية) = `migrate:fresh` + البذور الأساسية + حذف المرفقات من قرصي public/local (لا النسخ الاحتياطية). `DemoSeeder` و`DemoMonthSeeder` يرفضان العمل في `production`. اختبار التصفير في `tests/Unit` (خارج RefreshDatabase لأنه يعيد بناء الجداول).
 
 ## سيارات الأمانة والشراكة (بعد المرحلة 5، بطلب صاحب المشروع)

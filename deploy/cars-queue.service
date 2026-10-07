@@ -1,0 +1,13 @@
+[Unit]
+Description=Showroom system queue worker
+After=network.target mariadb.service
+
+[Service]
+User=www-data
+Group=www-data
+Restart=always
+WorkingDirectory=__APP_DIR__
+ExecStart=/usr/bin/php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+
+[Install]
+WantedBy=multi-user.target
