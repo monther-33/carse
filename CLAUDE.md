@@ -108,6 +108,7 @@
 - المنطقة الزمنية من `APP_TIMEZONE` (`Africa/Tripoli`).
 - **`DemoSeeder`** (`php artisan db:seed --class=DemoSeeder`، مرة واحدة على قاعدة فارغة): مستخدم لكل دور (`accountant`, `cashier`, `sales1`, `sales2`, `purchasing` بكلمة `ADMIN_PASSWORD`)، بدء تشغيل قبل شهرين عبر المستوردات نفسها، ثم شهر بدء التشغيل، ثم `DemoMonthSeeder`، ثم الشهر الحالي حتى اليوم. لا يُشغَّل على الإنتاج.
 - دليل التثبيت والنشر والاستعادة: `docs/DEPLOYMENT.md`.
+- **تصفير النظام**: `php artisan db:seed --class=ResetSystemSeeder --force` (تفاعلي فقط: كتابة اسم القاعدة + نسخة احتياطية اختيارية) = `migrate:fresh` + البذور الأساسية + حذف المرفقات من قرصي public/local (لا النسخ الاحتياطية). `DemoSeeder` و`DemoMonthSeeder` يرفضان العمل في `production`. اختبار التصفير في `tests/Unit` (خارج RefreshDatabase لأنه يعيد بناء الجداول).
 
 ## سيارات الأمانة والشراكة (بعد المرحلة 5، بطلب صاحب المشروع)
 

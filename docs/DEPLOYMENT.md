@@ -254,7 +254,29 @@ sudo systemctl daemon-reload && sudo systemctl enable --now cars-queue
    - التاريخ المقترح للأرصدة: اليوم السابق لبدء التشغيل.
 8. راجع **ميزان المراجعة** و**الميزانية العمومية** من التقارير قبل بدء العمل.
 
-> **بيانات العرض**: الأمر `php artisan db:seed --class=DemoSeeder` يملأ قاعدة بيانات فارغة بمعرض تجريبي كامل (مستخدم لكل دور بكلمة `ADMIN_PASSWORD`). **لا تشغّله على قاعدة الإنتاج.**
+> **بيانات العرض**: الأمر `php artisan db:seed --class=DemoSeeder` يملأ قاعدة بيانات فارغة بمعرض تجريبي كامل (مستخدم لكل دور بكلمة `ADMIN_PASSWORD`). يرفض العمل على خادم الإنتاج (`APP_ENV=production`).
+
+## 4.2 تصفير النظام
+
+لإرجاع النظام كما بعد التثبيت (مثلًا بعد فترة تجربة على الخادم قبل البدء الفعلي):
+
+```bash
+php artisan db:seed --class=ResetSystemSeeder --force
+```
+
+- يطلب كتابة **اسم قاعدة البيانات** للتأكيد، ثم يعرض أخذ **نسخة احتياطية كاملة** أولًا (موصى به).
+- يحذف كل الجداول ويعيد بناءها فارغة، ثم يشغّل البذور الأساسية: الأدوار والصلاحيات، الدليل المحاسبي، العملات، الخزائن، الإعدادات الافتراضية، السنة المالية، والمستخدمين `admin` و`developer` بكلمتي `ADMIN_PASSWORD` و`DEVELOPER_PASSWORD`.
+- يحذف الصور والمرفقات المرفوعة (صور السيارات، الهويات، الإيصالات، الشعار، نسخ سلة المحذوفات). **النسخ الاحتياطية لا تُحذف.**
+- لا يعمل دون تفاعل (`--no-interaction` = إلغاء)، فلا يمكن تشغيله بالخطأ من الجدولة أو سكربت.
+- بعده: نفّذ `php artisan optimize` ثم ابدأ من الخطوة 1 في القسم 4.
+
+## 4.3 قائمة ما قبل الرفع
+
+- `.env` على الخادم: `APP_ENV=production`، `APP_DEBUG=false`، `APP_URL` بعنوان HTTPS، `APP_KEY` مولّد (`php artisan key:generate`)، كلمتا `ADMIN_PASSWORD` و`DEVELOPER_PASSWORD` قويتان، `BACKUP_PATH` على قرص آخر، و`LOG_LEVEL=warning`.
+- لا ترفع ملف `.env` الخاص بجهاز التطوير، ولا مجلدات `vendor` و`node_modules` و`storage/app/public` و`storage/app/private` (بيانات التجربة)؛ تُبنى على الخادم بـ `composer install --no-dev -o` و`npm ci && npm run build`.
+- قاعدة بيانات جديدة فارغة ثم `php artisan migrate --force` و`php artisan db:seed --force` (البذور الأساسية فقط، **لا** `DemoSeeder`).
+- `php artisan storage:link` و`php artisan optimize`، ثم Cron/Task Scheduler (القسم 2.5 أو 3).
+- ادخل بـ `admin` و`developer` وغيّر كلمتي المرور فورًا، ثم أكمل القسم 4.
 
 ---
 

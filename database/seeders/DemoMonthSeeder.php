@@ -55,6 +55,12 @@ class DemoMonthSeeder extends Seeder
 
     public function run(): void
     {
+        if (app()->isProduction()) {
+            $this->command?->error(__('system_reset.demo_refused'));
+
+            return;
+        }
+
         $this->start = CarbonImmutable::now()->subMonthNoOverflow()->startOfMonth();
         app(GenerateFiscalYear::class)->handle($this->start->year);
 

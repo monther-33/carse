@@ -73,6 +73,12 @@ class DemoSeeder extends DemoMonthSeeder
 
     public function run(): void
     {
+        if (app()->isProduction()) {
+            $this->command?->error(__('system_reset.demo_refused'));
+
+            return;
+        }
+
         if (User::query()->where('username', 'sales1')->exists()) {
             $this->command?->warn('Demo data already present — nothing to do.');
 
