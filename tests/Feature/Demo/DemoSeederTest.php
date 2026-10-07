@@ -86,6 +86,7 @@ test('the demo shows consignment and partnership cars in every case', function (
         ->and($payouts->balance($party('حسين المصراتي'))->isZero())->toBeTrue()            // paid in full
         ->and((string) $payouts->balance($party('هدى الكيلاني')))->toBe('76000.000')        // the K5, no commission
         ->and((string) $payouts->balance($party('فرج الطرابلسي')))->toBe('104000.000')      // Land Cruiser 138,000 + Sonata 26,000 − paid 60,000 (his 120,000 share paid in)
-        ->and($payouts->pending($party('سالم بن عمران'))->isPositive())->toBeTrue()          // Sonata in installments
+        ->and($payouts->pending($party('سالم الدرسي'))->isPositive())->toBeTrue()          // Sonata in installments
+        ->and((string) $payouts->balance($party('سالم الدرسي')))->toBe('-34000.000')       // Sonata 26,000 − his Hilux share 60,000
         ->and(baseBalance('43')->isNegative())->toBeTrue();
 });

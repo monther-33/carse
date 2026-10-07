@@ -158,7 +158,7 @@ class DemoSeeder extends DemoMonthSeeder
             // Owners of consignment cars and partners.
             ['name' => 'حسين المصراتي', 'type' => 'عميل', 'phone' => '0915551122', 'national_id' => '119800067890', 'address' => 'طرابلس - تاجوراء'],
             ['name' => 'فرج الطرابلسي', 'type' => 'عميل', 'phone' => '0926663344', 'national_id' => '119780078901', 'address' => 'طرابلس - الظهرة'],
-            ['name' => 'سالم بن عمران', 'type' => 'عميل', 'phone' => '0917778899', 'national_id' => '119830089012', 'address' => 'الزاوية'],
+            ['name' => 'سالم الدرسي', 'type' => 'عميل', 'phone' => '0917778899', 'national_id' => '119830089012', 'address' => 'الزاوية'],
             ['name' => 'هدى الكيلاني', 'type' => 'عميل', 'phone' => '0924445566', 'national_id' => '219880090123', 'address' => 'طرابلس - بن عاشور'],
         ]), $options);
 
@@ -225,7 +225,7 @@ class DemoSeeder extends DemoMonthSeeder
         // Consignment cars come in: one owner on a percentage, two owners on a net price.
         $day(2, 11);
         $this->consign('JTMRFREV0MD500001', 'تويوتا', 'راف 4', 2021, 'أبيض', 54000, '98000', [['حسين المصراتي', '100']], 'percent', '3', 'on_sale');
-        $this->consign('KMHL14JA5KA500002', 'هيونداي', 'سوناتا', 2019, 'فضي', 83000, '58000', [['فرج الطرابلسي', '50'], ['سالم بن عمران', '50']], 'net_price', '52000', 'on_collection');
+        $this->consign('KMHL14JA5KA500002', 'هيونداي', 'سوناتا', 2019, 'فضي', 83000, '58000', [['فرج الطرابلسي', '50'], ['سالم الدرسي', '50']], 'net_price', '52000', 'on_collection');
 
         $day(6);
         $this->expense('متنوعة', $cash, '250', $car('JTMRFREV0MD500001'), 'غسيل وتلميع على حساب المالك', 'owners');
@@ -303,10 +303,10 @@ class DemoSeeder extends DemoMonthSeeder
 
         // More consignment cars: a fixed commission, a car taken in free of commission, and one still on show.
         $this->consign('KNAG34LA1M5500004', 'كيا', 'K5', 2021, 'أزرق', 41000, '76000', [['هدى الكيلاني', '100']], 'fixed', '2000', 'on_sale');
-        $this->consign('3N1AB7AP2JY500005', 'نيسان', 'صني', 2018, 'رمادي', 112000, '31000', [['سالم بن عمران', '100']], 'none', null, 'on_sale');
+        $this->consign('3N1AB7AP2JY500005', 'نيسان', 'صني', 2018, 'رمادي', 112000, '31000', [['سالم الدرسي', '100']], 'none', null, 'on_sale');
         $this->consign('WDDWF4KB7KR500006', 'مرسيدس', 'C-Class', 2019, 'أسود', 67000, '118000', [['حسين المصراتي', '60'], ['هدى الكيلاني', '40']], 'percent', '4', 'on_sale');
         // A Hilux bought half with a partner, paid as the customer pays, still in stock.
-        $this->partnershipPurchase($party('معرض الريان'), 'MR0HA3CD100500007', 'تويوتا', 'هايلكس', 2022, '120000', '138000', [['سالم بن عمران', '50']], 'on_collection');
+        $this->partnershipPurchase($party('معرض الريان'), 'MR0HA3CD100500007', 'تويوتا', 'هايلكس', 2022, '120000', '138000', [['سالم الدرسي', '50']], 'on_collection');
 
         // A reservation ending in two days.
         Auth::login($this->staff['sales1']);
