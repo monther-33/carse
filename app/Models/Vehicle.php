@@ -46,6 +46,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property string|null $min_price
  * @property int|null $purchase_invoice_id
  * @property int|null $sale_invoice_id
+ * @property int|null $ownership_id
  * @property Carbon|null $received_at
  * @property Carbon|null $sold_at
  * @property string|null $notes

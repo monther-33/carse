@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'return_entry' => 'Showroom costs of a consignment car returned to its owner :number — :vin',
     'errors' => [
         'entry_status' => 'Invalid entry status for the vehicle.',
         'percent' => 'The showroom commission percent must be above zero and below 100.',

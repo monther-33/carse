@@ -11,7 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $vehicle_id
  * @property int|null $expense_id
- * @property string $amount
+ * @property string $amount capitalised on the car (LYD)
+ * @property string $owners_amount charged to the owners' accounts instead (LYD)
  * @property string $description
  * @property bool $to_cost_of_sales
  */

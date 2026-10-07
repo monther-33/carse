@@ -3,6 +3,7 @@
 namespace App\Actions\Expenses;
 
 use App\Actions\Concerns\ManagesDocumentLifecycle;
+use App\Enums\AccountRole;
 use App\Enums\DocumentStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Expense;
@@ -36,13 +37,14 @@ class CancelExpense
         return DB::transaction(function () use ($expense, $reason) {
             $expense = $this->lockInStatus($expense, DocumentStatus::Posted);
             $entry = JournalEntry::query()->with('lines')->findOrFail($expense->journal_entry_id);
-            $cost = VehicleCost::query()->where('expense_id', $expense->id)->where('amount', '>', 0)->first();
-            $base = Money::of($expense->amount_base);
+            $cost = VehicleCost::query()->where('expense_id', $expense->id)->orderBy('id')->first();
+            $capitalised = Money::of($cost?->amount);
 
             $vehicle = null;
-            if ($cost !== null && ! $cost->to_cost_of_sales) {
+            if ($cost !== null && ! $cost->to_cost_of_sales && $capitalised->isPositive()) {
                 $vehicle = Vehicle::query()->lockForUpdate()->findOrFail($cost->vehicle_id);
-                $postedTo = $entry->lines->firstWhere('vehicle_id', $vehicle->id)?->account_id;
+                $stockAccounts = [$this->accounts->idFor(AccountRole::Inventory), $this->accounts->idFor(AccountRole::InTransit)];
+                $postedTo = $entry->lines->where('vehicle_id', $vehicle->id)->whereIn('account_id', $stockAccounts)->first()?->account_id;
 
                 if (! $vehicle->status->isInStock() || $postedTo !== $this->accounts->idFor($vehicle->status->stockRole())) {
                     throw BusinessRuleException::make('expenses.errors.cannot_cancel_capitalised', ['vin' => $vehicle->vin]);
@@ -56,7 +58,8 @@ class CancelExpense
                 VehicleCost::query()->create([
                     'vehicle_id' => $cost->vehicle_id,
                     'expense_id' => $expense->id,
-                    'amount' => (string) $base->negated(),
+                    'amount' => (string) $capitalised->negated(),
+                    'owners_amount' => (string) Money::of($cost->owners_amount)->negated(),
                     'description' => __('documents.cancellation_of', ['number' => $expense->number]),
                     'to_cost_of_sales' => $cost->to_cost_of_sales,
                     'created_by' => Auth::id(),
@@ -65,8 +68,8 @@ class CancelExpense
 
             if ($vehicle !== null) {
                 $vehicle->forceFill([
-                    'extra_cost' => (string) Money::of($vehicle->extra_cost)->minus($base),
-                    'total_cost' => (string) Money::of($vehicle->total_cost)->minus($base),
+                    'extra_cost' => (string) Money::of($vehicle->extra_cost)->minus($capitalised),
+                    'total_cost' => (string) Money::of($vehicle->total_cost)->minus($capitalised),
                 ])->save();
             }
 

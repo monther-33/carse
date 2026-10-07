@@ -34,6 +34,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property Carbon|null $next_due_date
  * @property DocumentStatus $status
  * @property int|null $journal_entry_id
+ * @property CostBearer|null $borne_by
  */
 class Expense extends Model implements HasMedia
 {
