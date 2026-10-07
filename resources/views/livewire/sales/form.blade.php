@@ -43,7 +43,22 @@
                             <td>
                                 {{ $v?->title() }}
                                 <span class="block num font-mono text-xs text-gray-500">{{ $v?->vin }}</span>
-                                @if ($v) <x-ui.badge :color="$v->status->color()">{{ $v->status->label() }}</x-ui.badge> @endif
+                                @if ($v) <x-ui.badge :color="$v->status->color()">{{ $v->status->label() }}</x-ui.badge> <x-ownership-badge :vehicle="$v" /> @endif
+                                @if ($v?->ownership?->isConsignment())
+                                    {{-- The showroom's commission on this consignment car, chosen on the sale. --}}
+                                    <div class="mt-2 flex flex-wrap items-center gap-2">
+                                        <select wire:model.live="items.{{ $i }}.commission_mode" class="form-input w-auto py-1 text-xs" data-searchable="off">
+                                            <option value="agreement">{{ __('ownership.sale_commission.agreement') }}</option>
+                                            <option value="none">{{ __('ownership.sale_commission.none') }}</option>
+                                            <option value="custom">{{ __('ownership.sale_commission.custom') }}</option>
+                                        </select>
+                                        @if (($item['commission_mode'] ?? '') === 'custom')
+                                            <input type="text" dir="ltr" inputmode="decimal" wire:model.live.debounce.500ms="items.{{ $i }}.commission"
+                                                   placeholder="{{ __('ownership.sale_commission.amount') }}" class="form-input w-32 py-1 text-xs">
+                                        @endif
+                                    </div>
+                                    @error('items.'.$i.'.commission')<p class="text-xs text-red-600">{{ $message }}</p>@enderror
+                                @endif
                             </td>
                             <td class="num">{{ $v?->asking_price !== null ? \App\Support\Money::format($v->asking_price) : '—' }}</td>
                             <td class="num">{{ $v?->min_price !== null ? \App\Support\Money::format($v->min_price) : '—' }}</td>

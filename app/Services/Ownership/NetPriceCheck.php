@@ -17,15 +17,17 @@ class NetPriceCheck
     public function __construct(private readonly OwnershipSplit $split) {}
 
     /**
-     * @param  list<array{vehicle: Vehicle, net_base: BigDecimal}>  $lines  each car with its net sale price in LYD
+     * @param  list<array{vehicle: Vehicle, net_base: BigDecimal, commission?: string|null}>  $lines  each car with its net sale price in LYD
+     *                                                                                                and the commission chosen on the sale (null: as agreed)
      * @return list<array{vin: string, short: BigDecimal}>
      */
     public function warnings(array $lines): array
     {
         $warnings = [];
 
-        foreach ($lines as ['vehicle' => $vehicle, 'net_base' => $net]) {
-            if ($vehicle->ownership_id === null) {
+        foreach ($lines as $line) {
+            ['vehicle' => $vehicle, 'net_base' => $net] = $line;
+            if ($vehicle->ownership_id === null || ($line['commission'] ?? null) !== null) {
                 continue;
             }
             $ownership = VehicleOwnership::query()->with('owners')->find($vehicle->ownership_id);

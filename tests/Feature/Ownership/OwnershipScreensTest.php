@@ -6,10 +6,12 @@ use App\Livewire\Consignments\Form;
 use App\Livewire\Consignments\Index;
 use App\Livewire\Expenses\Index as Expenses;
 use App\Livewire\Purchases\Form as PurchaseForm;
+use App\Livewire\Sales\Form as SalesForm;
 use App\Livewire\Vehicles\Show;
 use App\Models\CarModel;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Models\SalesInvoiceItem;
 use App\Models\VehicleOwnership;
 use App\Support\Features;
 use Livewire\Livewire;
@@ -142,4 +144,20 @@ it('receives a car with no commission from the screen', function () {
     $ownership = VehicleOwnership::query()->sole();
     expect($ownership->earning_amount)->toBeNull()
         ->and($ownership->earning_percent)->toBeNull();
+});
+
+it('chooses no commission on the sale screen', function () {
+    $ownership = receiveConsignment();
+
+    Livewire::test(SalesForm::class)
+        ->set('party_id', customer()->id)
+        ->set('pickVehicleId', $ownership->vehicle_id)
+        ->assertSee(__('ownership.sale_commission.agreement'))
+        ->set('items.0.price', '30000')
+        ->set('payment_type', 'credit')
+        ->set('items.0.commission_mode', 'none')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(SalesInvoiceItem::query()->sole()->showroom_commission)->toBe('0.000');
 });

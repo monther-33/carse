@@ -190,7 +190,7 @@ function saveSale(Vehicle $vehicle, array $data = []): SalesInvoice
         'currency_id' => lyd()->id,
         'rate' => '1',
         'discount' => '0',
-        'items' => [['vehicle_id' => $vehicle->id, 'price' => $data['price'] ?? '60000']],
+        'items' => [['vehicle_id' => $vehicle->id, 'price' => $data['price'] ?? '60000', 'showroom_commission' => $data['showroom_commission'] ?? null]],
         'payments' => [],
         'trade_in' => null,
         'installment' => null,

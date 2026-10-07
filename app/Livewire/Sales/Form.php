@@ -140,7 +140,11 @@ class Form extends Component
         $this->rate = rtrim(rtrim($invoice->rate, '0'), '.');
         $this->discount = (string) $invoice->discount;
         $this->notes = (string) $invoice->notes;
-        $this->items = $invoice->items->map(fn ($i) => ['vehicle_id' => $i->vehicle_id, 'price' => (string) $i->price])->all();
+        $this->items = $invoice->items->map(fn ($i) => ['vehicle_id' => $i->vehicle_id, 'price' => (string) $i->price] + match (true) {
+            $i->showroom_commission === null => ['commission_mode' => 'agreement', 'commission' => ''],
+            Money::of($i->showroom_commission)->isZero() => ['commission_mode' => 'none', 'commission' => ''],
+            default => ['commission_mode' => 'custom', 'commission' => (string) $i->showroom_commission],
+        })->all();
         $this->payments = $invoice->payments->map(fn ($p) => ['cashbox_id' => $p->cashbox_id, 'amount' => (string) $p->amount])->all()
             ?: [['cashbox_id' => null, 'amount' => '']];
 
@@ -185,7 +189,8 @@ class Form extends Component
             return;
         }
 
-        $this->items[] = ['vehicle_id' => $vehicle->id, 'price' => $vehicle->asking_price !== null ? (string) $vehicle->asking_price : ''];
+        $this->items[] = ['vehicle_id' => $vehicle->id, 'price' => $vehicle->asking_price !== null ? (string) $vehicle->asking_price : '',
+            'commission_mode' => 'agreement', 'commission' => ''];
     }
 
     public function removeItem(int $index): void
@@ -269,6 +274,8 @@ class Form extends Component
             'items' => ['required', 'array', 'min:1'],
             'items.*.vehicle_id' => ['required', 'exists:vehicles,id'],
             'items.*.price' => ['required', 'numeric', 'gt:0', 'decimal:0,3'],
+            'items.*.commission_mode' => ['nullable', Rule::in(['agreement', 'none', 'custom'])],
+            'items.*.commission' => ['nullable', 'required_if:items.*.commission_mode,custom', 'numeric', 'min:0', 'decimal:0,3'],
             'payments.*.amount' => ['nullable', 'numeric', 'min:0', 'decimal:0,3'],
             'payments.*.cashbox_id' => ['nullable', 'required_with:payments.*.amount', Rule::in($cashboxIds)],
             'months' => [$isInstallment ? 'required' : 'nullable', 'integer', 'between:1,120'],
@@ -300,7 +307,12 @@ class Form extends Component
             'rate' => $this->rate,
             'discount' => $this->discount,
             'notes' => $this->notes ?: null,
-            'items' => $this->items,
+            'items' => array_map(fn (array $item) => [
+                'vehicle_id' => $item['vehicle_id'],
+                'price' => $item['price'],
+                // Consignment car: the showroom's commission on this sale (null = as agreed).
+                'showroom_commission' => $this->chosenCommission($item),
+            ], $this->items),
             'payments' => $payments,
             'trade_in' => $this->hasTradeIn ? array_map(fn ($v) => $v === '' ? null : $v, $this->tradeIn) : null,
             'installment' => $isInstallment ? [
@@ -323,6 +335,18 @@ class Form extends Component
 
         $this->notify(__('app.saved'));
         $this->redirectRoute('sales.show', $invoice, navigate: true);
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     */
+    private function chosenCommission(array $item): ?string
+    {
+        return match ($item['commission_mode'] ?? 'agreement') {
+            'none' => '0',
+            'custom' => is_numeric($item['commission'] ?? '') ? (string) $item['commission'] : null,
+            default => null,
+        };
     }
 
     /** Display-only figures; the Actions recompute and validate everything on save. */
@@ -356,7 +380,7 @@ class Form extends Component
         $lines = [];
         foreach ($this->items as $n => $item) {
             if (isset($vehicles[$item['vehicle_id']])) {
-                $lines[] = ['vehicle' => $vehicles[$item['vehicle_id']], 'net_base' => Money::toBase($prices[$n]->minus($discounts[$n]), $rate)];
+                $lines[] = ['vehicle' => $vehicles[$item['vehicle_id']], 'net_base' => Money::toBase($prices[$n]->minus($discounts[$n]), $rate), 'commission' => $this->chosenCommission($item)];
             }
         }
 

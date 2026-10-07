@@ -82,6 +82,11 @@
                         <td>
                             <a href="{{ route('vehicles.show', $item->vehicle) }}" wire:navigate class="text-brand-700 hover:underline">{{ $item->vehicle->title() }}</a>
                             <span class="block num font-mono text-xs text-gray-500">{{ $item->vehicle->vin }}</span>
+                            @if ($item->showroom_commission !== null)
+                                <span class="block text-xs text-purple-700">{{ \App\Support\Money::of($item->showroom_commission)->isZero()
+                                    ? __('ownership.sale_commission.none')
+                                    : __('ownership.sale_commission.shown', ['amount' => \App\Support\Money::format($item->showroom_commission)]) }}</span>
+                            @endif
                         </td>
                         <td class="num">{{ \App\Support\Money::format($item->price) }}</td>
                         <td class="num">{{ \App\Support\Money::format($item->discount) }}</td>

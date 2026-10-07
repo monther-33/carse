@@ -52,7 +52,15 @@ return [
     'pending' => 'Held until collected',
     'available' => 'Available to pay',
     'dues_note' => 'A positive balance is owed to the owner; a negative one is owed by them to the showroom (expenses or their share of a purchase). Held: their part of "as collected" sales that customers have not paid yet.',
+    'sale_commission' => [
+        'agreement' => 'Showroom commission as agreed',
+        'none' => 'No commission (the whole price to the owners)',
+        'custom' => 'Another commission',
+        'amount' => 'Amount in LYD',
+        'shown' => 'Showroom commission on this sale: :amount',
+    ],
     'errors' => [
+        'sale_commission' => 'The showroom commission on a consignment car cannot be negative or above its sale price.',
         'base_cashbox' => 'Vehicle owners and partners are settled in dinars only: choose a dinar cashbox.',
         'over_available' => 'The amount is more than may be paid to the owner now (:available).',
         'partners_total' => 'The partners\' shares must add up to less than 100% (the rest is the showroom\'s).',

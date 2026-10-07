@@ -5,6 +5,7 @@ namespace App\Actions\Sales;
 use App\Actions\Concerns\ManagesDocumentLifecycle;
 use App\Enums\DocumentStatus;
 use App\Enums\InstallmentStatus;
+use App\Enums\OwnershipKind;
 use App\Enums\PaymentType;
 use App\Enums\ReservationStatus;
 use App\Enums\VehicleStatus;
@@ -247,10 +248,21 @@ class SaveSalesInvoice
     private function syncItems(SalesInvoice $invoice, array $items, array $prices, array $discounts, BigDecimal $rate): void
     {
         $kept = [];
+        $consignment = Vehicle::query()->whereIn('id', array_column($items, 'vehicle_id'))
+            ->whereHas('ownership', fn ($q) => $q->where('kind', OwnershipKind::Consignment))->pluck('id')->all();
 
         foreach ($items as $i => $item) {
             $net = $prices[$i]->minus($discounts[$i]);
             $kept[] = (int) $item['vehicle_id'];
+
+            // Consignment car: the showroom's commission chosen on the sale (null = as agreed).
+            $commission = null;
+            if (in_array((int) $item['vehicle_id'], $consignment, true) && isset($item['showroom_commission']) && $item['showroom_commission'] !== '') {
+                $commission = Money::of((string) $item['showroom_commission']);
+                if ($commission->isNegative() || $commission->isGreaterThan(Money::toBase($net, $rate))) {
+                    throw BusinessRuleException::make('ownership.errors.sale_commission');
+                }
+            }
 
             SalesInvoiceItem::query()->updateOrCreate(
                 ['invoice_id' => $invoice->id, 'vehicle_id' => (int) $item['vehicle_id']],
@@ -259,6 +271,7 @@ class SaveSalesInvoice
                     'discount' => (string) $discounts[$i],
                     'net' => (string) $net,
                     'net_base' => (string) Money::toBase($net, $rate),
+                    'showroom_commission' => $commission === null ? null : (string) $commission,
                 ],
             );
         }

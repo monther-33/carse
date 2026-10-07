@@ -19,18 +19,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $net_base
  * @property int|null $ownership_id
  * @property string|null $showroom_revenue LYD: the showroom's part of the price of a car with owners
+ * @property string|null $showroom_commission LYD, consignment only: null = as agreed, 0 = none, else this amount
  * @property string|null $cost_snapshot
  * @property string $commission
  * @property int|null $return_id
  */
 class SalesInvoiceItem extends Model
 {
-    protected $fillable = ['invoice_id', 'vehicle_id', 'price', 'discount', 'net', 'net_base', 'cost_snapshot', 'commission', 'return_id', 'ownership_id', 'showroom_revenue'];
+    protected $fillable = ['invoice_id', 'vehicle_id', 'price', 'discount', 'net', 'net_base', 'cost_snapshot', 'commission', 'return_id', 'ownership_id', 'showroom_revenue', 'showroom_commission'];
 
     protected function casts(): array
     {
         return [
             'showroom_revenue' => 'decimal:3',
+            'showroom_commission' => 'decimal:3',
             'price' => 'decimal:3',
             'discount' => 'decimal:3',
             'net' => 'decimal:3',

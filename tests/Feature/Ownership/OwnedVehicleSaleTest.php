@@ -7,6 +7,7 @@ use App\Enums\VehicleStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Models\VehicleOwnerDue;
 use App\Services\Ownership\OwnerPayouts;
+use App\Support\Money;
 
 beforeEach(function () {
     $this->actingAs(userWithRole('admin'));
@@ -134,4 +135,32 @@ it('sells a car for its owners with no commission and keeps their money for them
         ->and((string) $payouts->available($this->b->id))->toBe('20000.000')
         ->and((string) $invoice->items->first()->profit())->toBe('0.000')
         ->and(ledgerIsBalanced())->toBeTrue();
+});
+
+it('lets the seller drop or change the agreed commission on the sale', function (?string $chosen, string $showroom) {
+    $ownership = receiveConsignment(['earning_mode' => 'percent', 'earning_percent' => '5', 'owners' => owners($this)]);
+
+    $invoice = sell($ownership->vehicle, ['price' => '40000', 'showroom_commission' => $chosen]);
+
+    expect((string) baseBalance('43'))->toBe($showroom === '0.000' ? '0.000' : '-'.$showroom)
+        ->and((string) baseBalance('24'))->toBe('-'.Money::of('40000')->minus(Money::of($showroom)))
+        ->and($invoice->items->first()->showroom_revenue)->toBe($showroom)
+        ->and(ledgerIsBalanced())->toBeTrue();
+})->with([
+    'as agreed' => [null, '2000.000'],
+    'no commission' => ['0', '0.000'],
+    'another amount' => ['700', '700.000'],
+]);
+
+it('refuses a commission above the sale price', function () {
+    $ownership = receiveConsignment();
+
+    saveSale($ownership->vehicle, ['price' => '40000', 'showroom_commission' => '40000.001']);
+})->throws(BusinessRuleException::class);
+
+it('ignores a chosen commission on the showroom own cars', function () {
+    $invoice = sell(purchaseVehicle(), ['price' => '60000', 'showroom_commission' => '0']);
+
+    expect($invoice->items->first()->showroom_commission)->toBeNull()
+        ->and((string) baseBalance('41'))->toBe('-60000.000');
 });

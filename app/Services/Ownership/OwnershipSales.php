@@ -39,7 +39,7 @@ class OwnershipSales
     {
         $ownership = $vehicle->ownership_id ? VehicleOwnership::query()->with('owners')->findOrFail($vehicle->ownership_id) : null;
 
-        return $ownership === null ? null : $this->split->sale($ownership, Money::of($item->net_base));
+        return $ownership === null ? null : $this->split->sale($ownership, Money::of($item->net_base), $item->showroom_commission);
     }
 
     /**

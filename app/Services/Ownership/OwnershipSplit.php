@@ -19,6 +19,7 @@ use Brick\Math\RoundingMode;
  *   percent    the showroom keeps the percentage of the price, the owners get the rest;
  *   fixed      the showroom keeps the fixed amount, the owners get the rest;
  *   none       no commission: the owners get the whole price.
+ * The seller may override it on the sale with another commission (zero: none).
  * Partnership: everything by shares (showroom share first).
  */
 class OwnershipSplit
@@ -26,7 +27,7 @@ class OwnershipSplit
     /**
      * @return array{showroom: BigDecimal, owners: array<int, BigDecimal>} owners keyed by party id
      */
-    public function sale(VehicleOwnership $ownership, BigDecimal $netBase): array
+    public function sale(VehicleOwnership $ownership, BigDecimal $netBase, BigDecimal|string|null $commission = null): array
     {
         $ownership->loadMissing('owners');
         $net = Money::of($netBase);
@@ -35,7 +36,8 @@ class OwnershipSplit
             return $this->byShares($ownership, $net);
         }
 
-        $ownersTotal = match ($ownership->earning_mode) {
+        // Chosen on the sale instead of the agreement: the showroom keeps exactly this commission.
+        $ownersTotal = $commission !== null ? $net->minus(Money::of($commission)) : match ($ownership->earning_mode) {
             EarningMode::NetPrice => Money::of($ownership->earning_amount),
             EarningMode::Percent => $net->minus($net->multipliedBy(Money::rate($ownership->earning_percent ?? '0'))->dividedBy(100, Money::SCALE, RoundingMode::HalfUp)),
             EarningMode::Fixed => $net->minus(Money::of($ownership->earning_amount)),
