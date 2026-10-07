@@ -96,7 +96,7 @@ class SalesReport extends Report
 
         if ($group === 'none') {
             return $query->orderBy('s.date')->orderBy('s.id')
-                ->get(['s.date', 's.number', 's.payment_type', 'p.name as customer', 'b.name as brand', 'm.name as model', 'v.year', 'v.vin', 'u.name as salesperson', 'i.net_base', 'i.cost_snapshot', 'i.commission'])
+                ->get(['s.date', 's.number', 's.payment_type', 'p.name as customer', 'b.name as brand', 'm.name as model', 'v.year', 'v.vin', 'u.name as salesperson', 'i.net_base', 'i.cost_snapshot', 'i.commission', DB::raw('COALESCE(i.showroom_revenue, i.net_base) AS showroom')])
                 ->map(fn ($r) => $this->money($r, [
                     'date' => $r->date, 'number' => $r->number, 'customer' => $r->customer,
                     'vehicle' => "{$r->brand} {$r->model} {$r->year} — {$r->vin}", 'salesperson' => $r->salesperson,
@@ -111,7 +111,7 @@ class SalesReport extends Report
         };
 
         return $query->groupByRaw($label)->orderByRaw($label)
-            ->selectRaw("{$label} AS label, COUNT(*) AS n, SUM(i.net_base) AS net_base, SUM(i.cost_snapshot) AS cost_snapshot, SUM(i.commission) AS commission")
+            ->selectRaw("{$label} AS label, COUNT(*) AS n, SUM(i.net_base) AS net_base, SUM(COALESCE(i.showroom_revenue, i.net_base)) AS showroom, SUM(i.cost_snapshot) AS cost_snapshot, SUM(i.commission) AS commission")
             ->get()
             ->map(fn ($r) => $this->money($r, ['label' => $r->label, 'count' => (int) $r->n]))->all();
     }
@@ -130,7 +130,8 @@ class SalesReport extends Report
             'revenue' => $revenue,
             'cost' => $cost,
             'commission' => $commission,
-            'profit' => $revenue->minus($cost)->minus($commission),
+            // Cars with owners: only the showroom's part of the price is its revenue.
+            'profit' => Money::of((string) $r->showroom)->minus($cost)->minus($commission),
         ];
     }
 }

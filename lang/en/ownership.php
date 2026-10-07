@@ -12,5 +12,6 @@ return [
         'shares_total' => 'The owners\' shares must add up to :total%.',
         'not_active' => 'This vehicle is not an active consignment in the showroom.',
         'cannot_return' => 'The vehicle cannot be returned to its owner while ":status".',
+        'owner_already_paid' => ':name has already been paid more than would be left to them from this car; recover it with a receipt voucher first.',
     ],
 ];

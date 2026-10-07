@@ -80,6 +80,7 @@ class PostPurchaseInvoice
                     'total_cost' => $item->cost_base,
                     'purchase_invoice_id' => $invoice->id,
                     'sale_invoice_id' => null,
+                    'ownership_id' => null,
                     'received_at' => $invoice->date,
                     'sold_at' => null,
                 ])->save();

@@ -1,32 +1,16 @@
 <?php
 
-use App\Actions\Ownership\ReceiveConsignment;
 use App\Actions\Ownership\ReturnToOwner;
 use App\Enums\OwnershipStatus;
 use App\Enums\VehicleStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Models\JournalEntry;
-use App\Models\VehicleOwnership;
 use App\Services\Ownership\OwnershipSplit;
 use App\Support\Money;
 
 beforeEach(function () {
     $this->actingAs(userWithRole('admin'));
 });
-
-/**
- * @param  array<string, mixed>  $overrides
- */
-function receiveConsignment(array $overrides = []): VehicleOwnership
-{
-    return app(ReceiveConsignment::class)->handle($overrides + purchaseLine() + [
-        'received_at' => today()->toDateString(),
-        'earning_mode' => 'percent',
-        'earning_percent' => '5',
-        'payout' => 'on_sale',
-        'owners' => [['party_id' => customer()->id, 'share' => '100']],
-    ]);
-}
 
 it('receives a consignment car at zero cost without any journal entry', function () {
     $entries = JournalEntry::query()->count();

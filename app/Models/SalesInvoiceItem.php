@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $discount
  * @property string $net
  * @property string $net_base
+ * @property int|null $ownership_id
+ * @property string|null $showroom_revenue LYD: the showroom's part of the price of a car with owners
  * @property string|null $cost_snapshot
  * @property string $commission
  * @property int|null $return_id
@@ -38,14 +40,14 @@ class SalesInvoiceItem extends Model
         ];
     }
 
-    /** Spec 4.3: profit = sale price − cost_snapshot − commission (base currency). */
+    /** Spec 4.3: profit = sale price − cost_snapshot − commission (base currency); for a car with owners, the showroom's part of the price. */
     public function profit(): ?BigDecimal
     {
         if ($this->cost_snapshot === null) {
             return null;
         }
 
-        return Money::of($this->net_base)->minus(Money::of($this->cost_snapshot))->minus(Money::of($this->commission));
+        return Money::of($this->showroom_revenue ?? $this->net_base)->minus(Money::of($this->cost_snapshot))->minus(Money::of($this->commission));
     }
 
     /** @return BelongsTo<SalesInvoice, $this> */

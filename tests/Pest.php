@@ -2,6 +2,7 @@
 
 use App\Actions\Expenses\PostExpense;
 use App\Actions\Expenses\SaveExpense;
+use App\Actions\Ownership\ReceiveConsignment;
 use App\Actions\Purchases\PostPurchaseInvoice;
 use App\Actions\Purchases\SavePurchaseInvoice;
 use App\Actions\Sales\PostSalesInvoice;
@@ -19,6 +20,7 @@ use App\Models\PurchaseInvoice;
 use App\Models\SalesInvoice;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Models\VehicleOwnership;
 use App\Models\Voucher;
 use App\Services\Accounting\PostingService;
 use App\Services\Accounting\ReversalService;
@@ -127,6 +129,20 @@ function purchase(array $lines, array $header = []): PurchaseInvoice
     return app(PostPurchaseInvoice::class)->handle($invoice);
 }
 
+/**
+ * @param  array<string, mixed>  $overrides
+ */
+function receiveConsignment(array $overrides = []): VehicleOwnership
+{
+    return app(ReceiveConsignment::class)->handle($overrides + purchaseLine() + [
+        'received_at' => today()->toDateString(),
+        'earning_mode' => 'percent',
+        'earning_percent' => '5',
+        'payout' => 'on_sale',
+        'owners' => [['party_id' => customer()->id, 'share' => '100']],
+    ]);
+}
+
 /** Buy one car in LYD on credit and return it (fresh). */
 function purchaseVehicle(string $price = '50000', string $status = 'available'): Vehicle
 {
@@ -190,10 +206,10 @@ function sell(Vehicle $vehicle, array $data = []): SalesInvoice
     return app(PostSalesInvoice::class)->handle(saveSale($vehicle, $data));
 }
 
-/** Profit recognised in the ledger: revenue − cost of sales − commission expense − currency differences. */
+/** Profit recognised in the ledger: revenue and consignment commissions − cost of sales − commission expense − currency differences. */
 function ledgerProfit(): BigDecimal
 {
-    return baseBalance('41')->negated()
+    return baseBalance('41')->plus(baseBalance('43'))->negated()
         ->minus(baseBalance('51'))
         ->minus(baseBalance('65'))
         ->minus(baseBalance('71'));

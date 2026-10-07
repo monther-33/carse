@@ -18,6 +18,7 @@ use App\Models\SalesInvoice;
 use App\Models\Vehicle;
 use App\Models\Voucher;
 use App\Services\Accounting\ReversalService;
+use App\Services\Ownership\OwnershipSales;
 use App\Services\Vehicles\VehicleStateMachine;
 use App\Support\Money;
 use Illuminate\Support\Facades\DB;
@@ -39,6 +40,7 @@ class CancelSalesInvoice
         private readonly ReversalService $reversal,
         private readonly CancelVoucher $cancelVoucher,
         private readonly VehicleStateMachine $vehicles,
+        private readonly OwnershipSales $ownership,
     ) {}
 
     public function handle(SalesInvoice $invoice, string $reason): SalesInvoice
@@ -48,6 +50,9 @@ class CancelSalesInvoice
             $invoice->load(['items', 'tradeIn', 'installmentPlan', 'commissions']);
 
             $this->assertUntouched($invoice);
+            foreach ($invoice->items as $item) {
+                $this->ownership->undoSale($item);
+            }
 
             foreach (Voucher::query()->whereMorphedTo('reference', $invoice)->posted()->get() as $voucher) {
                 $this->cancelVoucher->handle($voucher, $reason);

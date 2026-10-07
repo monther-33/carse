@@ -20,6 +20,7 @@ use App\Services\Accounting\AccountResolver;
 use App\Services\Accounting\JournalBuilder;
 use App\Services\Accounting\PostingService;
 use App\Services\Numbering\SequenceService;
+use App\Services\Ownership\OwnershipSales;
 use App\Services\Vehicles\VehicleStateMachine;
 use App\Support\Money;
 use Carbon\CarbonImmutable;
@@ -28,7 +29,8 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * A customer returns one sold vehicle:
- *   Dr vehicle sales / Cr receivables          (the item's net price, invoice currency)
+ *   Dr vehicle sales / Cr receivables          (the item's net price, invoice currency;
+ *                                               a car with owners: the parts credited at the sale)
  *   Dr inventory / Cr cost of vehicles sold    (its cost_snapshot)
  *   Dr accrued commissions / Cr commission expense, if that commission is still unpaid
  * The car becomes "returned" (back in stock, then made available by hand after inspection).
@@ -42,6 +44,7 @@ class ReturnSalesItem
         private readonly AccountResolver $accounts,
         private readonly SequenceService $sequences,
         private readonly VehicleStateMachine $vehicles,
+        private readonly OwnershipSales $ownership,
     ) {}
 
     public function handle(SalesInvoiceItem $item, string $reason, ?string $date = null): ReturnDocument
@@ -83,9 +86,9 @@ class ReturnSalesItem
 
             $builder = JournalBuilder::make($date, __('sales.return_entry', ['number' => $number, 'invoice' => $invoice->number, 'vin' => $vehicle->vin]))
                 ->source($return)
-                ->branch($invoice->branch_id)
-                ->debit($this->accounts->idFor(AccountRole::VehicleSales), $item->net, $invoice->currency_id, $invoice->rate, vehicleId: $vehicle->id)
-                ->credit($this->accounts->idFor(AccountRole::Receivables), $item->net, $invoice->currency_id, $invoice->rate, partyId: $invoice->party_id, vehicleId: $vehicle->id);
+                ->branch($invoice->branch_id);
+            $this->ownership->debitRevenue($builder, $invoice, $item, $vehicle);
+            $builder->credit($this->accounts->idFor(AccountRole::Receivables), $item->net, $invoice->currency_id, $invoice->rate, partyId: $invoice->party_id, vehicleId: $vehicle->id);
 
             if (Money::of($item->cost_snapshot)->isPositive()) {
                 $builder
@@ -100,6 +103,7 @@ class ReturnSalesItem
                 $commission->update(['status' => CommissionStatus::Cancelled]);
             }
 
+            $this->ownership->undoSale($item);
             $entry = $this->posting->post($builder);
             $return->update(['journal_entry_id' => $entry->id]);
             $item->update(['return_id' => $return->id]);

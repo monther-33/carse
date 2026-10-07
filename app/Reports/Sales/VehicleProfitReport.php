@@ -71,7 +71,7 @@ class VehicleProfitReport extends Report
             ->when(! empty($f['branch_id']), fn ($q) => $q->where('s.branch_id', $f['branch_id']))
             ->when(! empty($f['brand_id']), fn ($q) => $q->where('v.brand_id', $f['brand_id']))
             ->orderBy('s.date')
-            ->get(['s.date', 'v.id', 'v.vin', 'v.year', 'v.received_at', 'b.name as brand', 'm.name as model', 'i.net_base', 'i.cost_snapshot', 'i.commission'])
+            ->get(['s.date', 'v.id', 'v.vin', 'v.year', 'v.received_at', 'b.name as brand', 'm.name as model', DB::raw('COALESCE(i.showroom_revenue, i.net_base) AS net_base'), 'i.cost_snapshot', 'i.commission'])
             ->map(function ($r) use ($afterSale) {
                 $profit = Money::of((string) $r->net_base)->minus(Money::of((string) $r->cost_snapshot))->minus(Money::of((string) $r->commission));
                 $after = Money::of((string) ($afterSale[$r->id] ?? '0'));

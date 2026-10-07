@@ -80,6 +80,7 @@ class PostOpeningStock
                     'total_cost' => $item->cost,
                     'purchase_invoice_id' => null,
                     'sale_invoice_id' => null,
+                    'ownership_id' => null,
                     'received_at' => $item->received_at,
                     'sold_at' => null,
                 ])->save();

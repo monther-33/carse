@@ -21,6 +21,7 @@ use App\Services\Accounting\AccountResolver;
 use App\Services\Accounting\JournalBuilder;
 use App\Services\Accounting\PostingService;
 use App\Services\Numbering\SequenceService;
+use App\Services\Ownership\OwnershipSales;
 use App\Services\Sales\CommissionCalculator;
 use App\Services\Sales\DepositService;
 use App\Services\Vehicles\VehicleStateMachine;
@@ -31,6 +32,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Approves a draft sale. One journal entry carries (spec 5.3):
  *  - revenue:    Dr receivables (party, invoice currency) / Cr vehicle sales     — per vehicle
+ *                (a car with owners: Cr the showroom's part and each owner's part, see OwnershipSales)
  *  - cost:       Dr cost of vehicles sold / Cr inventory (vehicles.total_cost)  — per vehicle, frozen in cost_snapshot
  *  - deposit:    Dr customer deposits / Cr receivables                           — any part of the customer's posted deposit credit
  *  - trade-in:   Dr inventory (customer's car) / Cr receivables
@@ -55,6 +57,7 @@ class PostSalesInvoice
         private readonly SaveVoucher $saveVoucher,
         private readonly PostVoucher $postVoucher,
         private readonly DepositService $deposits,
+        private readonly OwnershipSales $ownership,
     ) {}
 
     public function handle(SalesInvoice $invoice): SalesInvoice
@@ -89,8 +92,10 @@ class PostSalesInvoice
                 throw BusinessRuleException::make('sales.errors.plan_outdated');
             }
 
+            $splits = $invoice->items->mapWithKeys(fn ($item) => [$item->id => $this->ownership->splitFor($item, $vehicles[$item->vehicle_id])])->all();
+
             $number = $this->sequences->next(SequenceType::SalesInvoice, $invoice->date);
-            $entry = $this->posting->post($this->entry($invoice, $number, $vehicles->all(), $deposit));
+            $entry = $this->posting->post($this->entry($invoice, $number, $vehicles->all(), $deposit, $splits));
             $this->markPosted($invoice, $number, $entry);
             $invoice->update(['deposit_applied' => (string) $deposit]);
 
@@ -99,6 +104,7 @@ class PostSalesInvoice
                 $commission = $this->commissions->forVehicle(Money::of($item->net_base));
 
                 $item->update(['cost_snapshot' => $vehicle->total_cost, 'commission' => (string) $commission]);
+                $this->ownership->recordSale($item, $vehicle, $splits[$item->id], $invoice->date);
                 if ($commission->isPositive()) {
                     Commission::query()->create([
                         'sales_invoice_id' => $invoice->id,
@@ -120,6 +126,7 @@ class PostSalesInvoice
                     'total_cost' => $invoice->tradeIn->value_base,
                     'purchase_invoice_id' => null,
                     'sale_invoice_id' => null,
+                    'ownership_id' => null,
                     'received_at' => $invoice->date,
                     'sold_at' => null,
                 ])->save();
@@ -173,8 +180,9 @@ class PostSalesInvoice
 
     /**
      * @param  array<int, Vehicle>  $vehicles
+     * @param  array<int, array{showroom: BigDecimal, owners: array<int, BigDecimal>}|null>  $splits  per item id
      */
-    private function entry(SalesInvoice $invoice, string $number, array $vehicles, BigDecimal $deposit): JournalBuilder
+    private function entry(SalesInvoice $invoice, string $number, array $vehicles, BigDecimal $deposit, array $splits): JournalBuilder
     {
         $receivables = $this->accounts->idFor(AccountRole::Receivables);
         $builder = JournalBuilder::make($invoice->date, __('sales.entry', ['number' => $number]))
@@ -186,9 +194,8 @@ class PostSalesInvoice
         foreach ($invoice->items as $item) {
             $vehicle = $vehicles[$item->vehicle_id];
 
-            $builder
-                ->debit($receivables, $item->net, $invoice->currency_id, $invoice->rate, partyId: $invoice->party_id, vehicleId: $vehicle->id, memo: $vehicle->vin)
-                ->credit($this->accounts->idFor(AccountRole::VehicleSales), $item->net, $invoice->currency_id, $invoice->rate, vehicleId: $vehicle->id, memo: $vehicle->vin);
+            $builder->debit($receivables, $item->net, $invoice->currency_id, $invoice->rate, partyId: $invoice->party_id, vehicleId: $vehicle->id, memo: $vehicle->vin);
+            $this->ownership->creditRevenue($builder, $invoice, $item, $vehicle, $splits[$item->id]);
 
             if (Money::of($vehicle->total_cost)->isPositive()) {
                 $builder

@@ -42,7 +42,7 @@ class DashboardMetrics
             ->whereNull('i.return_id')
             ->where('s.date', '>=', $from->toDateString())
             ->when(! $user->canAny(['sales.view_all', 'reports.sales']), fn ($q) => $q->where('s.salesperson_id', $user->id))
-            ->selectRaw('COUNT(*) AS n, COALESCE(SUM(i.net_base), 0) AS revenue, COALESCE(SUM(i.net_base - i.cost_snapshot - i.commission), 0) AS profit')
+            ->selectRaw('COUNT(*) AS n, COALESCE(SUM(i.net_base), 0) AS revenue, COALESCE(SUM(COALESCE(i.showroom_revenue, i.net_base) - i.cost_snapshot - i.commission), 0) AS profit')
             ->first();
 
         return [
