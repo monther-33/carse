@@ -59,6 +59,7 @@ return [
         'journal_book' => 'Journal book',
         'cashbox_movement' => 'Cashbox movement',
         'aging' => 'Debt ageing',
+        'owner_dues' => 'Vehicle owners and partners dues',
         'expenses_by_category' => 'Expenses by category',
         'cancelled_documents' => 'Cancelled documents',
         'sales' => 'Sales',

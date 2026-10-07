@@ -46,6 +46,11 @@ return [
     'due_from_sale' => 'Due from the sale',
     'on_owners' => 'On the owners',
     'below_net_price' => 'Consignment car :vin is sold below what its owners were promised; the showroom bears the difference of :short LYD.',
+    'owner' => 'Owner / partner',
+    'balance' => 'Balance',
+    'pending' => 'Held until collected',
+    'available' => 'Available to pay',
+    'dues_note' => 'A positive balance is owed to the owner; a negative one is owed by them to the showroom (expenses or their share of a purchase). Held: their part of "as collected" sales that customers have not paid yet.',
     'errors' => [
         'base_cashbox' => 'Vehicle owners and partners are settled in dinars only: choose a dinar cashbox.',
         'over_available' => 'The amount is more than may be paid to the owner now (:available).',

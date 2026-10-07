@@ -114,3 +114,14 @@ it('hides everything when the feature is off', function () {
     $this->get(route('consignments.index'))->assertNotFound();
     Livewire::test(PurchaseForm::class)->assertDontSee(__('ownership.partners'));
 });
+
+it('reports what each owner is due', function () {
+    $ownership = receiveConsignment(['earning_mode' => 'fixed', 'earning_amount' => '1000']);
+    sell($ownership->vehicle, ['price' => '20000']);
+    $owner = $ownership->owners()->first()->party;
+
+    $this->get(route('reports.show', ['key' => 'owner_dues']))
+        ->assertOk()
+        ->assertSee($owner->name)
+        ->assertSee('19,000.000');
+});

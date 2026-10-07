@@ -18,6 +18,7 @@ final class ReportRegistry
         Accounting\JournalBookReport::class,
         Accounting\CashboxMovementReport::class,
         Accounting\AgingReport::class,
+        Accounting\OwnerDuesReport::class,
         Accounting\ExpensesByCategoryReport::class,
         Accounting\CancelledDocumentsReport::class,
         Sales\SalesReport::class,

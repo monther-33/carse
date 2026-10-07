@@ -59,6 +59,7 @@ return [
         'journal_book' => 'دفتر اليومية',
         'cashbox_movement' => 'حركة الخزينة',
         'aging' => 'أعمار الديون',
+        'owner_dues' => 'مستحقات ملاك وشركاء السيارات',
         'expenses_by_category' => 'المصروفات حسب التصنيف',
         'cancelled_documents' => 'المستندات الملغاة',
         'sales' => 'المبيعات',
