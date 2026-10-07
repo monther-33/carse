@@ -61,5 +61,12 @@ return [
         'discount_allowed' => 'Discount allowed',
         'forfeited_deposits' => 'Forfeited deposits',
         'opening_balances' => 'Opening balances',
+        'owners_payable' => 'Due to vehicle owners and partners',
+        'consignment_revenue' => 'Consignment commissions',
     ],
+    'ownership_kind' => ['consignment' => 'Consignment', 'partnership' => 'Partnership'],
+    'earning_mode' => ['net_price' => 'Net price to the owners, the rest to the showroom', 'percent' => 'Percentage commission', 'fixed' => 'Fixed commission'],
+    'payout_timing' => ['on_sale' => 'On sale', 'on_collection' => 'As the customer pays'],
+    'ownership_status' => ['active' => 'In the showroom', 'sold' => 'Sold', 'returned' => 'Returned to owner', 'closed' => 'Closed'],
+    'cost_bearer' => ['showroom' => 'Showroom', 'owners' => 'Owners'],
 ];

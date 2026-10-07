@@ -25,6 +25,8 @@ enum AccountRole: string
     case DiscountAllowed = 'discount_allowed';
     case ForfeitedDeposits = 'forfeited_deposits';
     case OpeningBalances = 'opening_balances';
+    case OwnersPayable = 'owners_payable';
+    case ConsignmentRevenue = 'consignment_revenue';
 
     public function settingKey(): string
     {

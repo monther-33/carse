@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CostBearer;
 use App\Enums\DocumentStatus;
 use App\Models\Concerns\Auditable;
 use App\Models\Concerns\HasUserstamps;
@@ -42,12 +43,12 @@ class Expense extends Model implements HasMedia
     protected $fillable = [
         'branch_id', 'number', 'date', 'category_id', 'cashbox_id', 'amount', 'currency_id', 'rate', 'amount_base',
         'vehicle_id', 'description', 'recurs_every_months', 'next_due_date', 'status', 'journal_entry_id', 'notes',
-        'approved_by', 'approved_at', 'cancelled_by', 'cancelled_at', 'cancel_reason',
-    ];
+        'approved_by', 'approved_at', 'cancelled_by', 'cancelled_at', 'cancel_reason', 'borne_by'];
 
     protected function casts(): array
     {
         return [
+            'borne_by' => CostBearer::class,
             'date' => 'date',
             'next_due_date' => 'date',
             'amount' => 'decimal:3',

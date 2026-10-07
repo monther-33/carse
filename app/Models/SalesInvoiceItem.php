@@ -23,11 +23,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class SalesInvoiceItem extends Model
 {
-    protected $fillable = ['invoice_id', 'vehicle_id', 'price', 'discount', 'net', 'net_base', 'cost_snapshot', 'commission', 'return_id'];
+    protected $fillable = ['invoice_id', 'vehicle_id', 'price', 'discount', 'net', 'net_base', 'cost_snapshot', 'commission', 'return_id', 'ownership_id', 'showroom_revenue'];
 
     protected function casts(): array
     {
         return [
+            'showroom_revenue' => 'decimal:3',
             'price' => 'decimal:3',
             'discount' => 'decimal:3',
             'net' => 'decimal:3',

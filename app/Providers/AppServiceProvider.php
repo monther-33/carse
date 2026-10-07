@@ -13,6 +13,7 @@ use App\Models\Reservation;
 use App\Models\ReturnDocument;
 use App\Models\SalesInvoice;
 use App\Models\Vehicle;
+use App\Models\VehicleOwnership;
 use App\Models\Voucher;
 use App\Services\Currency\ExchangeRateService;
 use App\Support\BackupDestinations;
@@ -58,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
             'installment_plan' => InstallmentPlan::class,
             'manual_journal' => ManualJournal::class,
             'opening_stock' => OpeningStock::class,
+            'vehicle_ownership' => VehicleOwnership::class,
         ]);
 
         // Arabic field names in validation messages, however the field is nested (App\Validation\Validator).

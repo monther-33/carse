@@ -17,11 +17,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class VehicleCost extends Model
 {
-    protected $fillable = ['vehicle_id', 'expense_id', 'amount', 'description', 'to_cost_of_sales', 'created_by'];
+    protected $fillable = ['vehicle_id', 'expense_id', 'amount', 'description', 'to_cost_of_sales', 'created_by', 'owners_amount'];
 
     protected function casts(): array
     {
         return [
+            'owners_amount' => 'decimal:3',
             'amount' => 'decimal:3',
             'to_cost_of_sales' => 'boolean',
         ];

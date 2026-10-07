@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PayoutTiming;
 use App\Enums\VehicleStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class PurchaseInvoiceItem extends Model
 {
-    protected $fillable = ['invoice_id', 'vehicle_id', 'entry_status', 'price', 'discount', 'net', 'cost_base', 'return_id'];
+    protected $fillable = ['invoice_id', 'vehicle_id', 'entry_status', 'price', 'discount', 'net', 'cost_base', 'return_id', 'partners', 'partner_payout'];
 
     protected function casts(): array
     {
@@ -31,6 +32,8 @@ class PurchaseInvoiceItem extends Model
             'discount' => 'decimal:3',
             'net' => 'decimal:3',
             'cost_base' => 'decimal:3',
+            'partners' => 'array',
+            'partner_payout' => PayoutTiming::class,
         ];
     }
 

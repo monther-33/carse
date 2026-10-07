@@ -33,7 +33,8 @@ class AccountResolver
     }
 
     /**
-     * Control accounts whose lines must carry a party_id (receivables, payables, deposits).
+     * Control accounts whose lines must carry a party_id (receivables, payables, deposits,
+     * vehicle owners and partners).
      *
      * @return list<int>
      */
@@ -43,6 +44,7 @@ class AccountResolver
             $this->idFor(AccountRole::Receivables),
             $this->idFor(AccountRole::Payables),
             $this->idFor(AccountRole::CustomerDeposits),
+            $this->idFor(AccountRole::OwnersPayable),
         ];
     }
 }

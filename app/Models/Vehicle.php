@@ -64,7 +64,7 @@ class Vehicle extends Model implements HasMedia
     protected $fillable = [
         'branch_id', 'vin', ...self::EDITABLE,
         'status', 'purchase_cost', 'extra_cost', 'total_cost',
-        'purchase_invoice_id', 'sale_invoice_id', 'received_at', 'sold_at',
+        'purchase_invoice_id', 'sale_invoice_id', 'ownership_id', 'received_at', 'sold_at',
     ];
 
     protected function casts(): array
@@ -114,6 +114,16 @@ class Vehicle extends Model implements HasMedia
     public function color(): BelongsTo
     {
         return $this->belongsTo(Color::class)->withTrashed();
+    }
+
+    /**
+     * The current owners and agreement (null: the showroom's own car).
+     *
+     * @return BelongsTo<VehicleOwnership, $this>
+     */
+    public function ownership(): BelongsTo
+    {
+        return $this->belongsTo(VehicleOwnership::class, 'ownership_id');
     }
 
     /** @return BelongsTo<Location, $this> */

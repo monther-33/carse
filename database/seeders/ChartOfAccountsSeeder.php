@@ -27,6 +27,7 @@ class ChartOfAccountsSeeder extends Seeder
             ['21', 'ذمم الموردين', null, false, []],
             ['22', 'عرابين العملاء', null, false, []],
             ['23', 'عمولات مستحقة', null, false, []],
+            ['24', 'مستحقات ملاك وشركاء السيارات', null, false, []],
         ]],
         ['3', 'حقوق الملكية', AccountType::Equity, true, [
             ['31', 'رأس المال', null, false, []],
@@ -37,6 +38,7 @@ class ChartOfAccountsSeeder extends Seeder
         ['4', 'الإيرادات', AccountType::Revenue, true, [
             ['41', 'مبيعات السيارات', null, false, []],
             ['42', 'إيرادات أخرى', null, false, []],
+            ['43', 'عمولات سيارات الأمانة', null, false, []],
         ]],
         ['5', 'تكلفة السيارات المباعة', AccountType::Expense, true, [
             ['51', 'تكلفة السيارات المباعة', null, false, []],

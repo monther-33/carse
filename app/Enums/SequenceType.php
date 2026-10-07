@@ -20,6 +20,7 @@ enum SequenceType: string
     case SalesReturn = 'sales_return';
     case ManualJournal = 'manual_journal';
     case OpeningStock = 'opening_stock';
+    case ConsignmentIntake = 'consignment_intake';
 
     public function defaultPrefix(): string
     {
@@ -36,6 +37,7 @@ enum SequenceType: string
             self::SalesReturn => 'SR',
             self::ManualJournal => 'MJ',
             self::OpeningStock => 'OS',
+            self::ConsignmentIntake => 'CI',
         };
     }
 
