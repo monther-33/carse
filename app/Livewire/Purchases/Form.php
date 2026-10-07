@@ -5,6 +5,7 @@ namespace App\Livewire\Purchases;
 use App\Actions\Purchases\PostPurchaseInvoice;
 use App\Actions\Purchases\SavePurchaseInvoice;
 use App\Enums\FuelType;
+use App\Enums\PayoutTiming;
 use App\Enums\PurchaseSource;
 use App\Enums\Transmission;
 use App\Enums\VehicleCondition;
@@ -96,6 +97,8 @@ class Form extends Component
             [
                 'entry_status' => $item->entry_status->value,
                 'price' => (string) $item->price,
+                'partners' => array_map(fn ($p) => ['party_id' => (int) $p['party_id'], 'share' => rtrim(rtrim((string) $p['share'], '0'), '.')], $item->partners ?? []),
+                'partner_payout' => $item->partner_payout->value ?? PayoutTiming::OnSale->value,
             ],
         ))->all();
     }
@@ -108,7 +111,20 @@ class Form extends Component
             'fuel' => FuelType::Petrol->value, 'transmission' => Transmission::Automatic->value, 'origin' => '',
             'location_id' => null, 'entry_status' => VehicleStatus::Available->value,
             'price' => '', 'asking_price' => '', 'min_price' => '', 'notes' => null,
+            'partners' => [], 'partner_payout' => PayoutTiming::OnSale->value,
         ];
+    }
+
+    /** A partner who owns a share of the car with the showroom. */
+    public function addPartner(int $index): void
+    {
+        $this->items[$index]['partners'][] = ['party_id' => null, 'share' => ''];
+    }
+
+    public function removePartner(int $index, int $row): void
+    {
+        unset($this->items[$index]['partners'][$row]);
+        $this->items[$index]['partners'] = array_values($this->items[$index]['partners']);
     }
 
     public function removeItem(int $index): void
@@ -160,6 +176,10 @@ class Form extends Component
             'items.*.price' => ['required', 'numeric', 'gt:0', 'decimal:0,3'],
             'items.*.asking_price' => ['nullable', 'numeric', 'min:0', 'decimal:0,3'],
             'items.*.min_price' => ['nullable', 'numeric', 'min:0', 'decimal:0,3'],
+            'items.*.partners' => ['array'],
+            'items.*.partners.*.party_id' => ['required', 'exists:parties,id'],
+            'items.*.partners.*.share' => ['required', 'numeric', 'gt:0', 'lt:100', 'decimal:0,4'],
+            'items.*.partner_payout' => ['nullable', Rule::enum(PayoutTiming::class)],
         ]);
 
         if ($data['cashbox_id'] && ! auth()->user()->can('view', Cashbox::query()->findOrFail($data['cashbox_id']))) {
@@ -206,6 +226,7 @@ class Form extends Component
             'locations' => Location::query()->orderBy('name')->get(),
             'sources' => PurchaseSource::cases(),
             'entryStatuses' => VehicleStatus::entryStatuses(),
+            'payouts' => PayoutTiming::cases(),
         ])->title($this->invoice ? __('purchases.edit', ['ref' => $this->invoice->displayNumber()]) : __('purchases.new'));
     }
 }

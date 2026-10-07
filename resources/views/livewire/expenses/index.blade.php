@@ -130,8 +130,18 @@
                 @endif
             @endif
             <x-ui.field :label="__('expenses.vehicle')" error="form.vehicle_id" class="sm:col-span-2" :hint="__('expenses.vehicle_hint')">
-                <livewire:pickers.vehicle-picker wire:model="form.vehicle_id" />
+                <livewire:pickers.vehicle-picker wire:model.live="form.vehicle_id" />
             </x-ui.field>
+            @if ($ownedVehicle)
+                <x-ui.field :label="__('expenses.borne_by')" for="e-borne" error="form.borne_by" class="sm:col-span-2"
+                            :hint="$ownedVehicle->ownership->isConsignment() ? __('expenses.borne_by_consignment') : __('expenses.borne_by_partnership')">
+                    <select id="e-borne" wire:model="form.borne_by" class="form-input">
+                        @foreach (\App\Enums\CostBearer::cases() as $bearer)
+                            <option value="{{ $bearer->value }}">{{ $bearer->label() }}</option>
+                        @endforeach
+                    </select>
+                </x-ui.field>
+            @endif
             <x-ui.field :label="__('app.fields.description')" for="e-desc" error="form.description" class="sm:col-span-2" required>
                 <input id="e-desc" type="text" wire:model="form.description" class="form-input">
             </x-ui.field>

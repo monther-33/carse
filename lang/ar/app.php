@@ -39,6 +39,8 @@ return [
         'new_expense' => 'مصروف جديد',
         'view_journals' => 'عرض القيود',
         'new_journal' => 'قيد يدوي جديد',
+        'view_consignments' => 'عرض سيارات الأمانة',
+        'new_consignment' => 'استلام سيارة أمانة',
     ],
     'nav' => [
         'dashboard' => 'لوحة التحكم',
@@ -57,6 +59,7 @@ return [
         'trading' => 'المخزون والمشتريات',
         'vehicles' => 'السيارات',
         'purchases' => 'فواتير الشراء',
+        'consignments' => 'سيارات الأمانة',
         'parties' => 'العملاء والموردون',
         'finance' => 'المالية',
         'vouchers' => 'السندات',

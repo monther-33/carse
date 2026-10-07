@@ -14,6 +14,7 @@ use App\Models\Vehicle;
 use App\Models\VehicleOwnership;
 use App\Services\Accounting\AccountResolver;
 use App\Services\Accounting\JournalBuilder;
+use App\Support\Features;
 use App\Support\Money;
 use Brick\Math\BigDecimal;
 
@@ -27,7 +28,10 @@ use Brick\Math\BigDecimal;
  */
 class PartnershipPurchase
 {
-    public function __construct(private readonly AccountResolver $accounts) {}
+    public function __construct(
+        private readonly AccountResolver $accounts,
+        private readonly Features $features,
+    ) {}
 
     /**
      * Checks a draft line's partners: their shares leave the showroom a share above zero.
@@ -41,6 +45,7 @@ class PartnershipPurchase
         if ($partners === []) {
             return ['partners' => null, 'payout' => null];
         }
+        $this->features->ensure(Features::CONSIGNMENT);
 
         $sum = $this->sumShares(array_map(fn ($p) => (string) ($p['share'] ?? '0'), $partners));
         if (! $sum->isLessThan(100)) {

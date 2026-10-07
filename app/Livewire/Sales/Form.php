@@ -24,6 +24,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\Currency\ExchangeRateService;
 use App\Services\Installments\InstallmentScheduleService;
+use App\Services\Ownership\NetPriceCheck;
 use App\Services\Sales\CreditLimitCheck;
 use App\Services\Sales\DepositService;
 use App\Support\Features;
@@ -342,12 +343,22 @@ class Form extends Component
         );
     }
 
-    public function render(InstallmentScheduleService $schedule, DepositService $deposits, CreditLimitCheck $credit): View
+    public function render(InstallmentScheduleService $schedule, DepositService $deposits, CreditLimitCheck $credit, NetPriceCheck $netPrice): View
     {
         $terms = $this->terms();
         $party = $this->party_id ? Party::query()->find($this->party_id) : null;
         $rate = is_numeric($this->rate) && (float) $this->rate > 0 ? (string) $this->rate : '1';
-        $vehicles = Vehicle::query()->with(['brand', 'carModel'])->findMany(array_column($this->items, 'vehicle_id'))->keyBy('id');
+        $vehicles = Vehicle::query()->with(['brand', 'carModel', 'ownership'])->findMany(array_column($this->items, 'vehicle_id'))->keyBy('id');
+
+        // Consignment cars sold below what the owners were promised (warning only, cost viewers only).
+        $prices = array_map(fn ($i) => is_numeric($i['price']) ? Money::of((string) $i['price']) : Money::zero(), $this->items);
+        $discounts = Money::allocate($terms->discount, $prices);
+        $lines = [];
+        foreach ($this->items as $n => $item) {
+            if (isset($vehicles[$item['vehicle_id']])) {
+                $lines[] = ['vehicle' => $vehicles[$item['vehicle_id']], 'net_base' => Money::toBase($prices[$n]->minus($discounts[$n]), $rate)];
+            }
+        }
 
         return view('livewire.sales.form', [
             'terms' => $terms,
@@ -366,6 +377,7 @@ class Form extends Component
             'colors' => Color::query()->orderBy('name')->get(),
             'locations' => Location::query()->orderBy('name')->get(),
             'canViewCost' => auth()->user()->can('vehicles.view_cost'),
+            'netPriceWarnings' => auth()->user()->can('vehicles.view_cost') ? $netPrice->warnings($lines) : [],
             'creditWarning' => $party ? $credit->warning($party, Money::toBase($terms->due->minus($terms->paid), $rate)) : null,
             'availableDeposit' => $this->party_id ? $deposits->availableCredit($this->party_id, (int) $this->currency_id) : Money::zero(),
         ])->title($this->invoice ? __('sales.edit', ['ref' => $this->invoice->displayNumber()]) : __('sales.new'));

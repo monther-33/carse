@@ -3,6 +3,9 @@
         <x-ui.card :title="__('vehicles.card')">
             <x-slot:actions>
                 <x-ui.badge :color="$vehicle->status->color()">{{ $vehicle->status->label() }}</x-ui.badge>
+                @if ($vehicle->ownership)
+                    <x-ui.badge :color="$vehicle->ownership->isConsignment() ? 'purple' : 'blue'">{{ $vehicle->ownership->kind->label() }}</x-ui.badge>
+                @endif
                 <x-ui.button size="sm" variant="secondary" icon="printer" :href="route('print.vehicle', $vehicle)" target="_blank">{{ __('print.print') }}</x-ui.button>
                 @if ($canUpdate)
                     <x-ui.button size="sm" variant="secondary" icon="pencil" wire:click="edit">{{ __('app.edit') }}</x-ui.button>
@@ -111,6 +114,44 @@
             </x-ui.card>
         @endif
 
+        @if ($canViewCost && $vehicle->ownership)
+            @php($own = $vehicle->ownership)
+            <x-ui.card :title="$own->kind->label()">
+                <x-slot:actions>
+                    <x-ui.badge :color="$own->status === \App\Enums\OwnershipStatus::Active ? 'green' : 'gray'">{{ $own->status->label() }}</x-ui.badge>
+                    @if ($own->isConsignment())
+                        <x-ui.button size="sm" variant="ghost" icon="printer" :href="route('print.consignment', $own)" target="_blank" :title="__('ownership.print_receipt')" />
+                    @endif
+                </x-slot:actions>
+                @if ($own->number)<p class="num mb-2 font-mono text-xs text-gray-500">{{ $own->number }}</p>@endif
+                <ul class="divide-y divide-gray-100 text-sm">
+                    @foreach ($own->owners as $owner)
+                        @php($due = $own->dues->whereNull('reversed_at')->firstWhere('party_id', $owner->party_id))
+                        <li class="flex items-start justify-between gap-2 py-1.5">
+                            <span>
+                                @can('viewStatement', $owner->party)
+                                    <a href="{{ route('parties.statement', $owner->party) }}" wire:navigate class="hover:text-brand-700 hover:underline">{{ $owner->party->name }}</a>
+                                @else
+                                    {{ $owner->party->name }}
+                                @endcan
+                                <span class="num text-xs text-gray-500">{{ rtrim(rtrim($owner->share, '0'), '.') }}%</span>
+                                @if (\App\Support\Money::of($owner->contribution)->isPositive())
+                                    <span class="block text-xs text-gray-500">{{ __('ownership.contribution_label') }}: <span class="num">{{ \App\Support\Money::format($owner->contribution) }}</span></span>
+                                @endif
+                            </span>
+                            @if ($due)
+                                <span class="text-end text-xs">{{ __('ownership.due_from_sale') }}<span class="num block font-semibold">{{ \App\Support\Money::format($due->amount) }}</span></span>
+                            @endif
+                        </li>
+                    @endforeach
+                    @unless ($own->isConsignment())
+                        <li class="py-1.5 text-gray-600">{{ __('ownership.showroom') }} <span class="num text-xs">{{ rtrim(rtrim($own->showroom_share, '0'), '.') }}%</span></li>
+                    @endunless
+                </ul>
+                <div class="mt-3 border-t pt-2 text-xs text-gray-600">@include('livewire.ownership.partials.agreement', ['ownership' => $own])</div>
+            </x-ui.card>
+        @endif
+
         @if ($canViewCost)
             <x-ui.card :title="__('vehicles.cost')">
                 <dl class="space-y-2 text-sm">
@@ -129,7 +170,11 @@
                         @foreach ($costs as $cost)
                             <li class="flex justify-between py-1.5">
                                 <span>{{ $cost->description }} @if ($cost->to_cost_of_sales)<x-ui.badge>{{ __('vehicles.after_sale') }}</x-ui.badge>@endif</span>
-                                <span class="num">{{ \App\Support\Money::format($cost->amount) }}</span>
+                                <span class="num text-end">{{ \App\Support\Money::format($cost->amount) }}
+                                    @if (! \App\Support\Money::of($cost->owners_amount)->isZero())
+                                        <span class="block text-gray-500">{{ __('ownership.on_owners') }}: {{ \App\Support\Money::format($cost->owners_amount) }}</span>
+                                    @endif
+                                </span>
                             </li>
                         @endforeach
                     </ul>

@@ -48,7 +48,7 @@
                         <td class="num hidden font-mono text-xs sm:table-cell">{{ $vehicle->vin }}</td>
                         <td class="num hidden md:table-cell">{{ $vehicle->plate_no }}</td>
                         <td class="hidden md:table-cell">{{ $vehicle->color?->name }}</td>
-                        <td><x-ui.badge :color="$vehicle->status->color()">{{ $vehicle->status->label() }}</x-ui.badge></td>
+                        <td><x-ui.badge :color="$vehicle->status->color()">{{ $vehicle->status->label() }}</x-ui.badge> <x-ownership-badge :vehicle="$vehicle" /></td>
                         <td class="hidden sm:table-cell">
                             @if ($age !== null)
                                 <span @class(['num', 'font-semibold text-red-700' => $age > $staleCritical, 'font-semibold text-yellow-700' => $age > $staleWarning && $age <= $staleCritical])>

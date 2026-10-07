@@ -13,6 +13,7 @@ return [
     'modules' => [
         'vehicles' => 'السيارات',
         'purchases' => 'المشتريات',
+        'consignments' => 'سيارات الأمانة',
         'quotations' => 'عروض الأسعار',
         'reservations' => 'الحجوزات',
         'sales' => 'المبيعات',
@@ -41,6 +42,7 @@ return [
     'actions' => [
         'vehicles' => ['view' => 'عرض السيارات', 'view_cost' => 'عرض التكلفة والربح', 'create' => 'إضافة سيارة', 'update' => 'تعديل سيارة'],
         'purchases' => ['view' => 'عرض فواتير الشراء', 'create' => 'إنشاء فاتورة شراء', 'approve' => 'اعتماد فاتورة شراء', 'cancel' => 'إلغاء فاتورة معتمدة'],
+        'consignments' => ['view' => 'عرض سيارات الأمانة وملاكها', 'manage' => 'استلام سيارة أمانة وإعادتها لمالكها'],
         'quotations' => ['view' => 'عرض عروض الأسعار', 'create' => 'إنشاء عرض سعر'],
         'reservations' => ['view' => 'عرض الحجوزات', 'create' => 'إنشاء حجز', 'cancel' => 'إلغاء حجز معتمد'],
         'sales' => [

@@ -45,7 +45,7 @@ class Index extends Component
     public function render(Settings $settings): View
     {
         $vehicles = Vehicle::query()
-            ->with(['brand', 'carModel', 'color', 'location'])
+            ->with(['brand', 'carModel', 'color', 'location', 'ownership'])
             ->where('status', '!=', VehicleStatus::Pending)
             ->when($this->status === 'stock', fn ($q) => $q->inStock())
             ->when(! in_array($this->status, ['stock', ''], true), fn ($q) => $q->where('status', $this->status))

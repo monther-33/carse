@@ -55,6 +55,38 @@
                     'brandModels' => $modelsByBrand[$item['brand_id'] ?? 0] ?? collect(),
                 ])
             </div>
+
+            {{-- Partners who own a share of this car with the showroom (optional). --}}
+            @feature('consignment')
+            @php($partners = $item['partners'] ?? [])
+            @php($partnerSum = array_sum(array_map(fn ($p) => is_numeric($p['share'] ?? '') ? (float) $p['share'] : 0, $partners)))
+            <div class="mt-4 border-t border-gray-100 pt-4">
+                <div class="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+                    <h4 class="text-sm font-semibold text-gray-700">{{ __('ownership.partners') }}</h4>
+                    <p class="text-xs text-gray-500">{{ __('ownership.partners_hint') }}</p>
+                </div>
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                    <div class="lg:col-span-2">
+                        @include('livewire.ownership.partials.owners', [
+                            'path' => 'items.'.$i.'.partners',
+                            'rows' => $partners,
+                            'add' => 'addPartner('.$i.')',
+                            'remove' => 'removePartner('.$i.', ',
+                            'total' => $partners ? __('ownership.showroom_share_is', ['share' => rtrim(rtrim(number_format(100 - $partnerSum, 4, '.', ''), '0'), '.')]) : null,
+                        ])
+                    </div>
+                    @if ($partners)
+                        <x-ui.field :label="__('ownership.payout')" error="items.{{ $i }}.partner_payout">
+                            <select wire:model="items.{{ $i }}.partner_payout" class="form-input">
+                                @foreach ($payouts as $p)
+                                    <option value="{{ $p->value }}">{{ $p->label() }}</option>
+                                @endforeach
+                            </select>
+                        </x-ui.field>
+                    @endif
+                </div>
+            </div>
+            @endfeature
         </x-ui.card>
     @endforeach
 

@@ -6,6 +6,7 @@ use App\Actions\DeleteDraft;
 use App\Actions\Expenses\CancelExpense;
 use App\Actions\Expenses\PostExpense;
 use App\Actions\Expenses\SaveExpense;
+use App\Enums\CostBearer;
 use App\Enums\DocumentStatus;
 use App\Livewire\Concerns\AcceptsQuickCreate;
 use App\Livewire\Concerns\HandlesBusinessErrors;
@@ -13,8 +14,10 @@ use App\Livewire\Concerns\Notifies;
 use App\Models\Cashbox;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Models\Vehicle;
 use App\Support\Settings;
 use Illuminate\Contracts\View\View;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -82,12 +85,12 @@ class Index extends Component
         $this->editingId = null;
         $this->repeatOf = $copyFrom;
         $this->form = ['date' => now()->toDateString(), 'category_id' => null, 'cashbox_id' => null, 'amount' => '', 'rate' => '',
-            'vehicle_id' => null, 'description' => '', 'recurs_every_months' => null];
+            'vehicle_id' => null, 'borne_by' => 'showroom', 'description' => '', 'recurs_every_months' => null];
 
         if ($copyFrom !== null) {
             // "Repeat" a recurring expense: same category, cashbox, amount and text, new date.
             $source = $this->findVisible($copyFrom);
-            $this->form = array_merge($this->form, $source->only(['category_id', 'cashbox_id', 'vehicle_id', 'description', 'recurs_every_months']), ['amount' => (string) $source->amount]);
+            $this->form = array_merge($this->form, $source->only(['category_id', 'cashbox_id', 'vehicle_id', 'description', 'recurs_every_months']), ['amount' => (string) $source->amount, 'borne_by' => $source->borne_by->value ?? 'showroom']);
         }
 
         $this->receipt = null;
@@ -103,7 +106,7 @@ class Index extends Component
         $this->editingId = $expense->id;
         $this->repeatOf = null;
         $this->form = $expense->only(['category_id', 'cashbox_id', 'vehicle_id', 'description', 'recurs_every_months'])
-            + ['date' => $expense->date->toDateString(), 'amount' => (string) $expense->amount, 'rate' => (string) $expense->rate];
+            + ['date' => $expense->date->toDateString(), 'amount' => (string) $expense->amount, 'rate' => (string) $expense->rate, 'borne_by' => $expense->borne_by->value ?? 'showroom'];
         $this->receipt = null;
         $this->resetValidation();
         $this->showForm = true;
@@ -121,6 +124,7 @@ class Index extends Component
             'form.amount' => ['required', 'numeric', 'gt:0', 'decimal:0,3'],
             'form.rate' => ['nullable', 'numeric', 'gt:0', 'decimal:0,6'],
             'form.vehicle_id' => ['nullable', 'exists:vehicles,id'],
+            'form.borne_by' => ['nullable', Rule::enum(CostBearer::class)],
             'form.description' => ['required', 'string', 'max:255'],
             'form.recurs_every_months' => ['nullable', 'integer', 'between:1,24'],
             'receipt' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:8192'],
@@ -203,6 +207,9 @@ class Index extends Component
             'categories' => ExpenseCategory::query()->where('is_active', true)->orderBy('name')->get(),
             'cashboxes' => Cashbox::query()->whereIn('id', $cashboxIds)->where('is_active', true)->with('currency')->orderBy('name')->get(),
             'statuses' => DocumentStatus::cases(),
+            // A car with owners: ask who bears the expense.
+            'ownedVehicle' => empty($this->form['vehicle_id']) ? null
+                : Vehicle::query()->with('ownership')->whereNotNull('ownership_id')->find($this->form['vehicle_id']),
             'dueCount' => Expense::query()->whereIn('cashbox_id', $cashboxIds)->where('status', DocumentStatus::Posted)->whereDate('next_due_date', '<=', today())->count(),
         ])->title(__('app.nav.expenses'));
     }

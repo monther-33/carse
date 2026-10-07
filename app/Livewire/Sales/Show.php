@@ -12,6 +12,7 @@ use App\Livewire\Concerns\Notifies;
 use App\Models\SalesInvoice;
 use App\Models\SalesInvoiceItem;
 use App\Models\Voucher;
+use App\Services\Ownership\NetPriceCheck;
 use App\Services\Sales\CreditLimitCheck;
 use App\Support\Money;
 use Illuminate\Contracts\View\View;
@@ -110,7 +111,7 @@ class Show extends Component
         }
     }
 
-    public function render(CreditLimitCheck $credit): View
+    public function render(CreditLimitCheck $credit, NetPriceCheck $netPrice): View
     {
         $this->invoice->load([
             'party', 'salesperson', 'currency', 'reservation', 'items.vehicle.brand', 'items.vehicle.carModel', 'items.returnDocument',
@@ -127,8 +128,13 @@ class Show extends Component
             $i->rate,
         )) : null;
 
+        $netPriceWarnings = $i->isDraft() && auth()->user()->can('vehicles.view_cost')
+            ? $netPrice->warnings($i->items->map(fn ($item) => ['vehicle' => $item->vehicle, 'net_base' => Money::of($item->net_base)])->values()->all())
+            : [];
+
         return view('livewire.sales.show', [
             'creditWarning' => $creditWarning,
+            'netPriceWarnings' => $netPriceWarnings,
             'canViewCost' => auth()->user()->can('vehicles.view_cost'),
             'vouchers' => Voucher::query()
                 ->where(fn ($q) => $q->whereMorphedTo('reference', $this->invoice)

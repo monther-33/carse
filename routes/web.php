@@ -34,6 +34,12 @@ Route::middleware('auth')->group(function () {
         Route::get('purchases/{invoice}', Livewire\Purchases\Show::class)->name('purchases.show');
     });
 
+    // Consignment cars (owned by others)
+    Route::middleware(['feature:consignment', 'can:consignments.view'])->group(function () {
+        Route::get('consignments', Livewire\Consignments\Index::class)->name('consignments.index');
+        Route::get('consignments/create', Livewire\Consignments\Form::class)->middleware('can:consignments.manage')->name('consignments.create');
+    });
+
     // Sales
     Route::middleware('can_any:sales.view,sales.view_all')->group(function () {
         Route::get('sales', Livewire\Sales\Index::class)->name('sales.index');
@@ -51,6 +57,7 @@ Route::middleware('auth')->group(function () {
             ->whereIn('document', ['quotation', 'invoice', 'contract', 'delivery', 'schedule'])->name('sales');
         Route::get('vouchers/{voucher}', [PrintController::class, 'voucher'])->name('voucher');
         Route::get('vehicles/{vehicle}', [PrintController::class, 'vehicle'])->name('vehicle');
+        Route::get('consignments/{ownership}', [PrintController::class, 'consignment'])->middleware(['feature:consignment', 'can:consignments.view'])->name('consignment');
         Route::get('parties/{party}/statement', [PrintController::class, 'statement'])->name('statement');
     });
 

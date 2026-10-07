@@ -31,7 +31,7 @@
                     <div class="sm:col-span-2 space-y-3">
                         <div class="flex flex-wrap items-center gap-2">
                             <h4 class="text-lg font-semibold">{{ $p->title() }}</h4>
-                            <x-ui.badge :color="$p->status->color()">{{ $p->status->label() }}</x-ui.badge>
+                            <x-ui.badge :color="$p->status->color()">{{ $p->status->label() }}</x-ui.badge> <x-ownership-badge :vehicle="$p" />
                         </div>
                         <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                             <dt class="text-gray-500">{{ __('vehicles.vin') }}</dt><dd class="num font-mono">{{ $p->vin }}</dd>
@@ -135,7 +135,7 @@
                                 <td class="num hidden sm:table-cell">{{ $v->mileage !== null ? number_format($v->mileage) : '' }}</td>
                                 <td class="num">{{ $v->asking_price !== null ? \App\Support\Money::format($v->asking_price) : '' }}</td>
                                 @if ($vs['canSeeCost'])<td class="num hidden md:table-cell">{{ \App\Support\Money::format($v->total_cost) }}</td>@endif
-                                <td class="hidden sm:table-cell"><x-ui.badge :color="$v->status->color()">{{ $v->status->label() }}</x-ui.badge></td>
+                                <td class="hidden sm:table-cell"><x-ui.badge :color="$v->status->color()">{{ $v->status->label() }}</x-ui.badge> <x-ownership-badge :vehicle="$v" /></td>
                                 <td class="whitespace-nowrap text-end">
                                     <x-ui.button variant="ghost" size="sm" icon="eye" wire:click="preview({{ $v->id }})" :title="__('vehicle_search.details')" class="hidden sm:inline-flex" />
                                     @if ($chooses)

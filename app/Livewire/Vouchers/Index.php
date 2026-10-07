@@ -19,6 +19,7 @@ use App\Models\SalesInvoice;
 use App\Models\Voucher;
 use App\Services\Accounting\AccountResolver;
 use App\Services\Ownership\OwnerPayouts;
+use App\Support\Features;
 use App\Support\Money;
 use App\Support\Settings;
 use Illuminate\Contracts\View\View;
@@ -232,6 +233,20 @@ class Index extends Component
         };
     }
 
+    /**
+     * The purposes offered, without the vehicle owners ones when that feature is off.
+     *
+     * @return array<string, array<string, AccountRole|null>>
+     */
+    private function purposes(): array
+    {
+        if (app(Features::class)->enabled(Features::CONSIGNMENT)) {
+            return self::PURPOSES;
+        }
+
+        return array_map(fn (array $p) => array_diff_key($p, ['owner' => 1, 'partner' => 1]), self::PURPOSES);
+    }
+
     /** What may be paid now to the owner chosen on an owner payment (LYD). */
     private function ownerAvailable(): ?string
     {
@@ -257,7 +272,7 @@ class Index extends Component
             'cashboxes' => Cashbox::query()->whereIn('id', $cashboxIds)->where('is_active', true)->with('currency')->orderBy('name')->get(),
             'allCashboxes' => Cashbox::query()->where('is_active', true)->with('currency')->orderBy('name')->get(),
             'accounts' => Account::query()->postable()->orderBy('code')->get(),
-            'purposes' => self::PURPOSES,
+            'purposes' => $this->purposes(),
             'statuses' => DocumentStatus::cases(),
             'referenceOptions' => $this->referenceOptions(),
             'ownerAvailable' => $this->ownerAvailable(),

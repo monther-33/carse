@@ -7,6 +7,7 @@ use App\Models\Cashbox;
 use App\Models\Party;
 use App\Models\SalesInvoice;
 use App\Models\Vehicle;
+use App\Models\VehicleOwnership;
 use App\Models\Voucher;
 use App\Reports\PartyStatement;
 use App\Services\Accounting\AccountResolver;
@@ -67,6 +68,16 @@ class PrintController extends Controller
             'vehicle' => $vehicle,
             'canViewCost' => $request->user()->can('vehicles.view_cost'),
         ], 'vehicle-'.$vehicle->vin.'.pdf');
+    }
+
+    /** Receipt of a consignment car: the car, its owners and the agreement, signed by both sides. */
+    public function consignment(VehicleOwnership $ownership): Response
+    {
+        abort_unless($ownership->isConsignment(), 404);
+
+        $ownership->load(['vehicle.brand', 'vehicle.carModel', 'vehicle.color', 'owners.party']);
+
+        return Pdf::inline('print.consignment', $this->letterhead() + ['ownership' => $ownership], $ownership->number.'.pdf');
     }
 
     public function statement(Request $request, Party $party, AccountResolver $accounts): Response

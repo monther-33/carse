@@ -87,7 +87,7 @@ trait SearchesVehicles
 
         $f = $this->filter;
         $query = $this->findableQuery()
-            ->with(['brand', 'carModel', 'color'])
+            ->with(['brand', 'carModel', 'color', 'ownership'])
             ->when($f['q'] !== '', fn ($q) => $q->search(trim($f['q'])))
             ->when($f['brand_id'] !== '', fn ($q) => $q->where('brand_id', $f['brand_id']))
             ->when($f['model_id'] !== '', fn ($q) => $q->where('model_id', $f['model_id']))
@@ -109,7 +109,7 @@ trait SearchesVehicles
             'statuses' => array_map(fn (string $s) => VehicleStatus::from($s), $this->allowedStatuses()),
             'canSeeCost' => auth()->user()->can('vehicles.view_cost'),
             'preview' => $this->previewId
-                ? Vehicle::query()->with(['brand', 'carModel', 'color', 'location', 'media'])->find($this->previewId)
+                ? Vehicle::query()->with(['brand', 'carModel', 'color', 'location', 'media', 'ownership'])->find($this->previewId)
                 : null,
         ]];
     }

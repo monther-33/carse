@@ -15,6 +15,9 @@ return [
     'due_only' => 'Due only',
     'repeat' => 'Repeat',
 
+    'borne_by' => 'Borne by',
+    'borne_by_consignment' => 'Consignment car: "owners" is deducted from what they are due, by share, and is not a showroom cost.',
+    'borne_by_partnership' => 'Partnership car: "owners" is split between the partners and the showroom by shares.',
     'errors' => [
         'amount' => 'The amount must be greater than zero.',
         'vehicle_not_ours' => 'Vehicle :vin is neither in stock nor sold by us.',

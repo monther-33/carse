@@ -5,10 +5,12 @@ namespace App\Support;
 use App\Enums\AccountRole;
 use App\Enums\CommissionStatus;
 use App\Enums\InstallmentStatus;
+use App\Enums\OwnershipStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Commission;
 use App\Models\Installment;
 use App\Models\Reservation;
+use App\Models\VehicleOwnership;
 use App\Services\Accounting\AccountResolver;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +34,9 @@ class Features
 
     public const IMPORTS = 'imports';             // Excel import of opening data
 
-    public const ALL = [self::RESERVATIONS, self::INSTALLMENTS, self::TRADE_IN, self::COMMISSIONS, self::IMPORTS];
+    public const CONSIGNMENT = 'consignment';     // cars of other owners (consignment) and partnership purchases
+
+    public const ALL = [self::RESERVATIONS, self::INSTALLMENTS, self::TRADE_IN, self::COMMISSIONS, self::IMPORTS, self::CONSIGNMENT];
 
     public function __construct(
         private readonly Settings $settings,
@@ -64,8 +68,24 @@ class Features
                     ? __('features.blockers.installments', ['count' => $n]) : null,
             self::COMMISSIONS => ($n = Commission::query()->where('status', CommissionStatus::Accrued)->count()) > 0
                 ? __('features.blockers.commissions', ['count' => $n]) : null,
+            self::CONSIGNMENT => $this->consignmentBlocker(),
             default => null,
         };
+    }
+
+    private function consignmentBlocker(): ?string
+    {
+        if (($n = VehicleOwnership::query()->where('status', OwnershipStatus::Active)->count()) > 0) {
+            return __('features.blockers.consignment', ['count' => $n]);
+        }
+
+        $owed = DB::query()->fromSub(
+            DB::table('journal_lines')->where('account_id', $this->accounts->idFor(AccountRole::OwnersPayable))
+                ->groupBy('party_id')->havingRaw('SUM(debit_base - credit_base) <> 0')->select('party_id'),
+            'owners',
+        )->count();
+
+        return $owed === 0 ? null : __('features.blockers.owners', ['count' => $owed]);
     }
 
     private function reservationsBlocker(): ?string

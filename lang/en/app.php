@@ -39,6 +39,8 @@ return [
         'new_expense' => 'New expense',
         'view_journals' => 'All entries',
         'new_journal' => 'New manual entry',
+        'view_consignments' => 'View consignment cars',
+        'new_consignment' => 'Receive a consignment car',
     ],
     'nav' => [
         'dashboard' => 'Dashboard',
@@ -57,6 +59,7 @@ return [
         'trading' => 'Stock & purchases',
         'vehicles' => 'Vehicles',
         'purchases' => 'Purchase invoices',
+        'consignments' => 'Consignment cars',
         'parties' => 'Customers & suppliers',
         'finance' => 'Finance',
         'vouchers' => 'Vouchers',

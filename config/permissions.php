@@ -13,6 +13,7 @@ return [
     'permissions' => [
         'vehicles' => ['view', 'view_cost', 'create', 'update'],
         'purchases' => ['view', 'create', 'approve', 'cancel'],
+        'consignments' => ['view', 'manage'],
         'quotations' => ['view', 'create'],
         'reservations' => ['view', 'create', 'cancel'],
         'sales' => ['view', 'view_all', 'create', 'approve', 'cancel', 'override_discount', 'override_min_price'],
@@ -54,6 +55,7 @@ return [
         'accountant' => [
             'vehicles.view', 'vehicles.view_cost',
             'purchases.view', 'purchases.create', 'purchases.approve',
+            'consignments.view', 'consignments.manage',
             'sales.view', 'sales.view_all', 'sales.create', 'sales.approve',
             'commissions.view', 'commissions.view_all',
             'parties.view', 'parties.manage',
@@ -88,6 +90,7 @@ return [
         'purchasing' => [
             'vehicles.view', 'vehicles.view_cost', 'vehicles.create', 'vehicles.update',
             'purchases.view', 'purchases.create',
+            'consignments.view', 'consignments.manage',
             'parties.view', 'parties.manage',
             'references.manage',
             'reports.inventory',

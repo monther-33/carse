@@ -44,6 +44,10 @@ class Navigation
                         ['label' => 'app.nav_actions.view_purchases', 'route' => 'purchases.index'],
                         ['label' => 'app.nav_actions.new_purchase', 'route' => 'purchases.create', 'can' => 'purchases.create'],
                     ]],
+                    ['label' => 'app.nav.consignments', 'route' => 'consignments.index', 'icon' => 'share', 'can' => 'consignments.view', 'feature' => 'consignment', 'children' => [
+                        ['label' => 'app.nav_actions.view_consignments', 'route' => 'consignments.index'],
+                        ['label' => 'app.nav_actions.new_consignment', 'route' => 'consignments.create', 'can' => 'consignments.manage'],
+                    ]],
                     ['label' => 'app.nav.parties', 'route' => 'parties.index', 'icon' => 'users', 'can' => 'parties.view', 'children' => [
                         ['label' => 'app.nav_actions.view_parties', 'route' => 'parties.index'],
                         ['label' => 'app.nav_actions.new_party', 'route' => 'parties.index', 'new' => '1', 'can' => 'parties.manage'],

@@ -156,7 +156,7 @@ class Show extends Component
 
     public function render(): View
     {
-        $this->vehicle->load(['brand', 'carModel', 'color', 'location', 'purchaseInvoice.party', 'media']);
+        $this->vehicle->load(['brand', 'carModel', 'color', 'location', 'purchaseInvoice.party', 'media', 'ownership.owners.party', 'ownership.dues']);
 
         return view('livewire.vehicles.show', [
             'canViewCost' => auth()->user()->can('viewCost', Vehicle::class),

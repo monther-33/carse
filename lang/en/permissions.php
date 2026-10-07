@@ -13,6 +13,7 @@ return [
     'modules' => [
         'vehicles' => 'Vehicles',
         'purchases' => 'Purchases',
+        'consignments' => 'Consignment cars',
         'quotations' => 'Quotations',
         'reservations' => 'Reservations',
         'sales' => 'Sales',
@@ -41,6 +42,7 @@ return [
     'actions' => [
         'vehicles' => ['view' => 'View vehicles', 'view_cost' => 'View cost and profit', 'create' => 'Add vehicle', 'update' => 'Edit vehicle'],
         'purchases' => ['view' => 'View purchase invoices', 'create' => 'Create purchase invoice', 'approve' => 'Approve purchase invoice', 'cancel' => 'Cancel posted invoice'],
+        'consignments' => ['view' => 'View consignment cars and their owners', 'manage' => 'Receive a consignment car and hand it back'],
         'quotations' => ['view' => 'View quotations', 'create' => 'Create quotation'],
         'reservations' => ['view' => 'View reservations', 'create' => 'Create reservation', 'cancel' => 'Cancel posted reservation'],
         'sales' => [

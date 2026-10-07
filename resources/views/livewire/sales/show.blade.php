@@ -1,6 +1,7 @@
 <div class="space-y-4">
     @error('document')<div class="rounded-md bg-red-50 p-3 text-sm text-red-700">{{ $message }}</div>@enderror
     @include('livewire.sales.partials.credit-warning', ['warning' => $creditWarning])
+    @include('livewire.sales.partials.net-price-warning', ['warnings' => $netPriceWarnings])
 
     <x-ui.card>
         <div class="flex flex-wrap items-start justify-between gap-4">
