@@ -122,3 +122,16 @@ it('pays an owner no more than is available now', function () {
     expect((string) app(OwnerPayouts::class)->balance($this->a->id))->toBe('0.000')
         ->and(ledgerIsBalanced())->toBeTrue();
 });
+
+it('sells a car for its owners with no commission and keeps their money for them', function () {
+    $ownership = receiveConsignment(['earning_mode' => 'none', 'owners' => owners($this)]);
+    $invoice = sell($ownership->vehicle, ['price' => '50000', 'payment_type' => 'cash', 'payments' => [['cashbox_id' => cashbox('خزينة دينار')->id, 'amount' => '50000']]]);
+    $payouts = app(OwnerPayouts::class);
+
+    expect((string) baseBalance('43'))->toBe('0.000')
+        ->and((string) baseBalance('24'))->toBe('-50000.000')
+        ->and((string) $payouts->available($this->a->id))->toBe('30000.000')
+        ->and((string) $payouts->available($this->b->id))->toBe('20000.000')
+        ->and((string) $invoice->items->first()->profit())->toBe('0.000')
+        ->and(ledgerIsBalanced())->toBeTrue();
+});

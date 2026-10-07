@@ -65,7 +65,7 @@ return [
         'consignment_revenue' => 'Consignment commissions',
     ],
     'ownership_kind' => ['consignment' => 'Consignment', 'partnership' => 'Partnership'],
-    'earning_mode' => ['net_price' => 'Net price to the owners, the rest to the showroom', 'percent' => 'Percentage commission', 'fixed' => 'Fixed commission'],
+    'earning_mode' => ['net_price' => 'Net price to the owners, the rest to the showroom', 'percent' => 'Percentage commission', 'fixed' => 'Fixed commission', 'none' => 'No commission (the whole price to the owners)'],
     'payout_timing' => ['on_sale' => 'On sale', 'on_collection' => 'As the customer pays'],
     'ownership_status' => ['active' => 'In the showroom', 'sold' => 'Sold', 'returned' => 'Returned to owner', 'closed' => 'Closed'],
     'cost_bearer' => ['showroom' => 'Showroom', 'owners' => 'Owners'],

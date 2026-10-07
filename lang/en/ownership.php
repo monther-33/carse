@@ -39,6 +39,7 @@ return [
     'summary' => [
         'percent' => 'Showroom commission :percent% of the sale price',
         'fixed' => 'Showroom commission :amount LYD',
+        'none' => 'No commission: the whole price to the owners',
         'net_price' => ':amount LYD net to the owners, the rest to the showroom',
         'partnership' => 'Partnership, showroom share :share%',
     ],

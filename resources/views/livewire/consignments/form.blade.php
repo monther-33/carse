@@ -44,7 +44,7 @@
                 <x-ui.field :label="__('ownership.earning_percent')" error="earning_percent" required>
                     <input type="text" dir="ltr" inputmode="decimal" wire:model="earning_percent" class="form-input">
                 </x-ui.field>
-            @else
+            @elseif ($earning_mode !== 'none')
                 <x-ui.field :label="$earning_mode === 'net_price' ? __('ownership.net_price') : __('ownership.fixed_commission')" error="earning_amount"
                             :hint="__('ownership.amount_in_base')" required>
                     <input type="text" dir="ltr" inputmode="decimal" wire:model="earning_amount" class="form-input">

@@ -17,7 +17,8 @@ use Brick\Math\RoundingMode;
  *   net_price  owners get the agreed net price, the showroom keeps the rest (may be negative:
  *              sold below the net price; a warning, the showroom bears it);
  *   percent    the showroom keeps the percentage of the price, the owners get the rest;
- *   fixed      the showroom keeps the fixed amount, the owners get the rest.
+ *   fixed      the showroom keeps the fixed amount, the owners get the rest;
+ *   none       no commission: the owners get the whole price.
  * Partnership: everything by shares (showroom share first).
  */
 class OwnershipSplit
@@ -38,7 +39,7 @@ class OwnershipSplit
             EarningMode::NetPrice => Money::of($ownership->earning_amount),
             EarningMode::Percent => $net->minus($net->multipliedBy(Money::rate($ownership->earning_percent ?? '0'))->dividedBy(100, Money::SCALE, RoundingMode::HalfUp)),
             EarningMode::Fixed => $net->minus(Money::of($ownership->earning_amount)),
-            null => $net,
+            EarningMode::None, null => $net,
         };
 
         $shares = Money::allocate($ownersTotal, $ownership->owners->pluck('share')->all());

@@ -82,7 +82,7 @@ class Form extends Component
         $data = $this->validate([
             'received_at' => ['required', 'date'],
             'earning_mode' => ['required', Rule::enum(EarningMode::class)],
-            'earning_amount' => [Rule::requiredIf($this->earning_mode !== EarningMode::Percent->value), 'nullable', 'numeric', 'gt:0', 'decimal:0,3'],
+            'earning_amount' => [Rule::requiredIf(in_array($this->earning_mode, [EarningMode::NetPrice->value, EarningMode::Fixed->value], true)), 'nullable', 'numeric', 'gt:0', 'decimal:0,3'],
             'earning_percent' => [Rule::requiredIf($this->earning_mode === EarningMode::Percent->value), 'nullable', 'numeric', 'gt:0', 'lt:100', 'decimal:0,4'],
             'payout' => ['required', Rule::enum(PayoutTiming::class)],
             'notes' => ['nullable', 'string', 'max:2000'],
@@ -114,8 +114,8 @@ class Form extends Component
             return $receive->handle(array_merge($vehicle, [
                 'received_at' => $data['received_at'],
                 'earning_mode' => $data['earning_mode'],
-                'earning_amount' => $data['earning_amount'] ?: null,
-                'earning_percent' => $data['earning_percent'] ?: null,
+                'earning_amount' => in_array($data['earning_mode'], ['net_price', 'fixed'], true) ? $data['earning_amount'] : null,
+                'earning_percent' => $data['earning_mode'] === 'percent' ? $data['earning_percent'] : null,
                 'payout' => $data['payout'],
                 'notes' => $data['notes'] ?: null,
                 'owners' => $data['owners'],

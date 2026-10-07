@@ -125,3 +125,21 @@ it('reports what each owner is due', function () {
         ->assertSee($owner->name)
         ->assertSee('19,000.000');
 });
+
+it('receives a car with no commission from the screen', function () {
+    $model = CarModel::query()->firstOrFail();
+
+    Livewire::test(Form::class)
+        ->set('vehicle.vin', 'NOCOMM12345678')
+        ->set('vehicle.brand_id', $model->brand_id)
+        ->set('vehicle.model_id', $model->id)
+        ->set('owners.0.party_id', customer()->id)
+        ->set('earning_mode', 'none')
+        ->assertDontSee(__('ownership.fixed_commission'))
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $ownership = VehicleOwnership::query()->sole();
+    expect($ownership->earning_amount)->toBeNull()
+        ->and($ownership->earning_percent)->toBeNull();
+});

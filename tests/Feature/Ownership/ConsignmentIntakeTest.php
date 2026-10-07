@@ -69,4 +69,5 @@ it('splits a consignment sale per the agreement', function (string $mode, array 
     'fixed' => ['fixed', ['earning_amount' => '1200'], '1200.000'],
     'net price' => ['net_price', ['earning_amount' => '47000'], '3000.000'],
     'sold below the net price' => ['net_price', ['earning_amount' => '52000'], '-2000.000'],
+    'no commission' => ['none', [], '0.000'],
 ]);

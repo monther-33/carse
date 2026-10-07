@@ -94,6 +94,9 @@ class ReceiveConsignment
      */
     private function terms(EarningMode $mode, array $data): array
     {
+        if ($mode === EarningMode::None) {
+            return [null, null];
+        }
         if ($mode === EarningMode::Percent) {
             $percent = Money::rate((string) ($data['earning_percent'] ?? '0'));
             if (! $percent->isPositive() || ! $percent->isLessThan(100)) {

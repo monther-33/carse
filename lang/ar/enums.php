@@ -65,7 +65,7 @@ return [
         'consignment_revenue' => 'عمولات سيارات الأمانة',
     ],
     'ownership_kind' => ['consignment' => 'أمانة', 'partnership' => 'شراكة'],
-    'earning_mode' => ['net_price' => 'سعر صافٍ للملاك والزيادة للمعرض', 'percent' => 'عمولة نسبة من سعر البيع', 'fixed' => 'عمولة مبلغ ثابت'],
+    'earning_mode' => ['net_price' => 'سعر صافٍ للملاك والزيادة للمعرض', 'percent' => 'عمولة نسبة من سعر البيع', 'fixed' => 'عمولة مبلغ ثابت', 'none' => 'بدون عمولة (الثمن كله للملاك)'],
     'payout_timing' => ['on_sale' => 'فور البيع', 'on_collection' => 'بقدر ما يُحصَّل من العميل'],
     'ownership_status' => ['active' => 'في المعرض', 'sold' => 'مباعة', 'returned' => 'أُعيدت لمالكها', 'closed' => 'منتهية'],
     'cost_bearer' => ['showroom' => 'على المعرض', 'owners' => 'على الملاك'],
