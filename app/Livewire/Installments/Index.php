@@ -33,7 +33,6 @@ class Index extends Component
     #[Url]
     public string $filter = 'overdue';
 
-    #[Url]
     public string $search = '';
 
     public bool $showCollect = false;

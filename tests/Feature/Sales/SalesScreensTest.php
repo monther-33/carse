@@ -123,7 +123,7 @@ test('reserve from the screen, then sell the reservation', function () {
     $reservation = Reservation::query()->latest('id')->firstOrFail();
     expect($vehicle->fresh()->status)->toBe(VehicleStatus::Reserved);
 
-    Livewire::withQueryParams(['reservation' => $reservation->id])
+    Livewire::withQueryParams(['reservation' => $reservation->getRouteKey()])
         ->test(SalesForm::class)
         ->assertSet('party_id', $customer->id)
         ->assertSet('reservation_id', $reservation->id)

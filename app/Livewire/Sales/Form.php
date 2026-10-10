@@ -6,6 +6,7 @@ use App\Actions\Sales\PostSalesInvoice;
 use App\Actions\Sales\SalesTerms;
 use App\Actions\Sales\SaveSalesInvoice;
 use App\Enums\PaymentType;
+use App\Enums\ReservationStatus;
 use App\Enums\VehicleStatus;
 use App\Livewire\Concerns\AcceptsQuickCreate;
 use App\Livewire\Concerns\HandlesBusinessErrors;
@@ -49,8 +50,9 @@ class Form extends Component
 
     public ?SalesInvoice $invoice = null;
 
+    /** Link code of the reservation the sale starts from (?reservation=...). */
     #[Url(as: 'reservation')]
-    public ?int $fromReservation = null;
+    public ?string $fromReservation = null;
 
     public string $date = '';
 
@@ -115,8 +117,8 @@ class Form extends Component
         $this->payments = [['cashbox_id' => null, 'amount' => '']];
 
         if ($this->fromReservation) {
-            $reservation = Reservation::query()->active()->find($this->fromReservation);
-            if ($reservation !== null) {
+            $reservation = Reservation::findByRouteKey($this->fromReservation);
+            if ($reservation !== null && $reservation->status === ReservationStatus::Active) {
                 $this->party_id = $reservation->party_id;
                 $this->currency_id = $reservation->currency_id;
                 $this->reservation_id = $reservation->id;

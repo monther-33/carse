@@ -8,6 +8,7 @@ use App\Reports\Report;
 use App\Reports\ReportRegistry;
 use App\Support\Pdf;
 use App\Support\Settings;
+use App\Support\UrlToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
@@ -55,7 +56,7 @@ class ReportController extends Controller
         abort_if($report === null, 404);
         abort_unless($report->allows($request->user()), 403);
 
-        $f = $report->resolve((array) $request->input('f', []));
+        $f = $report->resolve(UrlToken::decodeState((string) $request->query('s', '')));
         foreach ($report->required() as $required) {
             abort_if(empty($f[$required]), 422);
         }

@@ -12,6 +12,7 @@ use App\Models\ManualJournal;
 use App\Reports\Accounting\AgingReport;
 use App\Reports\Accounting\LedgerReport;
 use App\Services\Currency\ExchangeRateService;
+use App\Support\UrlToken;
 use Livewire\Livewire;
 
 test('a manual journal posts through PostingService and cancels with a reversal', function () {
@@ -94,8 +95,8 @@ test('reports follow permissions and hide cost from roles without view_cost', fu
     $cashier = userWithRole('cashier');
     $cashier->cashboxes()->attach(cashbox('خزينة دينار'));
     $this->actingAs($cashier);
-    $this->get(route('reports.show', ['key' => 'cashbox_movement', 'f' => ['cashbox_id' => cashbox('خزينة دينار')->id]]))->assertOk();
-    $this->get(route('reports.show', ['key' => 'cashbox_movement', 'f' => ['cashbox_id' => cashbox('خزينة دولار')->id]]))->assertNotFound();
+    $this->get(route('reports.show', ['key' => 'cashbox_movement', 's' => UrlToken::encodeState(['cashbox_id' => cashbox('خزينة دينار')->id])]))->assertOk();
+    $this->get(route('reports.show', ['key' => 'cashbox_movement', 's' => UrlToken::encodeState(['cashbox_id' => cashbox('خزينة دولار')->id])]))->assertNotFound();
 });
 
 test('debt ageing applies payments to the oldest debts first', function () {

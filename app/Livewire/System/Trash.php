@@ -25,7 +25,6 @@ class Trash extends Component
     #[Url]
     public string $show = 'pending';
 
-    #[Url]
     public string $q = '';
 
     public function mount(): void

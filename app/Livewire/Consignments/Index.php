@@ -31,7 +31,6 @@ class Index extends Component
     #[Url]
     public string $kind = '';
 
-    #[Url]
     public string $q = '';
 
     public ?int $returnId = null;

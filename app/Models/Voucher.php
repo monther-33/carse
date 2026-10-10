@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\DocumentStatus;
 use App\Enums\VoucherType;
 use App\Models\Concerns\Auditable;
+use App\Models\Concerns\HasOpaqueRouteKey;
 use App\Models\Concerns\HasUserstamps;
 use App\Models\Concerns\IsDocument;
 use Database\Factories\VoucherFactory;
@@ -40,7 +41,7 @@ use Illuminate\Support\Carbon;
 class Voucher extends Model
 {
     /** @use HasFactory<VoucherFactory> */
-    use Auditable, HasFactory, HasUserstamps, IsDocument;
+    use Auditable, HasFactory, HasOpaqueRouteKey, HasUserstamps, IsDocument;
 
     protected $fillable = [
         'branch_id', 'type', 'number', 'date', 'party_id', 'cashbox_id', 'to_cashbox_id', 'account_id',

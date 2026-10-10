@@ -7,6 +7,7 @@ use App\Enums\OwnershipKind;
 use App\Enums\OwnershipStatus;
 use App\Enums\PayoutTiming;
 use App\Models\Concerns\Auditable;
+use App\Models\Concerns\HasOpaqueRouteKey;
 use App\Models\Concerns\HasUserstamps;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -37,7 +38,7 @@ use Illuminate\Support\Carbon;
  */
 class VehicleOwnership extends Model
 {
-    use Auditable, HasUserstamps;
+    use Auditable, HasOpaqueRouteKey, HasUserstamps;
 
     protected $fillable = [
         'branch_id', 'number', 'vehicle_id', 'kind', 'showroom_share', 'earning_mode', 'earning_amount', 'earning_percent',

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\PartyType;
 use App\Models\Concerns\Auditable;
+use App\Models\Concerns\HasOpaqueRouteKey;
 use App\Models\Concerns\HasUserstamps;
 use Database\Factories\PartyFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -33,7 +34,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class Party extends Model implements HasMedia
 {
     /** @use HasFactory<PartyFactory> */
-    use Auditable, HasFactory, HasUserstamps, InteractsWithMedia, SoftDeletes;
+    use Auditable, HasFactory, HasOpaqueRouteKey, HasUserstamps, InteractsWithMedia, SoftDeletes;
 
     protected $fillable = ['branch_id', 'type', 'name', 'phone', 'phone2', 'national_id', 'address', 'credit_limit', 'notes', 'is_active'];
 

@@ -19,7 +19,6 @@ class Index extends Component
 {
     use WithPagination;
 
-    #[Url]
     public string $search = '';
 
     #[Url]

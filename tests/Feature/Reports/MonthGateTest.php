@@ -13,6 +13,7 @@ use App\Reports\Accounting\TrialBalanceReport;
 use App\Reports\ReportRegistry;
 use App\Reports\TrialBalance;
 use App\Support\Money;
+use App\Support\UrlToken;
 use Carbon\CarbonImmutable;
 use Database\Seeders\DemoMonthSeeder;
 use Illuminate\Support\Facades\DB;
@@ -78,12 +79,12 @@ test('every report runs, renders and exports for the admin', function () {
     foreach (ReportRegistry::forUser(auth()->user()) as $reports) {
         foreach ($reports as $report) {
             $key = $report::key();
-            $this->get(route('reports.show', ['key' => $key, 'f' => $f]))->assertOk();
+            $this->get(route('reports.show', ['key' => $key, 's' => UrlToken::encodeState($f)]))->assertOk();
 
-            $pdf = $this->get(route('reports.pdf', ['key' => $key, 'f' => $f]));
+            $pdf = $this->get(route('reports.pdf', ['key' => $key, 's' => UrlToken::encodeState($f)]));
             $pdf->assertOk()->assertHeader('Content-Type', 'application/pdf');
 
-            $this->get(route('reports.excel', ['key' => $key, 'f' => $f]))->assertOk()->assertDownload();
+            $this->get(route('reports.excel', ['key' => $key, 's' => UrlToken::encodeState($f)]))->assertOk()->assertDownload();
         }
     }
 });

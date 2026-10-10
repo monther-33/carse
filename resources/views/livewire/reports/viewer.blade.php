@@ -30,8 +30,8 @@
             @endforeach
 
             <div class="ms-auto flex gap-2">
-                <x-ui.button size="sm" variant="secondary" icon="printer" :href="route('reports.pdf', ['key' => $report::key(), 'f' => $f])" target="_blank">PDF</x-ui.button>
-                <x-ui.button size="sm" variant="secondary" icon="document" :href="route('reports.excel', ['key' => $report::key(), 'f' => $f])">Excel</x-ui.button>
+                <x-ui.button size="sm" variant="secondary" icon="printer" :href="route('reports.pdf', ['key' => $report::key(), 's' => $exportState])" target="_blank">PDF</x-ui.button>
+                <x-ui.button size="sm" variant="secondary" icon="document" :href="route('reports.excel', ['key' => $report::key(), 's' => $exportState])">Excel</x-ui.button>
             </div>
         </div>
     </x-ui.card>

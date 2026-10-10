@@ -7,6 +7,7 @@ use App\Enums\Transmission;
 use App\Enums\VehicleCondition;
 use App\Enums\VehicleStatus;
 use App\Models\Concerns\Auditable;
+use App\Models\Concerns\HasOpaqueRouteKey;
 use App\Models\Concerns\HasUserstamps;
 use Database\Factories\VehicleFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -54,7 +55,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class Vehicle extends Model implements HasMedia
 {
     /** @use HasFactory<VehicleFactory> */
-    use Auditable, HasFactory, HasUserstamps, InteractsWithMedia;
+    use Auditable, HasFactory, HasOpaqueRouteKey, HasUserstamps, InteractsWithMedia;
 
     /** Columns a user may edit directly on the vehicle card. */
     public const EDITABLE = [

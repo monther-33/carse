@@ -12,7 +12,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Models\Role;
@@ -22,7 +21,6 @@ class Index extends Component
 {
     use Notifies, WithPagination;
 
-    #[Url]
     public string $search = '';
 
     public bool $showForm = false;

@@ -137,6 +137,7 @@
 - الـ select في RTL: سهم `@tailwindcss/forms` منقول لليسار في `resources/css/app.css`.
 - شاشات الإعداد البسيطة ترث `App\Livewire\Concerns\CrudComponent`. رسائل النجاح عبر trait `Notifies`، ومكوّنات الواجهة في `resources/views/components/ui/*`.
 - عنصر قائمة جانبية جديد: `App\Support\Navigation` مع صلاحيته.
+- **لا بيانات مكشوفة في الروابط** (طلب صاحب المشروع، `App\Support\UrlToken`): الموديلات التي تظهر في المسارات (`SalesInvoice`, `PurchaseInvoice`, `Vehicle`, `Party`, `Voucher`, `VehicleOwnership`, `Reservation`) تستخدم trait `HasOpaqueRouteKey`: الرابط يحمل رمزًا من 6 أحرف (تبديل Feistel بمفتاح `APP_KEY` يختلف لكل موديل) لا المعرّف، و`route('x', $model)` يبنيه تلقائيًا، ورمز معدَّل أو لموديل آخر = 404. أي موديل جديد يظهر في مسار يأخذ نفس الـ trait، ورموز الاستعلام تُقرأ بـ `Model::findByRouteKey()`. فلاتر التقارير تُمرَّر مشفرة في `?s=` (`UrlToken::encodeState/decodeState`) في الشاشة والتصدير. لا `#[Url]` على نص بحث أو معرّف؛ الفلاتر البسيطة (الحالة، النوع) مسموحة. الحماية الفعلية تبقى الصلاحيات والسياسات. تغيير `APP_KEY` يغيّر كل الروابط المحفوظة.
 - Enums بدل النصوص الحرة، مع `label()` من `lang/*/enums.php`.
 - `Model::preventLazyLoading()` و`preventSilentlyDiscardingAttributes()` مفعّلان خارج الإنتاج: استخدم eager loading و`$fillable` صحيحًا.
 - كل نص واجهة عبر `__()`؛ مفاتيح `lang/ar` و`lang/en` متطابقة. رسائل التحقق عربية مع أسماء الحقول في `validation.attributes`: يكفي اسم الحقل نفسه (`account_id`)، و`App\Validation\Validator` يستخدمه لأي مفتاح متداخل (`form.account_id`، `items.*.price`، `roles.0`). حقل جديد = سطر واحد هناك.

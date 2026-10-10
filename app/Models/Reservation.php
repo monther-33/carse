@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ReservationStatus;
 use App\Models\Concerns\Auditable;
+use App\Models\Concerns\HasOpaqueRouteKey;
 use App\Models\Concerns\HasUserstamps;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -28,7 +29,7 @@ use Illuminate\Support\Carbon;
  */
 class Reservation extends Model
 {
-    use Auditable, HasUserstamps;
+    use Auditable, HasOpaqueRouteKey, HasUserstamps;
 
     protected $fillable = [
         'branch_id', 'number', 'date', 'vehicle_id', 'party_id', 'salesperson_id', 'deposit', 'forfeited_amount', 'currency_id',

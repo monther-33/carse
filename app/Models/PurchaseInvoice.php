@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\DocumentStatus;
 use App\Enums\PurchaseSource;
 use App\Models\Concerns\Auditable;
+use App\Models\Concerns\HasOpaqueRouteKey;
 use App\Models\Concerns\HasUserstamps;
 use App\Models\Concerns\IsDocument;
 use Database\Factories\PurchaseInvoiceFactory;
@@ -38,7 +39,7 @@ use Illuminate\Support\Carbon;
 class PurchaseInvoice extends Model
 {
     /** @use HasFactory<PurchaseInvoiceFactory> */
-    use Auditable, HasFactory, HasUserstamps, IsDocument;
+    use Auditable, HasFactory, HasOpaqueRouteKey, HasUserstamps, IsDocument;
 
     protected $fillable = [
         'branch_id', 'number', 'date', 'party_id', 'source', 'currency_id', 'rate',

@@ -51,7 +51,7 @@
                         <td class="text-end whitespace-nowrap">
                             @if ($active)
                                 @can('create', \App\Models\SalesInvoice::class)
-                                    <x-ui.button size="sm" icon="tag" :href="route('sales.create', ['reservation' => $r->id])" wire:navigate>{{ __('reservations.sell') }}</x-ui.button>
+                                    <x-ui.button size="sm" icon="tag" :href="route('sales.create', ['reservation' => $r])" wire:navigate>{{ __('reservations.sell') }}</x-ui.button>
                                 @endcan
                                 @can('manage', $r)
                                     <x-ui.button variant="ghost" size="sm" icon="plus" wire:click="open('top_up', {{ $r->id }})">{{ __('reservations.top_up') }}</x-ui.button>

@@ -21,7 +21,6 @@ class Index extends Component
 {
     use Notifies, WithFileUploads, WithPagination;
 
-    #[Url]
     public string $search = '';
 
     #[Url]

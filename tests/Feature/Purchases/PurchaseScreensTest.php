@@ -246,7 +246,8 @@ test('phase 2 screens render for the admin and are forbidden to others', functio
     $this->actingAs(userWithRole('admin'));
     $vehicle = purchaseVehicle();
     $party = $vehicle->purchaseInvoice->party;
-    $url = str_replace(['{vehicle}', '{invoice}', '{party}'], [$vehicle->id, $vehicle->purchase_invoice_id, $party->id], $url);
+    // Links carry each record's code, not its id (HasOpaqueRouteKey).
+    $url = str_replace(['{vehicle}', '{invoice}', '{party}'], [$vehicle->getRouteKey(), $vehicle->purchaseInvoice->getRouteKey(), $party->getRouteKey()], $url);
 
     foreach (['admin', 'accountant', 'cashier', 'sales', 'purchasing'] as $role) {
         $response = $this->actingAs(userWithRole($role))->get($url);

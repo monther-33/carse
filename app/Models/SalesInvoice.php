@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\DocumentStatus;
 use App\Enums\PaymentType;
 use App\Models\Concerns\Auditable;
+use App\Models\Concerns\HasOpaqueRouteKey;
 use App\Models\Concerns\HasUserstamps;
 use App\Models\Concerns\IsDocument;
 use App\Support\Money;
@@ -46,7 +47,7 @@ use Illuminate\Support\Carbon;
  */
 class SalesInvoice extends Model
 {
-    use Auditable, HasUserstamps, IsDocument;
+    use Auditable, HasOpaqueRouteKey, HasUserstamps, IsDocument;
 
     protected $fillable = [
         'branch_id', 'number', 'date', 'party_id', 'salesperson_id', 'reservation_id', 'payment_type', 'currency_id', 'rate',

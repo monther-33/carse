@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Reports\Cell;
 use App\Reports\Report;
 use App\Reports\ReportRegistry;
+use App\Support\UrlToken;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
@@ -26,8 +27,11 @@ class Viewer extends Component
     public string $key;
 
     /** @var array<string, mixed> */
-    #[Url(as: 'f')]
     public array $filters = [];
+
+    /** The filters, encrypted, in the link (?s=...) so they can be bookmarked but not read or altered. */
+    #[Url(as: 's')]
+    public string $state = '';
 
     public function mount(string $key): void
     {
@@ -35,7 +39,13 @@ class Viewer extends Component
         abort_unless($report->allows(auth()->user()), 403);
 
         $this->key = $key;
-        $this->filters = $report->resolve($this->filters);
+        $this->filters = $report->resolve(UrlToken::decodeState($this->state));
+        $this->state = UrlToken::encodeState($this->filters);
+    }
+
+    public function updatedFilters(): void
+    {
+        $this->state = UrlToken::encodeState($this->filters);
     }
 
     private function report(): Report
@@ -64,6 +74,7 @@ class Viewer extends Component
             'notes' => $missing === [] ? $report->notes($user, $f) : [],
             'missing' => $missing,
             'f' => $f,
+            'exportState' => UrlToken::encodeState($f),
             'lists' => $this->lists($report),
         ])->title($report->title());
     }

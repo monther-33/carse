@@ -28,7 +28,6 @@ class Index extends Component
     #[Url]
     public string $status = 'accrued';
 
-    #[Url]
     public ?int $userId = null;
 
     /** @var list<int> */

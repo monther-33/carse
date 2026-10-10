@@ -20,7 +20,6 @@ class Index extends Component
 {
     use WithPagination;
 
-    #[Url]
     public string $search = '';
 
     /** "stock" = every in-stock status, otherwise a VehicleStatus value or "" for all. */
