@@ -91,6 +91,7 @@ return [
         'show_password' => 'Show password',
         'hide_password' => 'Hide password',
         'signing_in' => 'Signing in...',
+        'session_expired' => 'Your session expired after a period of inactivity. Please sign in again.',
         'forgot_hint' => 'Forgot your password? The administrator sets a new one.',
     ],
 

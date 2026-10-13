@@ -16,10 +16,11 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Volt::route('confirm-password', 'pages.auth.confirm-password')
         ->name('password.confirm');
-
-    Route::post('logout', function (Logout $logout) {
-        $logout();
-
-        return redirect('/');
-    })->name('logout');
 });
+
+// Outside "auth": logging out of a session that already expired just lands on the sign-in page.
+Route::post('logout', function (Logout $logout) {
+    $logout();
+
+    return redirect()->route('login');
+})->name('logout');

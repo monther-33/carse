@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Backup\Config\Config as BackupConfig;
@@ -49,6 +50,11 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Every generated link (Livewire's update URL, assets, redirects) uses the site's scheme.
+        if (str_starts_with((string) config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
+
         // Recycle bin: every model deleted inside RecycleBin::keep() is kept for the developer to restore.
         Event::listen('eloquent.deleting: *', function (string $event, array $payload) {
             if (($payload[0] ?? null) instanceof Model) {

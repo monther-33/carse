@@ -20,7 +20,8 @@ new #[Layout('layouts.guest')] class extends Component
 
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        // A full page load: the new session's token is used from the first request on.
+        $this->redirectIntended(default: route('dashboard', absolute: false));
     }
 }; ?>
 

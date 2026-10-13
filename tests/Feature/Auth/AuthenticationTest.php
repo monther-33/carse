@@ -75,7 +75,7 @@ test('dashboard renders the RTL layout with the sidebar', function () {
 test('users can logout', function () {
     $this->actingAs(User::factory()->create());
 
-    $this->post('/logout')->assertRedirect('/');
+    $this->post('/logout')->assertRedirect(route('login'));
 
     $this->assertGuest();
 });

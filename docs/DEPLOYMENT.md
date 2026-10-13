@@ -377,4 +377,6 @@ php artisan up
 | الصور لا تظهر | نفّذ `php artisan storage:link` وتأكد من `APP_URL`. |
 | رفض رفع صورة أو ملف Excel كبير | ارفع `upload_max_filesize` و`post_max_size` في PHP و`client_max_body_size` في Nginx. |
 | "لا يوجد سعر صرف" عند الاستيراد أو الترحيل | أدخل سعر العملة بتاريخ المستند أو قبله من شاشة العملات. |
+| زر الدخول لا يستجيب، أو روابط `http` على موقع `https` | الخادم خلف موزّع حمل أو Cloudflare: النظام يثق بترويسات `X-Forwarded-*` افتراضيًا (`TRUSTED_PROXIES=*`، ويمكن تضييقها لعنوان البروكسي). تأكد أن `APP_URL` يبدأ بـ `https://` ثم `php artisan optimize`. |
+| تسجيل الخروج من الجلسة بعد فترة | مدة الجلسة `SESSION_LIFETIME` بالدقائق (افتراضيًا 120). صفحة تُركت مفتوحة أطول من ذلك تعود لصفحة الدخول برسالة بدل خطأ "Page Expired". لإطالتها: `SESSION_LIFETIME=480` ثم `php artisan optimize`. |
 | تغيير لا يظهر بعد تعديل `.env` | `php artisan optimize` (الإعدادات مخزّنة مؤقتًا في الإنتاج). |
