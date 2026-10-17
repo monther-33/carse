@@ -1,11 +1,18 @@
-{{-- Centered loading indicator while moving between pages (wire:navigate). Shown and hidden by resources/js/page-loader.js. --}}
+{{-- Centered loading indicator while moving between pages (wire:navigate). Shown and hidden by resources/js/page-loader.js;
+     the animated rings are styled in resources/css/app.css (#wifi-loader), in the theme's colours. --}}
 <div id="page-loader" role="status" aria-live="polite" aria-hidden="true"
      class="pointer-events-none fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/10 opacity-0 backdrop-blur-[1px] transition-opacity duration-150">
-    <div class="flex flex-col items-center gap-3 rounded-2xl bg-white px-8 py-6 shadow-xl ring-1 ring-gray-200">
-        <span class="relative block h-12 w-12">
-            <span class="absolute inset-0 rounded-full border-4 border-brand-100"></span>
-            <span class="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-brand-600"></span>
-        </span>
-        <span class="text-sm font-medium text-gray-700">{{ __('app.loading') }}</span>
+    <div class="flex items-center justify-center rounded-2xl bg-white px-12 pb-14 pt-8 shadow-xl ring-1 ring-gray-200">
+        <div id="wifi-loader">
+            <svg viewBox="0 0 86 86" class="circle-outer" aria-hidden="true">
+                <circle r="40" cy="43" cx="43" class="back" />
+                <circle r="40" cy="43" cx="43" class="front" />
+            </svg>
+            <svg viewBox="0 0 60 60" class="circle-middle" aria-hidden="true">
+                <circle r="27" cy="30" cx="30" class="back" />
+                <circle r="27" cy="30" cx="30" class="front" />
+            </svg>
+            <div class="text" data-text="{{ __('app.loading') }}"></div>
+        </div>
     </div>
 </div>
