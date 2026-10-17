@@ -42,6 +42,7 @@ return [
         'view_consignments' => 'View consignment cars',
         'new_consignment' => 'Receive a consignment car',
     ],
+    'loading' => 'Loading...',
     'nav' => [
         'dashboard' => 'Dashboard',
         'reports' => 'Reports',

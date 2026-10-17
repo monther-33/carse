@@ -40,3 +40,9 @@ test('the "new" links open the right form', function () {
     Livewire::withQueryParams(['new' => '1'])->test(App\Livewire\Parties\Index::class)->assertSet('showForm', true);
     Livewire::withQueryParams([]);
 });
+
+test('page changes show the centered loader, not the thin top bar', function () {
+    $this->actingAs(userWithRole('admin'));
+
+    $this->get(route('dashboard'))->assertOk()->assertSee('id="page-loader"', false)->assertSee(__('app.loading'));
+});

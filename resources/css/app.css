@@ -76,3 +76,15 @@
         @apply px-3 py-2 text-sm text-gray-500;
     }
 }
+
+/* Centered page-change indicator (<x-page-loader>, resources/js/page-loader.js). */
+#page-loader.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* It replaces Livewire's thin top bar on wire:navigate. (Turning that off in a published
+   config/livewire.php stopped Livewire from loading at all, so it is hidden here instead.) */
+#nprogress {
+    display: none !important;
+}

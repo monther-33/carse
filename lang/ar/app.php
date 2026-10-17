@@ -42,6 +42,7 @@ return [
         'view_consignments' => 'عرض سيارات الأمانة',
         'new_consignment' => 'استلام سيارة أمانة',
     ],
+    'loading' => 'جارٍ التحميل...',
     'nav' => [
         'dashboard' => 'لوحة التحكم',
         'reports' => 'التقارير',

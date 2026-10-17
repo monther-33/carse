@@ -159,6 +159,7 @@
 </div>
 
 <livewire:quick-create />
+<x-page-loader />
 <x-ui.toasts />
 <x-pwa-hint />
 </body>
